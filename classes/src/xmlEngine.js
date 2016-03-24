@@ -33,12 +33,11 @@ define(function(require, exports, module) {
             if (this.nodeType === TEXT_NODE) {
                 return this.innerText;
             }
-            var outerHtml = '';
-            outerHtml = '<' + this.tagName;
-            if (this.attributes) { //document没有attributes
+
+            var getAttributeHtml = function(attributes) {
                 var attrbutesList = [];
-                for (var i = 0; i < this.attributes.length; i++) {
-                    var item = this.attributes[i];
+                for (var i = 0; i < attributes.length; i++) {
+                    var item = attributes[i];
                     var attr = item.name;
                     if (attr === 'className') {
                         attr = 'class';
@@ -52,20 +51,30 @@ define(function(require, exports, module) {
                     }
                     attrbutesList.push(attr);
                 }
-                if (attrbutesList.length) {
-                    outerHtml = outerHtml + ' ' + attrbutesList.join(' ');
-                }
+                return attrbutesList.join(' ');
             }
-            outerHtml += '>';
 
-            if (ODD_TAG_LIST.indexOf(this.tagName) === -1) {
-                for (var i = 0; i < this.childNodes.length; i++) {
-                    outerHtml += this.childNodes[i].getOuterHtml();
+            var getChildNodesHtml = function(obj) {
+                var html = '';
+                for (var i = 0; i < obj.childNodes.length; i++) {
+                    html += obj.childNodes[i].getOuterHtml();
                 }
-                if (this.parentNode) {
-                    outerHtml += '</' + this.tagName + '>';
+                return html;
+            }
+
+
+            var outerHtml = '';
+            if (this.nodeType === DOCUMENT_NODE) {
+                outerHtml = getChildNodesHtml(this);
+            }
+            if (this.nodeType === ELEMENT_NODE) {
+                if (ODD_TAG_LIST.indexOf(this.tagName) === -1) {
+                    outerHtml = '<' + this.tagName + ' ' + getAttributeHtml(this.attributes) + '>' + getChildNodesHtml(this) + '</' + this.tagName + '>';
+                } else {
+                    outerHtml = '<' + this.tagName + ' ' + getAttributeHtml(this.attributes) + '>';
                 }
             }
+
             this.outerHtml = outerHtml;
             return outerHtml;
         },

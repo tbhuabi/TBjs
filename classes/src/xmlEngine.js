@@ -30,9 +30,6 @@ define(function(require, exports, module) {
             if (this.outerHtml) {
                 return this.outerHtml;
             }
-            if (this.tagName == 'img') {
-                console.log('333img')
-            }
             if (this.nodeType === TEXT_NODE) {
                 return this.innerText;
             }

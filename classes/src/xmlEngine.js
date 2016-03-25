@@ -358,7 +358,6 @@
             },
             $XMLEngine: function() {
                 //this.$XMLContent = this.$XMLContent.replace(/\s*[\n\t\r]+\s*/g, '');
-                var arr1 = []; //存放第一次标签分析结果
 
                 var SPLIT_TAG_BEFORE_REG = /(?!^)(?=<\w+(?:-\w+)*(?:\s+\w+(?:-\w+)*(?:="[^"]*"|='[^']*'|=[^\s>]+)*)*\s*\/?>|<\/\w+(?:-\w+)*>)/;
                 var SPLIT_TAG_AFTER_REG = /(<\w+(?:-\w+)*(?:\s+\w+(?:-\w+)*(?:="[^"]*"|='[^']*'|=[^\s>]+)*)*\s*\/?>|<\/\w+(?:-\w+)*>)((?:.|\r|\n|\t|\s)*)/;
@@ -366,9 +365,7 @@
 
 
 
-                this.$XMLContent.split(SPLIT_TAG_BEFORE_REG).filter(function(item) {
-                    arr1.push(item);
-                });
+                var arr1=this.$XMLContent.split(SPLIT_TAG_BEFORE_REG);//存放第一次标签分析结果
                 var arr2 = []; //存放第二次标签分析结果
                 arr1.filter(function(item) {
                     var oldLength = arr2.length;
@@ -376,7 +373,7 @@
                         arr2.push($1);
                         $2 && arr2.push($2);
                     });
-                    if (oldLength == arr2.length) {
+                    if (oldLength === arr2.length) {
                         arr2.push(item);
                     }
                 })

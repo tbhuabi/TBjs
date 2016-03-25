@@ -10,7 +10,7 @@
     define(function(require, exprots, module) {
         var xmlEngine = require('./src/xmlEngine');
 		var document=xmlEngine('vfda <div id="box"><img src="#" id="img" alt=""></div>');
-		console.log(document);
+		//console.log(document);
         module.exports = xmlEngine;
     })
 })

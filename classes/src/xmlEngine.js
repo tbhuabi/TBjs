@@ -365,7 +365,7 @@
 
 
 
-                var arr1=this.$XMLContent.split(SPLIT_TAG_BEFORE_REG);//存放第一次标签分析结果
+                var arr1 = this.$XMLContent.split(SPLIT_TAG_BEFORE_REG); //存放第一次标签分析结果
                 var arr2 = []; //存放第二次标签分析结果
                 arr1.filter(function(item) {
                     var oldLength = arr2.length;
@@ -495,8 +495,7 @@
 
 
         module.exports = function(text) {
-            var document = new DocumentEngine(text);
-            return document;
+            return typeof text === 'string' && text ? new DocumentEngine(text) : document;
         }
     })
 })

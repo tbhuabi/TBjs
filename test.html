@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Document</title>
-    <script src="seajs/seajs.js"></script>
+    <script src="requirejs/requirejs.js"></script>
     <script>
-        seajs.domReady(function() {
-            seajs.use('./classes/src/xmlEngine', function(obj) {
+		window.onload=function(){
+			require(['./classes/src/xmlEngine'],function(obj){
 				var _document=obj(document.getElementById('text').innerHTML);
 				console.log(_document)
-            });
-        })
+			})
+		}
     </script>
 </head>
 

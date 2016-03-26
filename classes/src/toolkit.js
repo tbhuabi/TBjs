@@ -50,6 +50,25 @@
                 }
                 return newObj;
             },
+            unique: function(arr) {
+                if (arr.length < 2) {
+                    return arr;
+                }
+                var result = [arr[0]];
+                var noRepeat = true;
+                for (var i = 1, len = arr.length; i < len; i++) {
+                    for (var j = 0, len2 = result.length; j < len2; j++) {
+                        if (result[j] === arr[i]) {
+                            noRepeat = false;
+                        }
+                    }
+                    if (noRepeat) {
+                        result.push(arr[i]);
+                        noRepeat = true;
+                    }
+                }
+				return result;
+            },
             extendPrototype: function(parentObj, fnChildAttr, childMethodes) {
                 function Child() {
                     parentObj.apply(this, arguments);

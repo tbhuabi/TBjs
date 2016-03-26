@@ -189,11 +189,12 @@
                 var TAG_SELECTOR_REG = /^(\w+(?:-\w+)*)/;
                 var ID_SELECTOR_REG = /^#(\w+(?:-\w+)*)/;
                 var CLASSNAME_SELECTOR_REG = /^\.(\w+(?:-\w+)*)/;
-                var ATTRIBUTE_SELECTOR_REG = /^\[\s*(\w+(?:-\w+)*)(?:\s*=\s*(['"]?)([^\2]*)\2?\s*)?\]/;
-                var CHILDREN_SELECTOR_RGE = /^(>)/;
-                var FIRST_SELECTOR_REG = /^:first-child\b/;
-                var LAST_SELECTOR_REG = /^:last-child\b/;
+                var ATTRIBUTE_SELECTOR_REG = /^\s*\[\s*(\w+(?:-\w+)*)(?:\s*=\s*(['"]?)([^\2]*)\2?\s*)?\]/;
+                var CHILDREN_SELECTOR_RGE = /^\s*>/;
+                var FIRST_SELECTOR_REG = /^\s*:first-child\b/;
+                var LAST_SELECTOR_REG = /^\s*:last-child\b/;
                 var SIBLINGS_SELECTOR_REG = /^\+\s*/;
+
 
                 function selectDistributor(selector, context) {
 
@@ -201,58 +202,6 @@
                     var nextSelector = '';
                     for (var i = 0, len = context.length; i < len; i++) {
                         var currentElement = context[i];
-                        nextSelector = selector.replace(TAG_SELECTOR_REG, function(selector, tagName) {
-                            if (currentElement.tagName === tagName) {
-                                parentElements.push(currentElement);
-                            }
-                            return '';
-                        }).replace(ID_SELECTOR_REG, function(selector, id) {
-                            for (var j = 0, len = currentElement.children.length; j < len; j++) {
-                                if (currentElement.id === id) {
-                                    parentElements.push(currentElement);
-                                }
-                            }
-                            return '';
-                        }).replace(CLASSNAME_SELECTOR_REG, function(selector, className) {
-                            var reg = new RegExp('(^|\\s+)' + className + '(\\s+|$)');
-                            if (reg.test(currentElement.className)) {
-                                parentElements.push(currentElement);
-                            }
-                            return '';
-                        }).replace(ATTRIBUTE_SELECTOR_REG, function(selector, propName, _, propValue) {
-                            if (propValue) {
-                                if (currentElement.getAttribute(propName) === propValue) {
-                                    parentElements.push(currentElement);
-                                }
-                            } else {
-                                if (currentElement.hasAttribute(propName)) {
-                                    parentElements.push(currentElement);
-                                }
-                            }
-                            return '';
-                        }).replace(CHILDREN_SELECTOR_RGE, function(selector, toDown) {
-                            if (!currentElement.children) return '';
-                            for (var j = 0, len = currentElement.children.length; j < len; j++) {
-                                parentElements.push(currentElement.children[j]);
-                            }
-                            return '';
-                        }).replace(FIRST_SELECTOR_REG, function() {
-                            parentElements.push(currentElement);
-                            i = len;
-                            return '';
-                        }).replace(LAST_SELECTOR_REG, function() {
-                            parentElements.push(context[len - 1]);
-                            i = len;
-                            return '';
-                        }).replace(SIBLINGS_SELECTOR_REG, function() {
-                            var siblings = currentElement.parentNode.children;
-                            siblings.filter(function(item) {
-                                if (item !== currentElement) {
-                                    parentElements.push(item);
-                                }
-                            })
-                            return '';
-                        })
                         if (ALL_SELECTOR_REG.test(selector)) {
                             nextSelector = selector.replace(ALL_SELECTOR_REG, function() {
                                 currentElement.getElementsByTagName('*').filter(function(item) {
@@ -260,7 +209,76 @@
                                 })
                                 return '';
                             })
+                        } else if (TAG_SELECTOR_REG.test(selector)) {
+                            nextSelector = selector.replace(TAG_SELECTOR_REG, function(selector, tagName) {
+                                if (currentElement.tagName === tagName) {
+                                    parentElements.push(currentElement);
+                                }
+                                return '';
+                            })
+                        } else if (ID_SELECTOR_REG.test(selector)) {
+                            nextSelector = selector.replace(ID_SELECTOR_REG, function(selector, id) {
+                                for (var j = 0, len = currentElement.children.length; j < len; j++) {
+                                    if (currentElement.id === id) {
+                                        parentElements.push(currentElement);
+                                    }
+                                }
+                                return '';
+                            })
+                        } else if (CLASSNAME_SELECTOR_REG.test(selector)) {
+                            nextSelector = selector.replace(CLASSNAME_SELECTOR_REG, function(selector, className) {
+                                var reg = new RegExp('(^|\\s+)' + className + '(\\s+|$)');
+                                if (reg.test(currentElement.className)) {
+                                    parentElements.push(currentElement);
+                                }
+                                return '';
+                            })
+                        } else if (ATTRIBUTE_SELECTOR_REG.test(selector)) {
+                            nextSelector = selector.replace(ATTRIBUTE_SELECTOR_REG, function(selector, propName, _, propValue) {
+                                if (propValue) {
+                                    if (currentElement.getAttribute(propName) === propValue) {
+                                        parentElements.push(currentElement);
+                                    }
+                                } else {
+                                    if (currentElement.hasAttribute(propName)) {
+                                        parentElements.push(currentElement);
+                                    }
+                                }
+                                return '';
+                            })
+                        } else if (CHILDREN_SELECTOR_RGE.test(selector)) {
+                            nextSelector = selector.replace(CHILDREN_SELECTOR_RGE, function() {
+                                if (!currentElement.children) return '';
+                                for (var j = 0, len = currentElement.children.length; j < len; j++) {
+                                    parentElements.push(currentElement.children[j]);
+                                }
+                                return '';
+                            })
+                        } else if (FIRST_SELECTOR_REG.test(selector)) {
+                            nextSelector = selector.replace(FIRST_SELECTOR_REG, function() {
+                                parentElements.push(currentElement);
+                                i = len;
+                                return '';
+                            })
+                        } else if (LAST_SELECTOR_REG.test(selector)) {
+                            nextSelector = selector.replace(LAST_SELECTOR_REG, function() {
+                                parentElements.push(context[len - 1]);
+                                i = len;
+                                return '';
+                            })
+                        } else if (SIBLINGS_SELECTOR_REG.test(selector)) {
+                            nextSelector = selector.replace(SIBLINGS_SELECTOR_REG, function() {
+                                var siblings = currentElement.parentNode.children;
+                                siblings.filter(function(item) {
+                                    if (item !== currentElement) {
+                                        parentElements.push(item);
+                                    }
+                                })
+                                return '';
+                            })
                         }
+
+
                     }
                     if (selector === nextSelector) {
                         throw new Error(selector + '不是一个正确的选择器！');
@@ -270,7 +288,6 @@
                     }
                     return parentElements;
                 }
-
                 return toolkit.unique(selectDistributor(selector, [this]));
             },
             querySelector: function(selector) {

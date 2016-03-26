@@ -9,9 +9,7 @@
     <script>
         window.onload = function() {
             require(['./classes/src/xmlEngine'], function(obj) {
-                var _document = new obj(document.body.innerHTML);
-                var ele = _document.querySelectorAll('div div');
-                console.log(ele)
+                window.ng = new obj(document.body.innerHTML);
             })
         }
     </script>

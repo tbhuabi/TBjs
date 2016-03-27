@@ -10,62 +10,72 @@
     define(function(require, exports, module) {
         var toolkit = require('./toolkit');
 
-        function TBPromise(callback) {
-            this.$resolves = [];
-            this.$rejects = [];
-            this.$next = null;
-            this.$status = 'pending';
+        function Promise(callback) {
             //pending 等待
             //fulfilled 肯定
             //rejected 否定
             //settled 结束
+            var status = 'pending';
+            this.next = null;
+            var resolves = [];
+            var rejects = [];
+            var _this = this;
+            this.resolve = function(resolve) {
+                status = 'fulfilled';
+                var firstFn;
+                while (firstFn = resolves.shift()) {
+                    var result = firstFn(resolve);
+                    if (_this.next) {
+                        _this.next.resolve(result);
 
-            if (toolkit.isFunction(callback)) {
-                callback(this.resolve, this.reject);
-            }
+                    }
+                }
+            };
+            this.reject = function(e) {
+                status = 'rejected';
+                var firstFn;
+                while (firstFn = resolves.shift()) {
+                    var result = firstFn(e);
+                    if (_this.next) {
+                        _this.next.reject(result);
+                    }
+                }
+            };
 
-        }
-
-        toolkit.extend(TBPromise.prototype, {
-            then: function(resolve, reject) {
-                var next = this.$next || (this.$next = new TBPromise());
-                var currentStepValue;
-                switch (this.$status) {
+            this.then = function(resolve, reject) {
+                var next = this.next || (this.next = new Promise());
+                switch (status) {
                     case 'pending':
-                        toolkit.isFunction(resolve) && this.$resolves.push(resolve);
-                        toolkit.isFunction(reject) && this.$rejects.push(reject);
+                        toolkit.isFunction(resolve) && resolves.push(resolve);
+                        toolkit.isFunction(reject) && rejects.push(reject);
                         return next;
                     case 'fulfilled':
-                        if (!toolkit.isFunction(resolve)) {
-                            next.resolve(resolve);
-                        } else {
+                        if (toolkit.isFunction(resolve)) {
                             try {
                                 next.resolve(resolve());
                             } catch (e) {
                                 this.reject(e);
                             }
+                        } else {
+                            next.resolve(resolve);
                         }
                         return next;
                     case 'rejected':
-                        if (!toolkit.isFunction(reject)) {
-                            next.reject(reject);
-                        } else {
+                        if (toolkit.isFunction(reject)) {
                             try {
                                 next.reject(reject());
                             } catch (e) {
                                 this.reject(e);
                             }
+                        } else {
+                            next.reject(resolve);
                         }
                         return next;
                 }
-            },
-            resolve: function() {
-                this.$status = 'fulfilled';
-            },
-            reject: function() {
-                this.$status = 'rejected';
             }
-        });
+
+            toolkit.isFunction(callback) && callback(this.resolve, this.reject);
+        }
 
         module.exports = Promise;
     })

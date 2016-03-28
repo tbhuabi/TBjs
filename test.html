@@ -5,38 +5,41 @@
     <meta charset="UTF-8">
     <title>Document</title>
     <script src="requirejs/requirejs.js"></script>
-    <script src="classes/src/jq.js"></script>
     <script>
         window.onload = function() {
-            require(['./classes/src/xmlEngine'], function(obj) {
-                window.ng = new obj(document.body.innerHTML);
-            })
+//            require(['./classes/src/xmlEngine'], function(obj) {
+//                window.ng = new obj(document.body.innerHTML);
+//            })
             require(['./classes/src/promise'], function(Promise) {
+
+
                 var promise = new Promise(function(resolve, reject) {
                     setTimeout(function() {
-                        var n = Math.random() > 0.5;
-                        if (n) {
-                            resolve('n大于0.5');
-                        } else {
-                            reject('n小于0.5');
-                        }
-                    }, 2000);
+                        resolve('1');
+                    }, 200);
                 })
                 promise.then(function(result) {
-                    result = result + '1111';
                     console.log(result);
-                    return result;
-                }, function(e) {
-                    e = e + '1111';
-                    console.log(e);
-                    return e;
+                    var p1 = new Promise(function(resolve, reject) {
+                        setTimeout(function() {
+                            resolve(result + 99999);
+                        }, 100)
+                    })
+                    p1.then(function(result) {
+                        console.log(result);
+                        return result + 3333;
+                    }).then(function(result) {
+                        console.log(result);
+						return result;
+                    })
+                    return p1;
                 }).then(function(result) {
                     result += '2222';
                     console.log(result);
-                }, function(e) {
-                    e += '2222';
-                    console.log(e);
                 })
+
+
+
             })
         }
     </script>

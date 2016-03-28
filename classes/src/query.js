@@ -49,8 +49,8 @@
                     return new Query(toolkit.unique(elements));
                 }
 
-                for (var i = 0, len = containers.length; i < len; i++) {
-                    containers[i].querySelectorAll(selector).filter(function(item) {
+                for (var i = 0, len = this.length; i < len; i++) {
+                    this[i].querySelectorAll(selector).filter(function(item) {
                         elements.push(item);
                     })
                 }

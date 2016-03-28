@@ -27,49 +27,26 @@
                 }
 
 
-                function findWrapContainer(QueryObj) {
-
-                    var containers = [];
-
-                    var count = 0;
-                    for (var i = 0; len = QueryObj.length; i < len; i++) {
-                        count = 0;
-                        while (QueryObj[i].parentNode) {
-                            count++
-                        }
-                        if (!containers[count]) {
-                            containers[count] = [];
-                        }
-                        containers[count].push(QueryObj[i]);
-                    }
-                    for (var i = 0, len = containers.length; i < len; i++) {
-                        if (containers[i]) {
-                            return containers[i];
-                        }
-                    }
-                    return containers;
-                }
 
                 var elements = [];
-                var containers = findWrapContainer(this);
 
                 if (this.isBrowser) {
-                    for (var i = 0, len = containers.length; i < len; i++) {
-                        var oldId = containers[i].id;
+                    for (var i = 0, len = this.length; i < len; i++) {
+                        var oldId = this[i].id;
                         var newId = '__TBJS__QUERY__' + Date.now();
 
-                        containers[i].id = 'newId';
+                        this[i].id = 'newId';
 
-                        containers[i].querySelectorAll('#' + newId + ' ' + selector).filter(function(item) {
+                        this[i].querySelectorAll('#' + newId + ' ' + selector).filter(function(item) {
                             elements.push(item);
                         })
                         if (oldId) {
-                            containers[i].id = oldId;
+                            this[i].id = oldId;
                         } else {
-                            containers[i].removeAttribute('id');
+                            this[i].removeAttribute('id');
                         }
                     }
-                    return new Query(elements);
+                    return new Query(toolkit.unique(elements));
                 }
 
                 for (var i = 0, len = containers.length; i < len; i++) {

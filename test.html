@@ -15,26 +15,32 @@
 
                 var promise = new Promise(function(resolve, reject) {
                     setTimeout(function() {
-                        resolve('1');
-                    }, 200);
+                        resolve(1);
+                    }, 1000);
                 })
                 promise.then(function(result) {
                     console.log(result);
                     var p1 = new Promise(function(resolve, reject) {
                         setTimeout(function() {
-                            resolve(result + 99999);
-                        }, 100)
+                            resolve(++result);
+                        }, 1000)
                     })
                     p1.then(function(result) {
+						console.log('a')
                         console.log(result);
-                        return result + 3333;
-                    }).then(function(result) {
-                        console.log(result);
-						return result;
+                        return ++result;
                     })
+//						.then(function(result) {
+//                        console.log(result);
+//						return ++result;
+//                    }).then(function(result){
+//						console.log(result);
+//						return result
+//					})
                     return p1;
                 }).then(function(result) {
-                    result += '2222';
+                    ++result;
+					console.log('b')
                     console.log(result);
                 })
 

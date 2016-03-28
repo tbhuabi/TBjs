@@ -27,32 +27,31 @@
 
 
             function resolve(data) {
-                if (status !== 'pending') return;
                 status = 'fulfilled';
                 value = data;
-                while (resolves.length) {
-                    var firstFn = resolves.shift();
-                    if (toolkit.isFunction(firstFn)) {
-                        firstFn(data);
+                setTimeout(function() {
+                    while (resolves.length) {
+                        var firstFn = resolves.shift();
+                        if (toolkit.isFunction(firstFn)) {
+                            firstFn(data);
+                        }
                     }
-                }
+                })
             }
 
 
             function reject(errorMsg) {
-                if (status !== 'pending') return;
                 status = 'rejected';
                 reason = errorMsg;
-                while (rejects.length) {
-                    var firstFn = rejects.shift();
-                    if (toolkit.isFunction(firstFn)) {
-                        firstFn(errorMsg);
+                setTimeout(function() {
+                    while (rejects.length) {
+                        var firstFn = rejects.shift();
+                        if (toolkit.isFunction(firstFn)) {
+                            firstFn(errorMsg);
+                        }
                     }
-                }
+                })
             }
-
-
-
 
 
             toolkit.isFunction(callback) && callback(resolve, reject);

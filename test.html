@@ -7,9 +7,9 @@
     <script src="requirejs/requirejs.js"></script>
     <script>
         window.onload = function() {
-//            require(['./classes/src/xmlEngine'], function(obj) {
-//                window.ng = new obj(document.body.innerHTML);
-//            })
+            //            require(['./classes/src/xmlEngine'], function(obj) {
+            //                window.ng = new obj(document.body.innerHTML);
+            //            })
             require(['./classes/src/promise'], function(Promise) {
 
 
@@ -18,29 +18,19 @@
                         resolve(1);
                     }, 1000);
                 })
-                promise.then(function(result) {
+                promise.then(function(result){
+					return ++result;
+				}).then(function(result) {
                     console.log(result);
                     var p1 = new Promise(function(resolve, reject) {
                         setTimeout(function() {
-                            resolve(++result);
+							result++;
+                            resolve(result);
                         }, 1000)
                     })
-                    p1.then(function(result) {
-						console.log('a')
-                        console.log(result);
-                        return ++result;
-                    })
-//						.then(function(result) {
-//                        console.log(result);
-//						return ++result;
-//                    }).then(function(result){
-//						console.log(result);
-//						return result
-//					})
                     return p1;
+
                 }).then(function(result) {
-                    ++result;
-					console.log('b')
                     console.log(result);
                 })
 

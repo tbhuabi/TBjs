@@ -8,7 +8,14 @@
     }
 })(function(define) {
     define(function(require, exports, module) {
-        'use strict'
+        var toolkit = require('./toolkit');
+
+        function Handler(onFulfilled, onRejected, resolve, reject) {
+            this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null;
+            this.onRejected = typeof onRejected === 'function' ? onRejected : null;
+            this.resolve = resolve;
+            this.reject = reject;
+        }
 
         function Promise(fn) {
 
@@ -23,15 +30,6 @@
             var value = null;
             var deferreds = [];
             var self = this;
-
-            // 成员函数：then。返回Promise2
-            this.then = function(onFulfilled, onRejected) {
-                // 返回一个新的Promise，Promise2。
-                return new Promise(function(resolve, reject) {
-                    // Handler没特别的，就是为了保存4个参数
-                    handle(new Handler(onFulfilled, onRejected, resolve, reject));
-                })
-            };
 
             // 处理defer，fulfill, reject等问题
             //
@@ -65,6 +63,16 @@
                     deferred.resolve(ret);
                 })
             }
+            // 成员函数：then。返回Promise2
+            this.then = function(onFulfilled, onRejected) {
+                // 返回一个新的Promise，Promise2。
+                return new Promise(function(resolve, reject) {
+                    // Handler没特别的，就是为了保存4个参数
+					var deferred=new Handler(onFulfilled, onRejected, resolve, reject)
+                    handle(deferred);
+                })
+            };
+
 
             // 作为第一个参数传给你写的那个函数
             //
@@ -104,7 +112,7 @@
                     state = true;
                     value = newValue;
                     // 触发依赖于这个promise的所有回调（通过then设置上去的）
-                    finale();
+                    invoke();
                 } catch (e) {
                     reject_(e);
                 }
@@ -121,11 +129,11 @@
                 if (state !== null) return;
                 state = false;
                 value = newValue;
-                finale();
+                invoke();
             }
 
             // 触发依赖于这个promise的所有回调（通过then设置上去的）
-            function finale() {
+            function invoke() {
                 for (var i = 0, len = deferreds.length; i < len; i++) {
                     handle(deferreds[i]);
                 }
@@ -139,14 +147,6 @@
             } catch (e) {
                 reject(e);
             }
-        }
-
-
-        function Handler(onFulfilled, onRejected, resolve, reject) {
-            this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null;
-            this.onRejected = typeof onRejected === 'function' ? onRejected : null;
-            this.resolve = resolve;
-            this.reject = reject;
         }
 
         module.exports = Promise;

@@ -70,7 +70,7 @@
             },
             attr: function(name, value) {
                 if (toolkit.isString(name)) {
-                    switch (argument.length) {
+                    switch (arguments.length) {
                         case 2:
                             for (var i = 0, len = this.length; i < len; i++) {
                                 this[i].setAttribute(name, value)

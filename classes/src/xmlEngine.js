@@ -218,11 +218,11 @@
                             })
                         } else if (ID_SELECTOR_REG.test(selector)) {
                             nextSelector = selector.replace(ID_SELECTOR_REG, function(selector, id) {
-                                for (var j = 0, len = currentElement.children.length; j < len; j++) {
+                                //for (var j = 0, len = currentElement.children.length; j < len; j++) {
                                     if (currentElement.id === id) {
                                         parentElements.push(currentElement);
                                     }
-                                }
+                                //}
                                 return '';
                             })
                         } else if (CLASSNAME_SELECTOR_REG.test(selector)) {

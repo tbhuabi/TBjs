@@ -10,33 +10,7 @@
             require(['./classes/src/xmlEngine'], function(obj) {
                 window.ng = new obj(document.getElementById('text').innerHTML);
             })
-            //            require(['./classes/src/promise'], function(Promise) {
-            //
-            //
-            //                var promise = new Promise(function(resolve, reject) {
-            //
-            //					$.ajax({
-            //						url:''
-            //					}).done(function(data){
-            //						resolve(data);
-            //					}).fail(function(msg){
-            //						reject(msg)
-            //					})
-            //                    setTimeout(function() {
-            //                        resolve(1);
-            //                    }, 1000);
-            //                })
-            //                promise.then(function(result) {
-            //                    return ++result;
-            //                },function(msg){
-            //					return msg
-            //				}).then(null,function(msg){
-            //
-            //				})
-            //
-            //
-            //
-            //            })
+            require(['./classes/src/Parser'])
         }
     </script>
 </head>

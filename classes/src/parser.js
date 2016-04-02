@@ -11,6 +11,20 @@
         var toolkit = require('./toolkit');
 
 
+        var OPERATORS = {};
+        '+ - * / % === !== == != < > <= >= && || ! = |'.split(' ').filter(function(operator) {
+            OPERATORS[operator] = true;
+        });
+        var ESCAPE = {
+            "n": "\n",
+            "f": "\f",
+            "r": "\r",
+            "t": "\t",
+            "v": "\v",
+            "'": "'",
+            '"': '"'
+        };
+
         var Lexer = function(options) {
             this.options = options;
         };
@@ -190,9 +204,11 @@
 
 
         var parser = new Lexer();
-        var a = parser.lex('[{3:4}]');
+        var a = parser.lex('a*-b');
 
 
+        console.log(a);
+        return;
 
         var AST = function(lexer, options) {
             this.lexer = lexer;
@@ -617,9 +633,9 @@
                 }
             }
         };
-		var ast=new AST(a);
-        console.log(ast.ast('[{3:4}]'))
+        var ast = new AST(new Lexer());
+        console.log(ast.ast('a=[{3:4,b:"fdsfds",a:c.n.d}]'))
 
-        module.exports = Parser;
+        //module.exports = Parser;
     })
 })

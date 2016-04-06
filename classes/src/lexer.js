@@ -26,112 +26,131 @@
         };
 
 
-        function Lexer(text) {
-            this.text = text;
+        function Lexer() {
+            this.text = '';
             this.index = 0;
             this.tokens = [];
         }
         Lexer.TBExpressionTypes = {
             TBString: 'TBString',
             TBIdent: 'TBIdent',
-            TBNumber: 'TBNumber'
+            TBNumber: 'TBNumber',
+            TBPrimary: 'TBPrimary',
+            TBOperator: 'TBOperator'
         };
 
         toolkit.extend(Lexer.prototype, {
             lex: function(text) {
+                this.text = text;
                 while (this.index < this.text.length) {
-                    var ch = this.text.charAt(this.index);
-                    if (ch === '"' || ch === "'") {
-                        this.readString(ch);
-                    } else if (this.isNumber(ch) || ch === '.' && this.isNumber(this.peek())) {
+                    var currentText = this.text.charAt(this.index);
+
+                    if (currentText === '"' || currentText === "'") {
+                        this.readString(currentText);
+                    } else if (this.isNumber(currentText) || currentText === '.' && this.isNumber(this.peek())) {
+                        //解析数字一定要在解析标识符前面
                         this.readNumber();
-                    } else if (this.isIdent(ch)) {
+                    } else if (this.isIdent(currentText)) {
                         this.readIdent();
-                    } else if (this.is(ch, '(){}[].,;:?')) {
+                    } else if ('(){}[].,;:?'.indexOf(currentText) !== -1) {
+                        //如果是语法结构符号
                         this.tokens.push({
+                            text: currentText,
                             index: this.index,
-                            text: ch
-                        });
+                            type: Lexer.TBExpressionTypes.TBPrimary,
+                            value: currentText
+                        })
                         this.index++;
-                    } else if (this.isWhitespace(ch)) {
+                    } else if (currentText === ' ' || currentText === '\r' || currentText === '\t' ||
+                        currentText === '\n' || currentText === '\v' || currentText === '\u00A0') {
+                        //如果是空白字符，则跳过
+                        //\u00a0 是抄google的，原文：IE treats non-breaking space as \u00A0
                         this.index++;
                     } else {
-                        var ch2 = ch + this.peek();
-                        var ch3 = ch2 + this.peek(2);
-                        var op1 = OPERATORS[ch];
-                        var op2 = OPERATORS[ch2];
-                        var op3 = OPERATORS[ch3];
-                        if (op1 || op2 || op3) {
-                            var token = op3 ? ch3 : (op2 ? ch2 : ch);
+                        //其它情况，如：+ - * / % === !== == != < > <= >= && || ! = |
+
+                        //currentText为单个运算符
+                        var t1 = currentText + this.peek(); //两个符号的运算符
+                        var t2 = t1 + this.peek(2); //三个符号的运算符
+
+                        //检测在当前运算符列表中是否有以上情况的一种，并取最长的为准
+                        var option1 = OPERATORS[currentText];
+                        var option2 = OPERATORS[t1];
+                        var option3 = OPERATORS[t2];
+
+                        if (option1 || option2 || option3) {
+                            var token = option3 ? t2 : (option2 ? t1 : currentText);
                             this.tokens.push({
-                                index: this.index,
                                 text: token,
-                                operator: true
-                            });
+                                index: this.index,
+                                type: Lexer.TBExpressionTypes.TBOperator,
+                                value: token
+                            })
                             this.index += token.length;
                         } else {
-                            this.throwError('Unexpected next character ', this.index, this.index + 1);
+                            //如果以上条件都不符合，则断定为当前不是一个合法的表达式
+                            throw new Error(this.text + '不是一个合法的表达式');
                         }
                     }
                 }
-                return this.tokens;
             },
-
-            is: function(ch, chars) {
-                return chars.indexOf(ch) !== -1;
+            isIdent: function(text) {
+                //校验text是否符合js标识符命名规范
+                return text >= 'a' && text <= 'z' || text >= 'A' && text <= 'Z' || text === '$' || text === '_';
+                //return /[_$a-z]/i.test(text); 上面一种写法性能更高
             },
-
-            peek: function(i) {
-                var num = i || 1;
-                return (this.index + num < this.text.length) ? this.text.charAt(this.index + num) : false;
-            },
-
-            isNumber: function(ch) {
-                return ('0' <= ch && ch <= '9') && typeof ch === "string";
-            },
-
-            isWhitespace: function(ch) {
-                // IE treats non-breaking space as \u00A0
-                return (ch === ' ' || ch === '\r' || ch === '\t' ||
-                    ch === '\n' || ch === '\v' || ch === '\u00A0');
-            },
-
-            isIdent: function(ch) {
-                return ('a' <= ch && ch <= 'z' ||
-                    'A' <= ch && ch <= 'Z' ||
-                    '_' === ch || ch === '$');
-            },
-
-            isExpOperator: function(ch) {
-                return (ch === '-' || ch === '+' || this.isNumber(ch));
-            },
-
-            throwError: function(error, start, end) {
-                end = end || this.index;
-                var colStr = (isDefined(start) ? 's ' + start + '-' + this.index + ' [' + this.text.substring(start, end) + ']' : ' ' + end);
-                throw $parseMinErr('lexerr', 'Lexer Error: {0} at column{1} in expression [{2}].',
-                    error, colStr, this.text);
-            },
-
-            readNumber: function() {
-                var number = '';
-                var start = this.index;
+            readIdent: function() {
+                var value = '';
+                var index = this.index;
                 while (this.index < this.text.length) {
-                    var ch = this.text.charAt(this.index).toLowerCase();
-                    if (ch == '.' || this.isNumber(ch)) {
-                        number += ch;
+                    var currentText = this.text.charAt(this.index);
+                    if (this.isIdent(currentText) || this.isNumber(currentText)) {
+                        value += currentText;
+                        this.index++;
                     } else {
-                        var peekCh = this.peek();
-                        if (ch == 'e' && this.isExpOperator(peekCh)) {
-                            number += ch;
-                        } else if (this.isExpOperator(ch) &&
-                            peekCh && this.isNumber(peekCh) &&
-                            number.charAt(number.length - 1) == 'e') {
-                            number += ch;
-                        } else if (this.isExpOperator(ch) &&
-                            (!peekCh || !this.isNumber(peekCh)) &&
-                            number.charAt(number.length - 1) == 'e') {
-                            this.throwError('Invalid exponent');
+                        this.tokens.push({
+                            text: value,
+                            index: index,
+                            type: Lexer.TBExpressionTypes.TBIdent,
+                            value: value
+                        })
+                        return;
+                    }
+                }
+            },
+            readNumber: function() {
+                var value = '';
+                var index = this.index;
+                var appearedDot = false;
+                while (this.index < this.text.length) {
+                    //取当前的字符串，并且转小写，因为有可能是科学计数法，中间会有e;
+                    var currentText = this.text.charAt(this.index).toLowerCase();
+                    if (currentText === '.') {
+                        //如果是以小数点开头，
+                        if (!this.isNumber(this.peek())) {
+                            throw new Error('解析数字' + value + '出错，.后面不能为' + this.peek());
+                        }
+                        if (appearedDot) {
+                            throw new Error('解析数字' + value + '出错，后面不能为.');
+                        }
+                        value += currentText;
+                        appearedDot = true;
+                    } else if (this.isNumber(currentText)) {
+                        value += currentText;
+                    } else {
+                        var nextText = this.peek();
+                        if (currentText === 'e' && this.isExpOperator(nextText)) {
+                            //如果当前为e,并且后面一位是数字或+-号，则断定为科学计数法
+                            value += currentText;
+                        } else if (this.isExpOperator(currentText) && nextText && this.isNumber(nextText) && value.charAt(value.length - 1) === 'e') {
+                            //如果当前是+-号，并且有下一位，且下一位是数字，并且当前值的最后一位是e，则断定为正确的科学计数法
+                            //这里只能是+-号，因为数字会走前面的分支
+                            value += currentText;
+                        } else if (this.isExpOperator(currentText) && (!nextText || !this.isNumber(nextText)) && value.charAt(value.length - 1) === 'e') {
+                            //如果当前是+-号，
+                            //并且没有下一位，或者且下一位不是数字，并且当前值的最后一位是e，则断定数字解析出错
+                            //这里只能是+-号，因为数字会走前面的分支
+                            throw new Error(value + currentText + '不是一个正确的数字')
                         } else {
                             break;
                         }
@@ -139,70 +158,67 @@
                     this.index++;
                 }
                 this.tokens.push({
-                    index: start,
-                    text: number,
-                    constant: true,
-                    value: Number(number)
-                });
+                    text: value,
+                    index: index,
+                    type: Lexer.TBExpressionTypes.TBNumber,
+                    value: Number(value)
+                })
             },
-
-            readIdent: function() {
-                var start = this.index;
-                while (this.index < this.text.length) {
-                    var ch = this.text.charAt(this.index);
-                    if (!(this.isIdent(ch) || this.isNumber(ch))) {
-                        break;
-                    }
-                    this.index++;
-                }
-                this.tokens.push({
-                    index: start,
-                    text: this.text.slice(start, this.index),
-                    identifier: true
-                });
+            isExpOperator: function(text) {
+                //主要用于校验科学计数法e后面的内容
+                return text === '+' || text === '-' || this.isNumber(text);
             },
-
+            isNumber: function(currentText) {
+                return typeof currentText === 'string' && currentText > '0' && currentText < '9';
+            },
+            peek: function(index) {
+                var i = index || 1;
+                return this.index + i < this.text.length ? this.text.charAt(this.index + i) : false;
+            },
             readString: function(quote) {
-                var start = this.index;
+                var value = '';
+                var index = this.index;
+                var escape = false; //是否有转义
                 this.index++;
-                var string = '';
-                var rawString = quote;
-                var escape = false;
                 while (this.index < this.text.length) {
-                    var ch = this.text.charAt(this.index);
-                    rawString += ch;
+                    var currentText = this.text.charAt(this.index);
                     if (escape) {
-                        if (ch === 'u') {
-                            var hex = this.text.substring(this.index + 1, this.index + 5);
-                            if (!hex.match(/[\da-f]{4}/i)) {
-                                this.throwError('Invalid unicode escape [\\u' + hex + ']');
+                        //如果有转义
+                        if (currentText === 'u') {
+                            //如果是unicode编码，向后取4位
+                            var hexCode = this.text.substring(this.index + 1, this.index + 5);
+                            if (/[\da-f]{4}/i.test(hexCode)) {
+                                //如果符合nuicode编码
+                                value += String.fromCharCode(parseInt(hexCode, 16));
+                                this.index += 4; //加4是因为后面的this.index++
+                            } else {
+                                throw new Error('转义\\' + hexCode + '失败，或者\\' + hexCode + '不是一个合法的nuicode字符');
                             }
-                            this.index += 4;
-                            string += String.fromCharCode(parseInt(hex, 16));
                         } else {
-                            var rep = ESCAPE[ch];
-                            string = string + (rep || ch);
+                            value += ESCAPE[currentText] || currentText;
                         }
                         escape = false;
-                    } else if (ch === '\\') {
+                    } else if (currentText === '\\') {
+                        //如果遇到转义
                         escape = true;
-                    } else if (ch === quote) {
+                    } else if (currentText === quote) {
+                        //如果遇到和初始引号相同的引号，则字符串读取结束
                         this.index++;
                         this.tokens.push({
-                            index: start,
-                            text: rawString,
-                            constant: true,
-                            value: string
-                        });
+                            text: quote + value + quote,
+                            value: value,
+                            index: index,
+                            type: Lexer.TBExpressionTypes.TBString
+                        })
                         return;
                     } else {
-                        string += ch;
+                        value += currentText;
                     }
                     this.index++;
                 }
-                this.throwError('Unterminated quote', start);
             }
         });
 
+        module.exports = Lexer;
     })
 })

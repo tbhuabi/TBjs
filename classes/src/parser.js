@@ -203,11 +203,11 @@
         };
 
 
-//        var parser = new Lexer();
-//        var a = parser.lex('{a:a*-b}');
-//
-//
-//        console.log(a);
+        //        var parser = new Lexer();
+        //        var a = parser.lex('{a:a*-b}');
+        //
+        //
+        //        console.log(a);
 
         var AST = function(lexer, options) {
             this.lexer = lexer;
@@ -215,20 +215,20 @@
         };
 
         AST.Program = 'Program';
-        AST.ExpressionStatement = 'ExpressionStatement';
-        AST.AssignmentExpression = 'AssignmentExpression';
-        AST.ConditionalExpression = 'ConditionalExpression';
-        AST.LogicalExpression = 'LogicalExpression';
-        AST.BinaryExpression = 'BinaryExpression';
-        AST.UnaryExpression = 'UnaryExpression';
-        AST.CallExpression = 'CallExpression';
-        AST.MemberExpression = 'MemberExpression';
-        AST.Identifier = 'Identifier';
-        AST.Literal = 'Literal';
-        AST.ArrayExpression = 'ArrayExpression';
-        AST.Property = 'Property';
-        AST.ObjectExpression = 'ObjectExpression';
-        AST.ThisExpression = 'ThisExpression';
+        AST.ExpressionStatement = 'ExpressionStatement'; //表达式语句
+        AST.AssignmentExpression = 'AssignmentExpression'; //赋值表达式
+        AST.ConditionalExpression = 'ConditionalExpression'; //条件表达式
+        AST.LogicalExpression = 'LogicalExpression'; //逻辑表达式
+        AST.BinaryExpression = 'BinaryExpression'; //二元运算表达式
+        AST.UnaryExpression = 'UnaryExpression'; //一元运算表达式
+        AST.CallExpression = 'CallExpression'; //函数调用表达式
+        AST.MemberExpression = 'MemberExpression'; //成员表达式
+        AST.Identifier = 'Identifier'; //标识符
+        AST.Literal = 'Literal'; //文本常量
+        AST.ArrayExpression = 'ArrayExpression'; //数组表达式
+        AST.Property = 'Property'; //属性表达式
+        AST.ObjectExpression = 'ObjectExpression'; //对象表达式
+        AST.ThisExpression = 'ThisExpression'; //this表达式
 
         // Internal use only
         AST.NGValueParameter = 'NGValueParameter';
@@ -237,7 +237,7 @@
             ast: function(text) {
                 this.text = text;
                 this.tokens = this.lexer.lex(text);
-				console.log(this.tokens);
+                console.log(this.tokens);
                 var value = this.program();
 
                 if (this.tokens.length !== 0) {
@@ -246,7 +246,7 @@
 
                 return value;
             },
-			//创建一个运算项目
+            //创建一个运算项目
             program: function() {
                 var body = [];
                 while (true) {
@@ -260,14 +260,14 @@
                     }
                 }
             },
-			//声明表达式
+            //声明表达式
             expressionStatement: function() {
                 return {
                     type: AST.ExpressionStatement,
                     expression: this.filterChain()
                 };
             },
-			//过滤器链
+            //过滤器链
             filterChain: function() {
                 var left = this.expression();
                 var token;
@@ -276,11 +276,11 @@
                 }
                 return left;
             },
-			//创建表达式
+            //创建表达式
             expression: function() {
                 return this.assignment();
             },
-			//等号运算符，赋值语句
+            //等号运算符，赋值语句
             assignment: function() {
                 var result = this.ternary();
                 if (this.expect('=')) {
@@ -293,7 +293,7 @@
                 }
                 return result;
             },
-			//三元运算
+            //三元运算
             ternary: function() {
                 var test = this.logicalOR();
                 var alternate;
@@ -312,7 +312,7 @@
                 }
                 return test;
             },
-			//逻辑或
+            //逻辑或
             logicalOR: function() {
                 var left = this.logicalAND();
                 while (this.expect('||')) {
@@ -325,7 +325,7 @@
                 }
                 return left;
             },
-			//逻辑与
+            //逻辑与
             logicalAND: function() {
                 var left = this.equality();
                 while (this.expect('&&')) {
@@ -338,7 +338,7 @@
                 }
                 return left;
             },
-			//比较运算符
+            //比较运算符
             equality: function() {
                 var left = this.relational();
                 var token;
@@ -352,7 +352,7 @@
                 }
                 return left;
             },
-			//关系运算
+            //关系运算
             relational: function() {
                 var left = this.additive();
                 var token;
@@ -366,7 +366,7 @@
                 }
                 return left;
             },
-			//加减法运算
+            //加减法运算
             additive: function() {
                 var left = this.multiplicative();
                 var token;
@@ -380,7 +380,7 @@
                 }
                 return left;
             },
-			//乘法除法取模运算
+            //乘法除法取模运算
             multiplicative: function() {
                 var left = this.unary();
                 var token;
@@ -394,7 +394,7 @@
                 }
                 return left;
             },
-			//一元运算
+            //一元运算
             unary: function() {
                 var token;
                 if ((token = this.expect('+', '-', '!'))) {
@@ -408,7 +408,7 @@
                     return this.primary();
                 }
             },
-			//结构构建
+            //结构构建
             primary: function() {
                 var primary;
                 if (this.expect('(')) {
@@ -458,7 +458,7 @@
                 }
                 return primary;
             },
-			//过滤器
+            //过滤器
             filter: function(baseExpression) {
                 var args = [baseExpression];
                 var result = {
@@ -474,7 +474,7 @@
 
                 return result;
             },
-			//分析函数参数
+            //分析函数参数
             parseArguments: function() {
                 var args = [];
                 if (this.peekToken().text !== ')') {
@@ -484,7 +484,7 @@
                 }
                 return args;
             },
-			//变量标识符
+            //变量标识符
             identifier: function() {
                 var token = this.consume();
                 if (!token.identifier) {
@@ -495,7 +495,7 @@
                     name: token.text
                 };
             },
-			//常量
+            //常量
             constant: function() {
                 // TODO check that it is a constant
                 return {
@@ -503,7 +503,7 @@
                     value: this.consume().value
                 };
             },
-			//数组声明
+            //数组声明
             arrayDeclaration: function() {
                 var elements = [];
                 if (this.peekToken().text !== ']') {
@@ -522,7 +522,7 @@
                     elements: elements
                 };
             },
-			//对象构建
+            //对象构建
             object: function() {
                 var properties = [],
                     property;
@@ -561,7 +561,7 @@
                     'Syntax Error: Token \'{0}\' {1} at column {2} of the expression [{3}] starting at [{4}].',
                     token.text, msg, (token.index + 1), this.text, this.text.substring(token.index));
             },
-			//校验是否已构建完
+            //校验是否已构建完
             consume: function(e1) {
                 if (this.tokens.length === 0) {
                     throw $parseMinErr('ueoe', 'Unexpected end of expression: {0}', this.text);
@@ -573,14 +573,14 @@
                 }
                 return token;
             },
-			//查看还有没有下一个单元
+            //查看还有没有下一个单元
             peekToken: function() {
                 if (this.tokens.length === 0) {
                     throw $parseMinErr('ueoe', 'Unexpected end of expression: {0}', this.text);
                 }
                 return this.tokens[0];
             },
-			//向后检测一个单元
+            //向后检测一个单元
             peek: function(e1, e2, e3, e4) {
                 return this.peekAhead(0, e1, e2, e3, e4);
             },
@@ -596,7 +596,7 @@
                 }
                 return false;
             },
-			//检测下一项是否符合预期
+            //检测下一项是否符合预期
             expect: function(e1, e2, e3, e4) {
                 var token = this.peek(e1, e2, e3, e4);
                 if (token) {
@@ -610,7 +610,7 @@
             /* `undefined` is not a constant, it is an identifier,
              * but using it as an identifier is not supported
              */
-			//js字面量
+            //js字面量
             constants: {
                 'true': {
                     type: AST.Literal,
@@ -634,8 +634,8 @@
             }
         };
         var ast = new AST(new Lexer());
-//        console.log(ast.ast('a=[{3:4,b:"fdsfds",a:c.n.d}]'))
-        console.log(ast.ast('a+b*3+2'))
+        //        console.log(ast.ast('a=[{3:4,b:"fdsfds",a:c.n.d}]'))
+        console.log(ast.ast('[a+b*3+2]'))
 
         //module.exports = Parser;
     })

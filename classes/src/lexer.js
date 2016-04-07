@@ -31,13 +31,6 @@
             this.index = 0;
             this.tokens = [];
         }
-        Lexer.TBExpressionTypes = {
-            TBString: 'TBString',
-            TBIdent: 'TBIdent',
-            TBNumber: 'TBNumber',
-            TBPrimary: 'TBPrimary',
-            TBOperator: 'TBOperator'
-        };
 
         toolkit.extend(Lexer.prototype, {
             lex: function(text) {
@@ -56,9 +49,6 @@
                         //如果是语法结构符号
                         this.tokens.push({
                             text: currentText,
-                            index: this.index,
-                            type: Lexer.TBExpressionTypes.TBPrimary,
-                            value: currentText
                         })
                         this.index++;
                     } else if (currentText === ' ' || currentText === '\r' || currentText === '\t' ||
@@ -82,9 +72,7 @@
                             var token = option3 ? t2 : (option2 ? t1 : currentText);
                             this.tokens.push({
                                 text: token,
-                                index: this.index,
-                                type: Lexer.TBExpressionTypes.TBOperator,
-                                value: token
+								operator: true
                             })
                             this.index += token.length;
                         } else {
@@ -101,7 +89,6 @@
             },
             readIdent: function() {
                 var value = '';
-                var index = this.index;
                 while (this.index < this.text.length) {
                     var currentText = this.text.charAt(this.index);
                     if (this.isIdent(currentText) || this.isNumber(currentText)) {
@@ -110,9 +97,7 @@
                     } else {
                         this.tokens.push({
                             text: value,
-                            index: index,
-                            type: Lexer.TBExpressionTypes.TBIdent,
-                            value: value
+                            identifier: true
                         })
                         return;
                     }
@@ -120,7 +105,6 @@
             },
             readNumber: function() {
                 var value = '';
-                var index = this.index;
                 var appearedDot = false;
                 while (this.index < this.text.length) {
                     //取当前的字符串，并且转小写，因为有可能是科学计数法，中间会有e;
@@ -159,9 +143,8 @@
                 }
                 this.tokens.push({
                     text: value,
-                    index: index,
-                    type: Lexer.TBExpressionTypes.TBNumber,
-                    value: Number(value)
+                    value: Number(value),
+                    constant: true
                 })
             },
             isExpOperator: function(text) {
@@ -177,7 +160,6 @@
             },
             readString: function(quote) {
                 var value = '';
-                var index = this.index;
                 var escape = false; //是否有转义
                 this.index++;
                 while (this.index < this.text.length) {
@@ -206,9 +188,8 @@
                         this.index++;
                         this.tokens.push({
                             text: quote + value + quote,
-                            value: value,
-                            index: index,
-                            type: Lexer.TBExpressionTypes.TBString
+                            constant: true,
+                            value: value
                         })
                         return;
                     } else {

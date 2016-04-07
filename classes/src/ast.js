@@ -89,6 +89,92 @@
             ternary: function() {
                 //三元运算 boolean ? trueExpression : falseExpression
 
+                var test = this.logicalOR(); // a || b ? true : false
+                var alternate;
+                var consequent;
+                if (this.expect('?')) {
+                    alternate = this.expression();
+                    if (this.expect(':')) {
+                        consequent = this.expression();
+                        return {
+                            type: AST.ConditionalExpression,
+                            test: test,
+                            alternate: alternate,
+                            consequent: consequent
+                        }
+                    }
+                }
+                return test;
+            },
+            logicalOR: function() {
+                //或者 a || b
+                var left = this.logicalAND(); //a && b || c;
+                while (this.expect('||')) {
+                    //a || b || c
+                    left = {
+                        type: AST.LogicalExpression,
+                        left: left,
+                        operator: '||',
+                        right: this.logicalAND() //运算优先级，后面一定不是三目（?:）运算表达式
+                    };
+                }
+                return left;
+            },
+            logicalAND: function() {
+                //并且 a && b
+                var left = this.equality(); // a == b && c
+
+                while (this.expect('&&')) {
+                    // a && b && c
+                    left = {
+                        type: AST.LogicalExpression,
+                        left: left,
+                        operator: '&&',
+                        right: this.equality(); //运算优先级，后面一定不是三目（?:），或者（||）运算表达式
+                    }
+                }
+                return left;
+            },
+            equality: function() {
+                //相等 a == b
+                var left = this.relational(); // a <= b == c
+                var token;
+                while (token = this.expect('==', '!=', '!==', '===')) {
+                    // a == b == c
+                    left = {
+                        type: AST.BinaryExpression,
+                        left: left,
+                        operator: token,
+                        right: this.relational()
+                    }
+                }
+                return left;
+            },
+            relational: function() {
+                //关系运算 a <= b
+                var left = this.additive(); // a + b <= c
+            },
+            additive: function() {
+                //加减法运算 a + b
+                var left = this.multiplicative(); // a * b + c
+            },
+            multiplicative: function() {
+                //乘除模运算 a * b
+                var left = this.unary(); // -a * b
+            },
+            unary: function() {
+                var token = this.expect('+', '-', !);
+                if (token) {
+                    return {
+
+                    }
+                } else {
+                    //如果不是以上所有情况，则判定当前表达式的构建逻辑为()优先运算符，或者是[]数组、{}json
+                    return this.primary();
+                }
+            },
+            primary: function() {
+
             },
             expect: function() {
 

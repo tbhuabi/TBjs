@@ -72,7 +72,7 @@
                             var token = option3 ? t2 : (option2 ? t1 : currentText);
                             this.tokens.push({
                                 text: token,
-								operator: true
+                                operator: true
                             })
                             this.index += token.length;
                         } else {
@@ -81,6 +81,7 @@
                         }
                     }
                 }
+                return this.tokens;
             },
             isIdent: function(text) {
                 //校验text是否符合js标识符命名规范

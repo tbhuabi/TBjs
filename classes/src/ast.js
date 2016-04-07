@@ -9,6 +9,7 @@
 })(function(define) {
     define(function(require, exports, module) {
         var toolkit = require('./toolkit');
+        var Lexer = require('./lexer');
 
         function AST(lexer) {
             this.lexer = lexer;
@@ -41,8 +42,7 @@
 
                 if (this.tokens.length !== 0) {
                     //如果项目构建完，但当前的词法单元并未用完，则判定当前表达式不正确
-                    throw new Error('表达式：'
-                        text + '中，' + this.tokens[0] + '没用使用');
+                    throw new Error('表达式：' + text + '中，' + this.tokens[0] + '没用使用');
                 }
                 return value;
             },
@@ -50,9 +50,15 @@
                 var body = [];
                 while (true) {
                     //循环this.tokens中的每一项
-                    if (this.tokens.length > 0) {
+                    if (this.tokens.length > 0 && !this.peek('}', ')', ';', ']')) {
                         //如果tokens中还有元素，则创建抽象语法树
                         body.push(this.expressionStatement());
+                    }
+                    if (!this.expect(';')) {
+                        return {
+                            type: AST.Program,
+                            body: body
+                        };
                     }
                 }
             },
@@ -67,7 +73,11 @@
             filterChain: function() {
                 //过滤器规则 value | filter，但value的值没有，所以先计算value的表达式
                 var left = this.expression();
-
+                var token;
+                while (token = this.expect('|')) {
+                    left = this.filter(left);
+                }
+                return left;
             },
             expression: function() {
                 return this.assignment();
@@ -130,7 +140,7 @@
                         type: AST.LogicalExpression,
                         left: left,
                         operator: '&&',
-                        right: this.equality(); //运算优先级，后面一定不是三目（?:），或者（||）运算表达式
+                        right: this.equality() //运算优先级，后面一定不是三目（?:），或者（||）运算表达式
                     }
                 }
                 return left;
@@ -153,20 +163,54 @@
             relational: function() {
                 //关系运算 a <= b
                 var left = this.additive(); // a + b <= c
+                var token;
+                while (token = this.expect('<', '>', '<=', '>=')) {
+                    // a < b < c
+                    left = {
+                        type: AST.BinaryExpression,
+                        left: left,
+                        operator: token,
+                        right: this.additive()
+                    }
+                }
+                return left;
             },
             additive: function() {
                 //加减法运算 a + b
                 var left = this.multiplicative(); // a * b + c
+                var token;
+                while (token = this.expect('+', '-')) {
+                    // a + b + c
+                    left = {
+                        type: AST.BinaryExpression,
+                        left: left,
+                        operator: token,
+                        right: this.multiplicative()
+                    }
+                }
+                return left;
             },
             multiplicative: function() {
                 //乘除模运算 a * b
                 var left = this.unary(); // -a * b
+                var token;
+                while (token = this.expect('*', '/', '%')) {
+                    left = {
+                        type: AST.BinaryExpression,
+                        left: left,
+                        operator: token,
+                        right: this.unary
+                    }
+                }
+                return left;
             },
             unary: function() {
-                var token = this.expect('+', '-', !);
+                var token = this.expect('+', '-', '!');
                 if (token) {
                     return {
-
+                        type: AST.UnaryExpression,
+                        operator: token.text,
+                        argument: this.unary()
                     }
                 } else {
                     //如果不是以上所有情况，则判定当前表达式的构建逻辑为()优先运算符，或者是[]数组、{}json
@@ -174,13 +218,180 @@
                 }
             },
             primary: function() {
-
+                var primary;
+                if (this.expect('(')) {
+                    primary = this.filterChain(); //括号内可能包含任意元素
+                    this.consume(')');
+                } else if (this.expect('[')) {
+                    primary = this.arrayDeclaration();
+                    this.consume(']');
+                } else if (this.expect('{')) {
+                    primary = this.object();
+                    this.consume('}');
+                } else if (this.constants.hasOwnProperty(this.peek().text)) {
+                    primary = this.constants[this.consume().text];
+                } else if (this.peek().identifier) {
+                    primary = this.identifier();
+                    this.consume();
+                } else if (this.peek().constant) {
+                    primary = this.constant();
+                    this.consume();
+                } else {
+                    //如果以上所有情况都不匹配，则判定表达式不正确
+                    throw new Error(this.peek().text + '不是一个正确的表达式');
+                }
+                var next;
+                //有可能出现取属性：[1,2][0]，{key:value}[key]，a.b.c
+                //也有可能是函数调用：fn(a,b)
+                while (next = this.expect('[', '(', '.')) {
+                    if (next.text === '[') {
+                        //取一个对象的属性
+                        primary = {
+                            type: AST.MemberExpression,
+                            primary: primary,
+                            property: this.expression()
+                        }
+                        this.consume(']');
+                    } else if (next.text === '(') {
+                        primary = {
+                            type: AST.CallExpression,
+                            callee: primary,
+                            arguments: this.parseArguments()
+                        }
+                    } else if (next.text === '.') {
+                        primary = {
+                            type: AST.MemberExpression,
+                            primary: primary,
+                            property: this.expression()
+                        }
+                    } else {
+                        //如果以上所有情况都不符合，则判定当前表达式不正确
+                        throw new Error(next.text + '不是一个正确的表达式');
+                    }
+                }
             },
-            expect: function() {
-
+            parseArguments: function() {
+                var args = [];
+                if (this.peek().text !== ')') {
+                    do {
+                        args.push(this.expression);
+                    } while (this.expect(','));
+                }
+                return args;
+            },
+			filter: function(baseExpression) {
+                var args = [baseExpression];
+                var result = {
+                    type: AST.CallExpression,
+                    callee: this.identifier(),
+                    arguments: args
+                };
+                while (this.expect(':')) {
+                    args.push(this.expression());
+                }
+                return result;
+            },
+            object: function() {
+                var properties = [];
+                var property;
+                if (!this.peek('}')) {
+                    do {
+                        property = {
+                            type: AST.Property
+                        };
+                        if (this.peek().constant) {
+                            //属性名为true,false,null,undefined
+                            property.key = this.constant();
+                        } else if (this.peek().identifier) {
+                            property.key = this.identifier();
+                        } else {
+                            throw new Error(this.peek().text + ' 不能作为一个标识符或属性名');
+                        }
+                        this.consume(':');
+                        property.value = this.expression();
+                        properties.push(property);
+                    } while (this.expect(','));
+                }
+                return {
+                    type: AST.ObjectExpression,
+                    properties: properties
+                }
+            },
+            identifier: function() {
+                var token = this.peek();
+                if (token.identifier) {
+                    return {
+                        type: AST.Identifier,
+                        value: token.text
+                    }
+                }
+                throw new Error(token.text + ' 不能作为一个标识符或属性名');
+            },
+            constant: function() {
+                return {
+                    type: AST.Literal,
+                    value: this.peek().value
+                }
+            },
+            arrayDeclaration: function() {
+                var elements = [];
+                if (!this.peek(']')) {
+                    do {
+                        elements.push(this.expression());
+                    } while (this.expect(','));
+                }
+                return {
+                    type: AST.ArrayExpression,
+                    elements: elements
+                }
+            },
+            expect: function(e1, e2, e3, e4) {
+                var token = this.peek(e1, e2, e3, e4);
+                if (token) {
+                    this.tokens.shift();
+                    return token;
+                }
+                return false;
+            },
+            peek: function(e1, e2, e3, e4) {
+                if (this.tokens.length) {
+                    var token = this.tokens[0];
+                    var text = token.text;
+                    if (text === e1 || text === e2 || text === e3 || text === e4 || !e1 && !e2 && !e3 && !e4) {
+                        return token
+                    }
+                }
+                return false;
+            },
+            consume: function(e1) {
+                if (this.tokens.length) {
+                    var token = this.expect(e1);
+                    if (token) return token;
+                }
+                throw new Error('解析表达式出错，' + this.text + ' 中缺少' + e1);
+            },
+            constants: {
+                'true': {
+                    type: AST.Literal,
+                    value: true
+                },
+                'false': {
+                    type: AST.Literal,
+                    value: false
+                },
+                'null': {
+                    type: AST.Literal,
+                    value: null
+                },
+                'undefined': {
+                    type: AST.Literal,
+                    value: undefined
+                }
             }
         });
-
+        var ast = new AST(new Lexer());
+        //        console.log(ast.ast('a=[{3:4,b:"fdsfds",a:c.n.d}]'))
+        console.log(ast.ast('[a+b*3+2]'))
 
         module.exports = AST;
     })

@@ -10,15 +10,16 @@
     define(function(require, exports, module) {
         var toolkit = require('./toolkit');
 
-		function TBModule(moduleName,obj){
+        function TBModule(moduleName, obj) {
 
-		}
-		toolkit(TBModule.prototype,{
-			$new: function(){
+        }
+        toolkit(TBModule.prototype, {
+            $new: function() {
 
-			}
-		})
+            }
+        })
 
-		module.exports=TBModule
-	})
+
+        module.exports = TBModule
+    })
 })

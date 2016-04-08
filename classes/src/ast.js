@@ -271,7 +271,7 @@
                 var args = [];
                 if (this.peek().text !== ')') {
                     do {
-                        args.push(this.expression);
+                        args.push(this.expression());
                     } while (this.expect(','));
                 }
                 return args;
@@ -397,9 +397,9 @@
             }
         });
         var ast = new AST(new Lexer());
-        console.log(ast.ast('a=[{3:4,b:"fdsfds",a:c.n.d}]'))
-        console.log(ast.ast('[a+b*3+2]'))
-        console.log(ast.ast('{a:b}'))
+        console.log(ast.ast('a=[{3:4,b:"fdsfds",a:c.n.d},3]'))
+//        console.log(ast.ast('[a+b*3+2]'))
+        console.log(ast.ast('"{a  \\"+:b}"'))
 
         module.exports = AST;
     })

@@ -199,7 +199,7 @@
                         type: AST.BinaryExpression,
                         left: left,
                         operator: token,
-                        right: this.unary
+                        right: this.unary()
                     }
                 }
                 return left;
@@ -224,18 +224,14 @@
                     this.consume(')');
                 } else if (this.expect('[')) {
                     primary = this.arrayDeclaration();
-                    this.consume(']');
                 } else if (this.expect('{')) {
                     primary = this.object();
-                    this.consume('}');
                 } else if (this.constants.hasOwnProperty(this.peek().text)) {
                     primary = this.constants[this.consume().text];
                 } else if (this.peek().identifier) {
                     primary = this.identifier();
-                    this.consume();
                 } else if (this.peek().constant) {
                     primary = this.constant();
-                    this.consume();
                 } else {
                     //如果以上所有情况都不匹配，则判定表达式不正确
                     throw new Error(this.peek().text + '不是一个正确的表达式');
@@ -269,6 +265,7 @@
                         throw new Error(next.text + '不是一个正确的表达式');
                     }
                 }
+                return primary;
             },
             parseArguments: function() {
                 var args = [];
@@ -279,7 +276,7 @@
                 }
                 return args;
             },
-			filter: function(baseExpression) {
+            filter: function(baseExpression) {
                 var args = [baseExpression];
                 var result = {
                     type: AST.CallExpression,
@@ -296,6 +293,10 @@
                 var property;
                 if (!this.peek('}')) {
                     do {
+                        if (this.peek('}')) {
+                            //ECMA5 支持 {key:value,key:value,} 最后一个元素后面可以有逗号
+                            break;
+                        }
                         property = {
                             type: AST.Property
                         };
@@ -312,13 +313,14 @@
                         properties.push(property);
                     } while (this.expect(','));
                 }
+                this.consume('}');
                 return {
                     type: AST.ObjectExpression,
                     properties: properties
                 }
             },
             identifier: function() {
-                var token = this.peek();
+                var token = this.consume();
                 if (token.identifier) {
                     return {
                         type: AST.Identifier,
@@ -330,16 +332,21 @@
             constant: function() {
                 return {
                     type: AST.Literal,
-                    value: this.peek().value
+                    value: this.consume().value
                 }
             },
             arrayDeclaration: function() {
                 var elements = [];
                 if (!this.peek(']')) {
                     do {
+                        if (this.peek(']')) {
+                            //ECMA5 支持 [1,3,] 最后一个元素后面可以有逗号
+                            break;
+                        }
                         elements.push(this.expression());
                     } while (this.expect(','));
                 }
+                this.consume(']');
                 return {
                     type: AST.ArrayExpression,
                     elements: elements
@@ -390,8 +397,9 @@
             }
         });
         var ast = new AST(new Lexer());
-        //        console.log(ast.ast('a=[{3:4,b:"fdsfds",a:c.n.d}]'))
+        console.log(ast.ast('a=[{3:4,b:"fdsfds",a:c.n.d}]'))
         console.log(ast.ast('[a+b*3+2]'))
+        console.log(ast.ast('{a:b}'))
 
         module.exports = AST;
     })

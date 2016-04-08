@@ -27,13 +27,12 @@
 
 
         function Lexer() {
-            this.text = '';
-            this.index = 0;
-            this.tokens = [];
         }
 
         toolkit.extend(Lexer.prototype, {
             lex: function(text) {
+				this.index = 0;
+				this.tokens = [];
                 this.text = text;
                 while (this.index < this.text.length) {
                     var currentText = this.text.charAt(this.index);

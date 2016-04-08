@@ -26,13 +26,12 @@
         };
 
 
-        function Lexer() {
-        }
+        function Lexer() {}
 
         toolkit.extend(Lexer.prototype, {
             lex: function(text) {
-				this.index = 0;
-				this.tokens = [];
+                this.index = 0;
+                this.tokens = [];
                 this.text = text;
                 while (this.index < this.text.length) {
                     var currentText = this.text.charAt(this.index);
@@ -88,20 +87,18 @@
                 //return /[_$a-z]/i.test(text); 上面一种写法性能更高
             },
             readIdent: function() {
-                var value = '';
+                var start = this.index;
                 while (this.index < this.text.length) {
                     var currentText = this.text.charAt(this.index);
-                    if (this.isIdent(currentText) || this.isNumber(currentText)) {
-                        value += currentText;
-                        this.index++;
-                    } else {
-                        this.tokens.push({
-                            text: value,
-                            identifier: true
-                        })
-                        return;
+                    if (!(this.isIdent(currentText) || this.isNumber(currentText))) {
+                        break;
                     }
+                    this.index++;
                 }
+                this.tokens.push({
+                    text: this.text.slice(start, this.index),
+                    identifier: true
+                });
             },
             readNumber: function() {
                 var value = '';

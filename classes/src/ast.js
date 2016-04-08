@@ -154,7 +154,7 @@
                     left = {
                         type: AST.BinaryExpression,
                         left: left,
-                        operator: token,
+                        operator: token.text,
                         right: this.relational()
                     }
                 }
@@ -169,7 +169,7 @@
                     left = {
                         type: AST.BinaryExpression,
                         left: left,
-                        operator: token,
+                        operator: token.text,
                         right: this.additive()
                     }
                 }
@@ -184,7 +184,7 @@
                     left = {
                         type: AST.BinaryExpression,
                         left: left,
-                        operator: token,
+                        operator: token.text,
                         right: this.multiplicative()
                     }
                 }
@@ -198,7 +198,7 @@
                     left = {
                         type: AST.BinaryExpression,
                         left: left,
-                        operator: token,
+                        operator: token.text,
                         right: this.unary()
                     }
                 }

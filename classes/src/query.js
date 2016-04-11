@@ -11,13 +11,15 @@
         var toolkit = require('./toolkit');
 
         function Query(selector) {
-            this.isBrowser = selector.$ENGINE === 'TBJS_VIRTUAL';
+            this.isBrowser = false;
             this.length = 0;
             this.find(selector);
+            this.selector = '';
+            this.parent = null;
         }
+        var elementsCache = {};
         toolkit.extend(Query.prototype, {
             find: function(selector, context) {
-
                 var _this = this;
                 if (toolkit.isArray(selector)) {
                     selector.filter(function(item) {
@@ -25,7 +27,10 @@
                     })
                     return this;
                 }
-
+                if (selector.$ENGINE == 'TBJS_VIRTUAL') {
+                    this[this.length++] = selector;
+                    return this;
+                }
 
 
                 var elements = [];
@@ -35,7 +40,7 @@
                         var oldId = this[i].id;
                         var newId = '__TBJS__QUERY__' + Date.now();
 
-                        this[i].id = 'newId';
+                        this[i].id = newId;
 
                         this[i].querySelectorAll('#' + newId + ' ' + selector).filter(function(item) {
                             elements.push(item);
@@ -54,10 +59,16 @@
                         elements.push(item);
                     })
                 }
-                return new Query(elements);
+                var result = new Query(elements);
+                result.parent = this;
+                result.selector = selector;
+                return result;
             },
             on: function(eventType, eventSource, callback) {
 
+                if (toolkit.isFunction(callback)) {
+
+                }
             },
             off: function() {
 
@@ -88,11 +99,11 @@
                     var reg = new RegExp('(^|\\s+)' + className + '(\\s+|$)');
                     if (this.isBrowser) {
                         for (var i = 0, len = this.length; i < len; i++) {
-                            this[i].className = toolkit.trim(this[i].className) + ' ' + className;
+                            this[i].className = toolkit.trim(this[i].className + ' ' + className);
                         }
                     } else {
                         for (var i = 0, len = this.length; i < len; i++) {
-                            this[i].setAttribute('className', toolkit.trim(this[i].className) + ' ' + className);
+                            this[i].setAttribute('className', toolkit.trim(this[i].className + ' ' + className));
                         }
                     }
                 }
@@ -129,6 +140,8 @@
             }
         })
 
-        module.exports = Query;
+        module.exports = function(selector) {
+            return new Query(selector);
+        };
     })
 })

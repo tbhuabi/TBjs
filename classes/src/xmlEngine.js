@@ -219,9 +219,9 @@
                         } else if (ID_SELECTOR_REG.test(selector)) {
                             nextSelector = selector.replace(ID_SELECTOR_REG, function(selector, id) {
                                 //for (var j = 0, len = currentElement.children.length; j < len; j++) {
-                                    if (currentElement.id === id) {
-                                        parentElements.push(currentElement);
-                                    }
+                                if (currentElement.id === id) {
+                                    parentElements.push(currentElement);
+                                }
                                 //}
                                 return '';
                             })
@@ -283,12 +283,13 @@
                     if (selector === nextSelector) {
                         throw new Error(selector + '不是一个正确的选择器！');
                     }
+                    parentElements = toolkit.unique(parentElements);
                     if (nextSelector) {
                         return selectDistributor(nextSelector, parentElements);
                     }
                     return parentElements;
                 }
-                return toolkit.unique(selectDistributor(selector, [this]));
+                return selectDistributor(selector, [this]);
             },
             querySelector: function(selector) {
                 return this.querySelectorAll(selector)[0] || null;

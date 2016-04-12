@@ -10,29 +10,30 @@
     define(function(require, exports, module) {
         var toolkit = require('./toolkit');
 
-        function Query(selector) {
-            this.isBrowser = false;
+        function Query(selector, isBrowser) {
+            this.isBrowser = !! isBrowser;
             this.length = 0;
-            this.find(selector);
             this.selector = '';
             this.parent = null;
+            var _this = this;
+            if (toolkit.isArray(selector)) {
+                selector.forEach(function(item) {
+                    _this[_this.length++] = item;
+                })
+            } else if (selector.$ENGINE == 'TBJS_VIRTUAL') {
+                this[this.length++] = selector;
+                this.isBrowser = false;
+            } else {
+                this.find(selector);
+            }
         }
-        var elementsCache = {};
+        //事件缓存
+        var eventCache = [];
+
+
         toolkit.extend(Query.prototype, {
-            find: function(selector, context) {
+            find: function(selector) {
                 var _this = this;
-                if (toolkit.isArray(selector)) {
-                    selector.filter(function(item) {
-                        _this[_this.length++] = item;
-                    })
-                    return this;
-                }
-                if (selector.$ENGINE == 'TBJS_VIRTUAL') {
-                    this[this.length++] = selector;
-                    return this;
-                }
-
-
                 var elements = [];
 
                 if (this.isBrowser) {
@@ -42,7 +43,7 @@
 
                         this[i].id = newId;
 
-                        this[i].querySelectorAll('#' + newId + ' ' + selector).filter(function(item) {
+                        this[i].querySelectorAll('#' + newId + ' ' + selector).forEach(function(item) {
                             elements.push(item);
                         })
                         if (oldId) {
@@ -51,27 +52,114 @@
                             this[i].removeAttribute('id');
                         }
                     }
-                    return new Query(toolkit.unique(elements));
+                } else {
+                    for (var i = 0, len = this.length; i < len; i++) {
+                        this[i].querySelectorAll(selector).forEach(function(item) {
+                            elements.push(item);
+                        })
+                    }
                 }
-
-                for (var i = 0, len = this.length; i < len; i++) {
-                    this[i].querySelectorAll(selector).filter(function(item) {
-                        elements.push(item);
-                    })
-                }
-                var result = new Query(elements);
+                var result = new Query(toolkit.unique(elements), this.isBrowser);
                 result.parent = this;
                 result.selector = selector;
                 return result;
             },
-            on: function(eventType, eventSource, callback) {
-
-                if (toolkit.isFunction(callback)) {
-
+            on: function(eventType, selector, callback, useCapture) {
+                var _this = this;
+                var useDelegate = true;
+                if (toolkit.isFunction(selector)) {
+                    useCapture = callback;
+                    callback = selector;
+                    selector = '';
+                    useDelegate = false;
                 }
-            },
-            off: function() {
+                useCapture = !! useCapture;
 
+                //eventType 可能的情况 click.eventName mouseover...
+                eventType = toolkit.trim(eventType);
+                var events = eventType.match(/[^\s]+/g);
+
+                events.forEach(function(eventType) {
+                    var position = eventType.indexOf('.');
+                    var eventName = '';
+                    if (position !== -1) {
+                        eventName = eventType.substring(position + 1, eventType.length);
+                        eventType = eventType.substring(0, position);
+                    }
+                    var handleFn = function(event) {
+                        if (useDelegate) {
+                            _this.find(selector).each(function(item) {
+                                if (item === event.srcEelement) {
+                                    callback.call(item, event);
+                                }
+                            });
+                        } else {
+                            callback.call(this, event);
+                        }
+                    };
+                    _this.each(function(item) {
+                        item.addEventListener(eventType, handleFn, useCapture);
+                        eventCache.push({
+                            element: item,
+                            handleFn: handleFn,
+                            callback: callback,
+                            eventType: eventType,
+                            eventName: eventName,
+                            selector: selector
+                        })
+                    });
+                })
+                console.log(eventCache);
+                return this;
+            },
+            off: function(eventType, selector, fn) {
+                var isDelegate = true;
+                var _this = this;
+                if (arguments.length === 0) {
+                    this.each(function(item) {
+                        eventCache.forEach(function(eventCacheItem) {
+                            if (eventCacheItem.element === item) {
+                                item.removeEventListener(eventCacheItem.handleFn);
+                            }
+                        })
+                    })
+                } else {
+
+                    if (!toolkit.isFunction(selector)) {
+                        fn = selector;
+                        selector = '';
+                        isDelegate = false;
+                    }
+
+                    var events = eventType.match(/[^\s]+/g);
+                    events.forEach(function(eventType) {
+                        var position = eventType.indexOf('.');
+                        var eventName = '';
+                        if (position !== -1) {
+                            eventName = eventType.substring(position + 1, eventType.length);
+                            eventType = eventType.substring(0, position);
+                        }
+                        _this.each(function(item) {
+                            var arr = [];
+                            eventCache.forEach(function(eventCacheItem) {
+                                if (eventCacheItem.selector === selector && eventCacheItem.eventType === eventType && eventCacheItem.eventName === eventName) {
+                                    if (fn) {
+                                        if (eventCacheItem.callback === fn) {
+                                            item.removeEventListener(eventCacheItem.handleFn);
+                                        }
+                                    } else {
+                                        item.removeEventListener(eventCacheItem.handleFn);
+                                    }
+                                } else {
+                                    arr.push(eventCacheItem);
+                                }
+                            })
+                            eventCache = arr;
+                        })
+                    })
+                }
+				console.log(eventCache);
+				return this;
             },
             one: function() {
 
@@ -83,9 +171,9 @@
                 if (toolkit.isString(name)) {
                     switch (arguments.length) {
                         case 2:
-                            for (var i = 0, len = this.length; i < len; i++) {
-                                this[i].setAttribute(name, value)
-                            }
+                            this.each(function(item) {
+                                item.setAttribute(name, value)
+                            })
                             return this;
                         case 1:
                             return this[0].getAttribute(name);
@@ -98,13 +186,14 @@
                     className = toolkit.trim(className);
                     var reg = new RegExp('(^|\\s+)' + className + '(\\s+|$)');
                     if (this.isBrowser) {
-                        for (var i = 0, len = this.length; i < len; i++) {
-                            this[i].className = toolkit.trim(this[i].className + ' ' + className);
-                        }
+                        this.each(function(item) {
+                            item.className = toolkit.trim(item.className + ' ' + className);
+
+                        })
                     } else {
-                        for (var i = 0, len = this.length; i < len; i++) {
-                            this[i].setAttribute('className', toolkit.trim(this[i].className + ' ' + className));
-                        }
+                        this.each(function(item) {
+                            item.setAttribute('className', toolkit.trim(item.className + ' ' + className));
+                        })
                     }
                 }
                 return this;
@@ -114,13 +203,13 @@
                     className = toolkit.trim(className);
                     var reg = new RegExp('(^|\\s+)' + className + '(\\s+|$)');
                     if (this.isBrowser) {
-                        for (var i = 0, len = this.length; i < len; i++) {
-                            this[i].className = toolkit.trim(this[i].className.replace(reg, '')).replace(/\s+/g, ' ');
-                        }
+                        this.each(function(item) {
+                            item.className = toolkit.trim(item.className.replace(reg, '')).replace(/\s+/g, ' ');
+                        })
                     } else {
-                        for (var i = 0, len = this.length; i < len; i++) {
-                            this[i].setAttribute('className', toolkit.trim(this[i].className.replace(reg, '')).replace(/\s+/g, ' '));
-                        }
+                        this.each(function(item) {
+                            item.setAttribute('className', toolkit.trim(item.className.replace(reg, '')).replace(/\s+/g, ' '));
+                        })
                     }
                 }
                 return this;
@@ -131,10 +220,8 @@
                 return reg.test(this[0].className);
             },
             each: function(callback) {
-                if (toolkit.isFunction(callback)) {
-                    for (var i = 0, len = this.length; i < len; i++) {
-                        callback(this[i]);
-                    }
+                for (var i = 0, len = this.length; i < len; i++) {
+                    callback(this[i]);
                 }
                 return this;
             }

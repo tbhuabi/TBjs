@@ -22,6 +22,7 @@
         //根对象
         function RootElementEngine() {
             this.$ENGINE = 'TBJS_VIRTUAL';
+            this.eventListener = {};
         };
         toolkit.extend(RootElementEngine.prototype, {
             getInnerHtml: function() {
@@ -102,6 +103,27 @@
                 }
                 this.innerText = text.replace(/[\n\t\r]/g, '');
                 return this.innerText;
+            },
+            addEventListener: function(eventType, fn, useCapture) {
+                useCapture = !! useCapture;
+                eventType = eventType.toLowerCase();
+                if (!toolkit.isArray(this.eventListener[eventType])) {
+                    this.eventListener[eventType] = [];
+                }
+                this.eventListener[eventType].push({
+                    fn: fn,
+                    useCapture: useCapture
+                });
+            },
+            removeEventListener: function(eventType, fn) {
+                if (toolkit.isArray(this.eventListener[eventType])) {
+                    for (var i = 0, len = this.eventListener.length; i < len; i++) {
+                        if (this.eventListener[i].fn === fn) {
+                            this.eventListener.splice(i, 1);
+                            return;
+                        }
+                    }
+                }
             }
         });
 

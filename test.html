@@ -13,7 +13,10 @@
             require(['./classes/src/xmlEngine','./classes/src/query'], function(obj,$) {
                 var ng = new obj(document.getElementById('text').innerHTML);
 				var $obj=$(ng);
-				var $a=$obj.find('div p').addClass('red');
+				var $a=$obj.find('div p a').addClass('red');
+				$a.on('click',function(){
+
+				}).off('click');
 				var box=document.getElementById('box');
 				var t='';
 				$a.each(function(item){

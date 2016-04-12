@@ -10,66 +10,69 @@
     define(function(require, exports, module) {
         var toolkit = require('./toolkit');
 
-        function Query(selector, isBrowser) {
+        function Query(selector, context, isBrowser) {
+            return new Query.prototype.init(selector, context, isBrowser);
+        }
+        //事件缓存
+        Query.eventCache = [];
+        Query.prototype.init = function(selector, context, isBrowser) {
+            context = context || document;
             this.isBrowser = isBrowser === undefined ? true : !! isBrowser;
             this.length = 0;
-            this.selector = '';
-            this.parent = null;
+            this.selector = selector;
             var _this = this;
             if (toolkit.isArray(selector)) {
                 selector.forEach(function(item) {
                     _this[_this.length++] = item;
                 })
             } else if (toolkit.isString(selector)) {
-                this[this.length++] = document;
-                return this.find(selector);
-            } else if (selector.$ENGINE == 'TBJS_VIRTUAL') {
+                this.find(selector, context === document ? [document] : this);
+            } else {
+                if (selector instanceof this.init) return selector;
                 this[this.length++] = selector;
-                this.isBrowser = false;
+                if (selector.$ENGINE == 'TBJS_VIRTUAL') {
+                    this.isBrowser = false;
+                }
             }
         }
-        //事件缓存
-        Query.eventCache = [];
-
-
+        Query.prototype.init.prototype = Query.prototype;
         toolkit.extend(Query.prototype, {
-            find: function(selector) {
+            find: function(selector, context) {
                 var _this = this;
                 var elements = [];
 
                 if (this.isBrowser) {
-                    for (var i = 0, len = this.length; i < len; i++) {
-                        if (this[i] === document) {
-							[].slice.call(this[i].querySelectorAll(selector)).forEach(function(item) {
+                    for (var i = 0, len = context.length; i < len; i++) {
+                        if (context[i] === document) {
+                            [].slice.call(context[i].querySelectorAll(selector)).forEach(function(item) {
                                 elements.push(item);
                             })
                         } else {
-                            var oldId = this[i].id;
+                            var oldId = context[i].id;
                             var newId = '__TBJS__QUERY__' + Date.now();
 
-                            this[i].id = newId;
+                            context[i].id = newId;
 
-                            [].slice.call(this[i].querySelectorAll('#' + newId + ' ' + selector)).forEach(function(item) {
+                            [].slice.call(context[i].querySelectorAll('#' + newId + ' ' + selector)).forEach(function(item) {
                                 elements.push(item);
                             })
                             if (oldId) {
-                                this[i].id = oldId;
+                                context[i].id = oldId;
                             } else {
-                                this[i].removeAttribute('id');
+                                context[i].removeAttribute('id');
                             }
                         }
                     }
                 } else {
-                    for (var i = 0, len = this.length; i < len; i++) {
-                        this[i].querySelectorAll(selector).forEach(function(item) {
+                    for (var i = 0, len = context.length; i < len; i++) {
+                        context[i].querySelectorAll(selector).forEach(function(item) {
                             elements.push(item);
                         })
                     }
                 }
-                var result = new Query(toolkit.unique(elements), this.isBrowser);
-                result.parent = this;
-                result.selector = selector;
-                return result;
+                toolkit.unique(elements).forEach(function(item) {
+                    _this[_this.length++] = item;
+                });
             },
             on: function(eventType, selector, callback, useCapture, one) {
                 var eventTypeOld = eventType;
@@ -135,7 +138,7 @@
                         var arr = [];
                         eventCache.forEach(function(eventCacheItem) {
                             if (eventCacheItem.element === item) {
-                                item.removeEventListener(eventCacheItem.handleFn);
+                                item.removeEventListener(eventCacheItem.eventType, eventCacheItem.handleFn);
                             } else {
                                 arr.push(eventCacheItem);
                             }
@@ -175,7 +178,7 @@
                             var arr = [];
                             eventCache.forEach(function(eventCacheItem) {
                                 if (compare(eventMap, eventCacheItem)) {
-                                    item.removeEventListener(eventCacheItem.handleFn);
+                                    item.removeEventListener(eventCacheItem.eventType, eventCacheItem.handleFn);
                                 } else {
                                     arr.push(eventCacheItem);
                                 }
@@ -252,8 +255,6 @@
             }
         })
 
-        module.exports = function(selector) {
-            return new Query(selector);
-        };
+        module.exports = Query;
     })
 })

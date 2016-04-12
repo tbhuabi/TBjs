@@ -21,7 +21,7 @@
 
         //根对象
         function RootElementEngine() {
-            this.$ENGINE = 'TBJS_VIRTUAL';
+            this.$ENGINE = true;
             this.eventListener = {};
         };
         toolkit.extend(RootElementEngine.prototype, {
@@ -487,16 +487,54 @@
             },
             $XMLEngine: function() {
                 //this.$XMLContent = this.$XMLContent.replace(/\s*[\n\t\r]+\s*/g, '');
-
+                var SPLIT_SCRIPT_REG = /(?!^)(?=<\/script)/i;
+                var TEST_SCRIPT_BERORE_REG = /^<script(?:-\w+)*(?:\s+\w+(?:-\w+)*(?:="[^"]*"|='[^']*'|=[^\s>]+)*)*\s*\/?>|<\/\w+(?:-\w+)*>/i;
+                var SPLIT_SCRIPT_CONTENT_REG = /(^<script(?:-\w+)*(?:\s+\w+(?:-\w+)*(?:="[^"]*"|='[^']*'|=[^\s>]+)*)*\s*\/?>|<\/\w+(?:-\w+)*>)((?:.|[\n\t\r\v\s])*)(<\/script>)/i;
                 var SPLIT_TAG_BEFORE_REG = /(?!^)(?=<\w+(?:-\w+)*(?:\s+\w+(?:-\w+)*(?:="[^"]*"|='[^']*'|=[^\s>]+)*)*\s*\/?>|<\/\w+(?:-\w+)*>)/;
                 var SPLIT_TAG_AFTER_REG = /(<\w+(?:-\w+)*(?:\s+\w+(?:-\w+)*(?:="[^"]*"|='[^']*'|=[^\s>]+)*)*\s*\/?>|<\/\w+(?:-\w+)*>)((?:.|\r|\n|\t|\s)*)/;
                 var TEST_TAG_REG = /^<\w+(?:-\w+)*(?:\s+\w+(?:-\w+)*(?:="[^"]*"|='[^']*'|=[^\s>]+)*)*\s*\/?>$|^<\/\w+(?:-\w+)*>$/;
+                var arr = [];
+
+                function findScript(str) {
+                    var startIndex = str.indexOf('<script');
+                    if (startIndex !== -1) {
+                        var beforeStr = str.substring(0, startIndex);
+                        var afterStr = str.substring(startIndex, str.length);
+                        if (TEST_SCRIPT_BERORE_REG.test(afterStr)) {
+                            var closeIndex = afterStr.indexOf('</script>');
+                            if (closeIndex !== -1) {
+                                beforeStr && arr.push(beforeStr);
+                                var body = afterStr.substring(0, closeIndex + 9);
+                                body && arr.push(body);
+                                findScript(afterStr.substring(closeIndex + 9, afterStr.length));
+                                return;
+                            }
+                        }
+                    }
+                    arr.push(str)
+                }
+                findScript(this.$XMLContent);
 
 
 
-                var arr1 = this.$XMLContent.split(SPLIT_TAG_BEFORE_REG); //存放第一次标签分析结果
+
+                var arr1 = []; //存放第一次标签分析结果
+                arr.forEach(function(item) {
+                    if (item.indexOf('<script') === 0) {
+                        arr1.push(item);
+                        return;
+                    }
+                    item.split(SPLIT_TAG_BEFORE_REG).forEach(function(item) {
+                        arr1.push(item);
+                    });
+                })
+
                 var arr2 = []; //存放第二次标签分析结果
-                arr1.filter(function(item) {
+                arr1.forEach(function(item) {
+                    if (item.indexOf('<script') === 0) {
+                        arr2.push(item);
+                        return;
+                    }
                     var oldLength = arr2.length;
                     item.replace(SPLIT_TAG_AFTER_REG, function(str, $1, $2) {
                         arr2.push($1);
@@ -509,6 +547,18 @@
                 var arr3 = []; //存入组合过滤后的dom文本元素集合;
                 var text = '';
                 for (var i = 0, len = arr2.length; i < len; i++) {
+                    if (arr2[i].indexOf('<script') === 0) {
+                        if (text !== '') {
+                            arr3.push(text);
+                            text = '';
+                        }
+                        arr2[i].replace(SPLIT_SCRIPT_CONTENT_REG, function(str, $1, $2, $3) {
+                            arr3.push($1);
+                            $2 && arr3.push($2);
+                            arr3.push($3);
+                        });
+                        continue;
+                    }
                     if (TEST_TAG_REG.test(arr2[i])) {
                         if (text !== '') {
                             arr3.push(text);
@@ -528,6 +578,7 @@
                     var beginTag = /^<(\w+(?:-\w+)*)/.exec(item);
                     if (beginTag) {
                         beginTag = beginTag[1];
+
                         var currentElement = this.createElement(beginTag);
                         var attrbutes = item.match(/\s\w+(-\w+)*(="[^"]*"|='[^']*'|[^\s>]+)*\s*?/g);
                         if (attrbutes) {

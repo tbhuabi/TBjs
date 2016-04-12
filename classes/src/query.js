@@ -30,7 +30,7 @@
             } else {
                 if (selector instanceof this.init) return selector;
                 this[this.length++] = selector;
-                if (selector.$ENGINE == 'TBJS_VIRTUAL') {
+                if (selector.$ENGINE) {
                     this.isBrowser = false;
                 }
             }
@@ -190,7 +190,7 @@
                 return this;
             },
             one: function(eventType, selector, callback, useCapture) {
-                this.on(eventType, selector, callback, useCapture, 1);
+                return this.on(eventType, selector, callback, useCapture, 1);
             },
             trigger: function(eventName) {
 

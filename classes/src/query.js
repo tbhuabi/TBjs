@@ -159,7 +159,7 @@
                             if (obj1[name] !== obj2[name]) return false;
                         }
                         return true;
-                    }
+                    };
                     events.forEach(function(eventType) {
                         var position = eventType.indexOf('.');
                         var eventName = '';

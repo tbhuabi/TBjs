@@ -11,7 +11,7 @@
         var toolkit = require('./toolkit');
 
         function Query(selector, isBrowser) {
-            this.isBrowser = !! isBrowser;
+            this.isBrowser = isBrowser === undefined ? true : !! isBrowser;
             this.length = 0;
             this.selector = '';
             this.parent = null;
@@ -20,15 +20,16 @@
                 selector.forEach(function(item) {
                     _this[_this.length++] = item;
                 })
+            } else if (toolkit.isString(selector)) {
+                this[this.length++] = document;
+                return this.find(selector);
             } else if (selector.$ENGINE == 'TBJS_VIRTUAL') {
                 this[this.length++] = selector;
                 this.isBrowser = false;
-            } else {
-                this.find(selector);
             }
         }
         //事件缓存
-        var eventCache = [];
+        Query.eventCache = [];
 
 
         toolkit.extend(Query.prototype, {
@@ -38,18 +39,24 @@
 
                 if (this.isBrowser) {
                     for (var i = 0, len = this.length; i < len; i++) {
-                        var oldId = this[i].id;
-                        var newId = '__TBJS__QUERY__' + Date.now();
-
-                        this[i].id = newId;
-
-                        this[i].querySelectorAll('#' + newId + ' ' + selector).forEach(function(item) {
-                            elements.push(item);
-                        })
-                        if (oldId) {
-                            this[i].id = oldId;
+                        if (this[i] === document) {
+							[].slice.call(this[i].querySelectorAll(selector)).forEach(function(item) {
+                                elements.push(item);
+                            })
                         } else {
-                            this[i].removeAttribute('id');
+                            var oldId = this[i].id;
+                            var newId = '__TBJS__QUERY__' + Date.now();
+
+                            this[i].id = newId;
+
+                            [].slice.call(this[i].querySelectorAll('#' + newId + ' ' + selector)).forEach(function(item) {
+                                elements.push(item);
+                            })
+                            if (oldId) {
+                                this[i].id = oldId;
+                            } else {
+                                this[i].removeAttribute('id');
+                            }
                         }
                     }
                 } else {
@@ -64,7 +71,9 @@
                 result.selector = selector;
                 return result;
             },
-            on: function(eventType, selector, callback, useCapture) {
+            on: function(eventType, selector, callback, useCapture, one) {
+                var eventTypeOld = eventType;
+                var eventCache = Query.eventCache;
                 var _this = this;
                 var useDelegate = true;
                 if (toolkit.isFunction(selector)) {
@@ -91,10 +100,16 @@
                             _this.find(selector).each(function(item) {
                                 if (item === event.srcEelement) {
                                     callback.call(item, event);
+                                    if (one) {
+                                        _this.off(eventTypeOld, selector, callback);
+                                    }
                                 }
                             });
                         } else {
                             callback.call(this, event);
+                            if (one) {
+                                _this.off(eventTypeOld, selector, callback);
+                            }
                         }
                     };
                     _this.each(function(item) {
@@ -109,29 +124,39 @@
                         })
                     });
                 })
-                console.log(eventCache);
                 return this;
             },
             off: function(eventType, selector, fn) {
+                var eventCache = Query.eventCache;
                 var isDelegate = true;
                 var _this = this;
                 if (arguments.length === 0) {
                     this.each(function(item) {
+                        var arr = [];
                         eventCache.forEach(function(eventCacheItem) {
                             if (eventCacheItem.element === item) {
                                 item.removeEventListener(eventCacheItem.handleFn);
+                            } else {
+                                arr.push(eventCacheItem);
                             }
                         })
+                        eventCache = arr;
                     })
                 } else {
 
-                    if (!toolkit.isFunction(selector)) {
+                    if (toolkit.isFunction(selector)) {
                         fn = selector;
                         selector = '';
                         isDelegate = false;
                     }
 
                     var events = eventType.match(/[^\s]+/g);
+                    var compare = function(obj1, obj2) {
+                        for (var name in obj1) {
+                            if (obj1[name] !== obj2[name]) return false;
+                        }
+                        return true;
+                    }
                     events.forEach(function(eventType) {
                         var position = eventType.indexOf('.');
                         var eventName = '';
@@ -139,17 +164,18 @@
                             eventName = eventType.substring(position + 1, eventType.length);
                             eventType = eventType.substring(0, position);
                         }
+                        var eventMap = {};
+                        if (selector) eventMap.selector = selector;
+                        if (eventType) eventMap.eventType = eventType;
+                        if (eventName) eventMap.eventName = eventName;
+                        if (fn) eventMap.callback = fn;
+
+
                         _this.each(function(item) {
                             var arr = [];
                             eventCache.forEach(function(eventCacheItem) {
-                                if (eventCacheItem.selector === selector && eventCacheItem.eventType === eventType && eventCacheItem.eventName === eventName) {
-                                    if (fn) {
-                                        if (eventCacheItem.callback === fn) {
-                                            item.removeEventListener(eventCacheItem.handleFn);
-                                        }
-                                    } else {
-                                        item.removeEventListener(eventCacheItem.handleFn);
-                                    }
+                                if (compare(eventMap, eventCacheItem)) {
+                                    item.removeEventListener(eventCacheItem.handleFn);
                                 } else {
                                     arr.push(eventCacheItem);
                                 }
@@ -158,11 +184,10 @@
                         })
                     })
                 }
-				console.log(eventCache);
-				return this;
+                return this;
             },
-            one: function() {
-
+            one: function(eventType, selector, callback, useCapture) {
+                this.on(eventType, selector, callback, useCapture, 1);
             },
             trigger: function(eventName) {
 

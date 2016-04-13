@@ -103,27 +103,6 @@
                 }
                 this.innerText = text.replace(/[\n\t\r]/g, '');
                 return this.innerText;
-            },
-            addEventListener: function(eventType, fn, useCapture) {
-                useCapture = !! useCapture;
-                eventType = eventType.toLowerCase();
-                if (!toolkit.isArray(this.eventListener[eventType])) {
-                    this.eventListener[eventType] = [];
-                }
-                this.eventListener[eventType].push({
-                    fn: fn,
-                    useCapture: useCapture
-                });
-            },
-            removeEventListener: function(eventType, fn) {
-                if (toolkit.isArray(this.eventListener[eventType])) {
-                    for (var i = 0, len = this.eventListener.length; i < len; i++) {
-                        if (this.eventListener[i].fn === fn) {
-                            this.eventListener.splice(i, 1);
-                            return;
-                        }
-                    }
-                }
             }
         });
 
@@ -313,6 +292,27 @@
             },
             querySelector: function(selector) {
                 return this.querySelectorAll(selector)[0] || null;
+            },
+            addEventListener: function(eventType, fn, useCapture) {
+                useCapture = !! useCapture;
+                eventType = eventType.toLowerCase();
+                if (!toolkit.isArray(this.eventListener[eventType])) {
+                    this.eventListener[eventType] = [];
+                }
+                this.eventListener[eventType].push({
+                    fn: fn,
+                    useCapture: useCapture
+                });
+            },
+            removeEventListener: function(eventType, fn) {
+                if (toolkit.isArray(this.eventListener[eventType])) {
+                    for (var i = 0, len = this.eventListener.length; i < len; i++) {
+                        if (this.eventListener[i].fn === fn) {
+                            this.eventListener.splice(i, 1);
+                            return;
+                        }
+                    }
+                }
             }
         });
 
@@ -450,12 +450,6 @@
                 return new OddElement(tag);
             },
             createTextNode: function(text) {
-                text = text.replace(/[<>]/g, function(str) {
-                    if (str === '<') {
-                        return '&lt;';
-                    }
-                    return '&gt;';
-                })
                 return new TextElement(text);
             },
             getElementById: function(id) {

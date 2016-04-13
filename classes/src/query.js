@@ -282,19 +282,20 @@
 
                                     if (eventName) {
                                         events[eventType][oldEventType].forEach(function(eventListenerObj) {
-                                            if (eventListenerObj.selector === selector) {
-                                                var eventListener = eventListenerObj.eventListener;
-                                                if (fn) {
-                                                    var arr = [];
-                                                    eventListener.forEach(function(callback) {
-                                                        if (callback !== fn) {
-                                                            arr.push(callback);
-                                                        }
-                                                    })
-                                                    eventListenerObj.eventListener = arr;
-                                                } else {
-                                                    eventListenerObj.eventListener = [];
-                                                }
+                                            if (selector) {
+                                                if (eventListenerObj.selector !== selector) return;
+                                            }
+                                            var eventListener = eventListenerObj.eventListener;
+                                            if (fn) {
+                                                var arr = [];
+                                                eventListener.forEach(function(callback) {
+                                                    if (callback !== fn) {
+                                                        arr.push(callback);
+                                                    }
+                                                })
+                                                eventListenerObj.eventListener = arr;
+                                            } else {
+                                                eventListenerObj.eventListener = [];
                                             }
                                         });
                                     } else {
@@ -311,7 +312,7 @@
                                                 })
                                             }
                                         } else {
-                                            events[eventType] = {};
+                                            delete events[eventType];
                                             item.removeEventListener(eventType, Query.dispatchEvent);
                                         }
                                     }
@@ -320,6 +321,7 @@
                         })
                     })
                 }
+                console.log(Query.eventCache)
                 return this;
             },
             one: function(eventType, selector, callback, useCapture) {

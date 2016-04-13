@@ -13,8 +13,6 @@
         function Query(selector, context, isBrowser) {
             return new Query.prototype.init(selector, context, isBrowser);
         }
-        //事件缓存
-        Query.eventCache = [];
         Query.prototype.init = function(selector, context, isBrowser) {
             this.isBrowser = isBrowser === undefined ? true : !! isBrowser;
             this.length = 0;
@@ -36,6 +34,72 @@
             }
         }
         Query.prototype.init.prototype = Query.prototype;
+        //事件缓存
+        toolkit.extend(Query, {
+            isTrigger: false,
+            eventCache: [],
+            findEventCache: function(element) {
+                var eventCache = Query.eventCache;
+                for (var i = 0, len = eventCache.length; i < len; i++) {
+                    if (eventCache[i].element === element) {
+                        return eventCache[i];
+                    }
+                }
+                return false;
+            },
+            dispatchEvent: function(event) {
+                var _this = this;
+
+                var result;
+                var eventCacheItem = Query.findEventCache(this);
+
+                if (Query.isTrigger) {
+                    var eventType = Query.isTrigger[0];
+                    var args = Query.isTrigger.slice(1, Query.isTrigger.length);
+                    args.unshift(event);
+                    var oldEventType = eventType;
+                    var dotPosition = eventType.indexOf('.');
+                    var eventName = '';
+                    if (dotPosition !== -1) {
+                        eventName = eventType.substring(dotPosition + 1, eventType.length);
+                        eventType = eventType.substring(0, dotPosition);
+                    }
+                    var eventListener = eventCacheItem.events[eventType];
+                    if (!eventListener) return;
+                    if (eventName) {
+                        for (var type in eventListener) {
+                            if (type === oldEventType) {
+                                eventListener[type].forEach(function(fn) {
+                                    if (fn.apply(_this, args) === false) {
+                                        result = false
+                                    }
+                                })
+                            }
+                        }
+                    } else {
+                        for (var type in eventListener) {
+                            eventListener[type].forEach(function(fn) {
+                                if (fn.apply(_this, args) === false) {
+                                    result = false
+                                }
+                            })
+                        }
+                    }
+                } else {
+                    var eventType = event.type;
+                    var eventListener = eventCacheItem.events[eventType];
+                    for (var key in eventListener) {
+                        eventListener[key].forEach(function(fn) {
+                            if (fn.call(_this, event) === false) {
+                                result = false;
+                            };
+                        })
+                    }
+                }
+                return result;
+            }
+        });
+
         toolkit.extend(Query.prototype, {
             find: function(selector, context) {
 
@@ -80,11 +144,14 @@
                 });
                 return this;
             },
-            on: function(eventType, selector, callback, useCapture, one) {
-                var eventTypeOld = eventType;
-                var eventCache = Query.eventCache;
+            on: function(eventTypes, selector, callback, useCapture, one) {
                 var _this = this;
-                var useDelegate = true;
+                if (!toolkit.isString(eventTypes)) return this;
+                eventTypes = toolkit.trim(eventTypes);
+                if (!eventTypes) return this;
+
+                var eventCache = Query.eventCache;
+                var useDelegate = true; //默认有事件委托
                 if (toolkit.isFunction(selector)) {
                     useCapture = callback;
                     callback = selector;
@@ -94,45 +161,45 @@
                 useCapture = !! useCapture;
 
                 //eventType 可能的情况 click.eventName mouseover...
-                eventType = toolkit.trim(eventType);
-                var events = eventType.match(/[^\s]+/g);
+                var events = eventTypes.match(/[^\s]+/g);
 
-                events.forEach(function(eventType) {
-                    var position = eventType.indexOf('.');
-                    var eventName = '';
-                    if (position !== -1) {
-                        eventName = eventType.substring(position + 1, eventType.length);
-                        eventType = eventType.substring(0, position);
-                    }
-                    var handleFn = function(event) {
-                        if (useDelegate) {
-                            _this.find(selector).each(function(item) {
-                                if (item === event.srcEelement) {
-                                    callback.call(item, event);
-                                    if (one) {
-                                        _this.off(eventTypeOld, selector, callback);
-                                    }
-                                }
-                            });
-                        } else {
-                            callback.call(this, event);
-                            if (one) {
-                                _this.off(eventTypeOld, selector, callback);
+                this.each(function(item) {
+                    if (!one) {
+                        var eventCacheItem = Query.findEventCache(item);
+                        if (!eventCacheItem) {
+                            eventCacheItem = {
+                                element: item,
+                                events: {}
                             }
+                            eventCache.push(eventCacheItem);
                         }
-                    };
-                    _this.each(function(item) {
-                        item.addEventListener(eventType, handleFn, useCapture);
-                        eventCache.push({
-                            element: item,
-                            handleFn: handleFn,
-                            callback: callback,
-                            eventType: eventType,
-                            eventName: eventName,
-                            selector: selector
-                        })
-                    });
+                    }
+                    events.forEach(function(eventType) {
+                        var oldEventType = eventType;
+                        var dotPosition = eventType.indexOf('.');
+                        if (dotPosition !== -1) {
+                            eventType = eventType.substring(0, dotPosition);
+                        }
+                        if (one) {
+                            var handleFn = function(event) {
+                                item.removeEventListener(eventType, handleFn);
+                                return callback.call(this, event);
+                            };
+                            item.addEventListener(eventType, handleFn, useCapture);
+                            return;
+                        }
+                        if (!eventCacheItem.events[eventType]) {
+                            eventCacheItem.events[eventType] = {};
+                            item.addEventListener(eventType, Query.dispatchEvent, useCapture);
+                        }
+                        var eventListener = eventCacheItem.events[eventType];
+                        if (!eventListener[oldEventType]) {
+                            eventListener[oldEventType] = [];
+                        };
+                        eventListener[oldEventType].push(callback);
+                    })
                 })
+                console.log(eventCache);
                 return this;
             },
             off: function(eventType, selector, fn) {
@@ -141,15 +208,14 @@
                 var _this = this;
                 if (arguments.length === 0) {
                     this.each(function(item) {
-                        var arr = [];
-                        eventCache.forEach(function(eventCacheItem) {
-                            if (eventCacheItem.element === item) {
-                                item.removeEventListener(eventCacheItem.eventType, eventCacheItem.handleFn);
-                            } else {
-                                arr.push(eventCacheItem);
+                        var eventCacheItem = Query.findEventCache(item);
+                        if (eventCacheItem) {
+                            var events = eventCacheItem.events;
+                            for (var type in events) {
+                                item.removeEventListener(type, Query.dispatchEvent);
                             }
-                        })
-                        eventCache = arr;
+                        }
+                        eventCacheItem.events = {};
                     })
                 } else {
 
@@ -160,46 +226,64 @@
                     }
 
                     var events = eventType.match(/[^\s]+/g);
-                    var compare = function(obj1, obj2) {
-                        for (var name in obj1) {
-                            if (obj1[name] !== obj2[name]) return false;
-                        }
-                        return true;
-                    };
                     events.forEach(function(eventType) {
-                        var position = eventType.indexOf('.');
+                        var oldEventType = eventType;
+                        var dotPosition = eventType.indexOf('.');
                         var eventName = '';
-                        if (position !== -1) {
-                            eventName = eventType.substring(position + 1, eventType.length);
-                            eventType = eventType.substring(0, position);
+                        if (dotPosition !== -1) {
+                            eventName = eventType.substring(dotPosition + 1, eventType.length);
+                            eventType = eventType.substring(0, dotPosition);
                         }
-                        var eventMap = {};
-                        if (selector) eventMap.selector = selector;
-                        if (eventType) eventMap.eventType = eventType;
-                        if (eventName) eventMap.eventName = eventName;
-                        if (fn) eventMap.callback = fn;
-
-
                         _this.each(function(item) {
-                            var arr = [];
-                            eventCache.forEach(function(eventCacheItem) {
-                                if (compare(eventMap, eventCacheItem)) {
-                                    item.removeEventListener(eventCacheItem.eventType, eventCacheItem.handleFn);
-                                } else {
-                                    arr.push(eventCacheItem);
+                            var eventCacheItem = Query.findEventCache(item);
+                            if (eventCacheItem) {
+                                var events = eventCacheItem.events;
+                                if (events[eventType]) {
+                                    var eventListener = events[eventType];
+                                    if (eventName) {
+                                        for (var name in eventListener) {
+                                            if (name === oldEventType) {
+                                                delete eventListener[name];
+                                            }
+                                        }
+                                        return;
+                                    }
+                                    events[eventType].eventListener = {};
                                 }
-                            })
-                            eventCache = arr;
+                            }
                         })
                     })
                 }
+                console.log(eventCache);
                 return this;
             },
             one: function(eventType, selector, callback, useCapture) {
                 return this.on(eventType, selector, callback, useCapture, 1);
             },
-            trigger: function(eventName) {
+            trigger: function(eventTypes) {
+                var _this = this;
+                var args = [].slice.call(arguments);
 
+                var events = eventTypes.match(/[^\s]+/g);
+                events.forEach(function(eventType) {
+                    args.shift();
+                    var oldEventType = eventType;
+                    args.unshift(oldEventType);
+                    Query.isTrigger = args;
+
+                    var dotPosition = eventType.indexOf('.');
+                    if (dotPosition !== -1) {
+                        eventType = eventType.substring(0, dotPosition);
+                    }
+                    _this.each(function(item) {
+                        try {
+                            item[eventType]();
+                        } catch (e) {
+
+                        }
+                    })
+                })
+                Query.isTrigger = false;
             },
             attr: function(name, value) {
                 if (toolkit.isString(name)) {

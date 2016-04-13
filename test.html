@@ -12,17 +12,17 @@
         window.onload = function() {
             require(['./classes/src/xmlEngine','./classes/src/query'], function(obj,$) {
                 var ng = new obj(document.getElementsByTagName('html')[0].innerHTML);
-				var n=$(ng);
-				var t='';
-				var a=n.find('div');
-				a.addClass('red').each(function(item){
-					t+=item.outerHtml;
-				});
-				var $obj=$('#box');
-				$obj.html(t);
-				console.log($obj);
-				$obj.one('click',function(){
-					console.log($($obj))
+
+				$('div').on('click', function(event){
+					console.log(event);
+					alert(3)
+				}).on('click.a', function(){
+					console.log(arguments)
+					alert(444)
+					$(this).off('click.a');
+				}).trigger('click.a',{},555);
+				$('div').one('click',function(){
+					alert(333)
 				})
             })
 //            require(['./classes/src/Lexer'])
@@ -34,7 +34,7 @@
 
 
 <body class="browserscripting" id="jsref">
-	<div id="box">fdasafdsa</div>
+	<div>fdasafdsa</div>
 	<script id="text" type="text/template">
 
 	</script>

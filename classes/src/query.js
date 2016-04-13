@@ -174,12 +174,10 @@
                 if (!eventTypes) return this;
 
                 var eventCache = Query.eventCache;
-                var useDelegate = true; //默认有事件委托
                 if (toolkit.isFunction(selector)) {
                     useCapture = callback;
                     callback = selector;
                     selector = '';
-                    useDelegate = false;
                 }
                 useCapture = !! useCapture;
 
@@ -244,7 +242,6 @@
             },
             off: function(eventType, selector, fn) {
                 var eventCache = Query.eventCache;
-                var isDelegate = true;
                 var _this = this;
                 if (arguments.length === 0) {
                     this.each(function(item) {
@@ -262,7 +259,6 @@
                     if (toolkit.isFunction(selector)) {
                         fn = selector;
                         selector = '';
-                        isDelegate = false;
                     }
                     selector = selector || '';
                     var events = eventType.match(/[^\s]+/g);

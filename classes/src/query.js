@@ -34,10 +34,10 @@
             }
         }
         Query.prototype.init.prototype = Query.prototype;
-        //事件缓存
+
         toolkit.extend(Query, {
-            isTrigger: false,
-            eventCache: [],
+            isTrigger: false, //存放trigger参数
+            eventCache: [], //事件缓存
             findEventCache: function(element) {
                 var eventCache = Query.eventCache;
                 for (var i = 0, len = eventCache.length; i < len; i++) {
@@ -64,35 +64,58 @@
                         eventName = eventType.substring(dotPosition + 1, eventType.length);
                         eventType = eventType.substring(0, dotPosition);
                     }
-                    var eventListener = eventCacheItem.events[eventType];
-                    if (!eventListener) return;
+                    var events = eventCacheItem.events[eventType];
+                    if (!events) return;
+
                     if (eventName) {
-                        for (var type in eventListener) {
-                            if (type === oldEventType) {
-                                eventListener[type].forEach(function(fn) {
-                                    if (fn.apply(_this, args) === false) {
-                                        result = false
-                                    }
+                        for (var key in events) {
+                            if (key === oldEventType) {
+                                var eventListenerCollection = events[key];
+                                eventListenerCollection.forEach(function(eventListenerObj) {
+                                    var eventListener = eventListenerObj.eventListener;
+                                    eventListener.forEach(function(fn) {
+                                        if (fn.apply(_this, args) === false) {
+                                            result = false
+                                        }
+                                    })
                                 })
                             }
                         }
                     } else {
-                        for (var type in eventListener) {
-                            eventListener[type].forEach(function(fn) {
-                                if (fn.apply(_this, args) === false) {
-                                    result = false
-                                }
+                        for (var type in events) {
+                            var eventListenerCollection = events[key];
+                            eventListenerCollection.forEach(function(eventListenerObj) {
+                                var eventListener = eventListenerObj.eventListener;
+                                eventListener.forEach(function(fn) {
+                                    if (fn.apply(_this, args) === false) {
+                                        result = false
+                                    }
+                                })
                             })
                         }
                     }
                 } else {
                     var eventType = event.type;
-                    var eventListener = eventCacheItem.events[eventType];
-                    for (var key in eventListener) {
-                        eventListener[key].forEach(function(fn) {
-                            if (fn.call(_this, event) === false) {
-                                result = false;
-                            };
+                    var events = eventCacheItem.events[eventType];
+                    var findEventSrcElement = function(QueryObj, srcElement) {
+                        for (var i = 0, len = QueryObj.length; i < len; i++) {
+                            if (QueryObj[i] === srcElement) return true;
+                        }
+                        return false;
+                    };
+                    for (var key in events) {
+                        var eventListenerObj = events[key];
+                        eventListenerObj.forEach(function(item) {
+                            if (item.selector) {
+                                if (!findEventSrcElement(Query(_this).find(item.selector), event.srcElement)) {
+                                    return;
+                                }
+                            }
+                            item.eventListener.forEach(function(fn) {
+                                if (fn.call(_this, event) === false) {
+                                    result = false;
+                                };
+                            })
                         })
                     }
                 }
@@ -192,11 +215,28 @@
                             eventCacheItem.events[eventType] = {};
                             item.addEventListener(eventType, Query.dispatchEvent, useCapture);
                         }
-                        var eventListener = eventCacheItem.events[eventType];
-                        if (!eventListener[oldEventType]) {
-                            eventListener[oldEventType] = [];
+
+                        var events = eventCacheItem.events[eventType];
+                        if (!events[oldEventType]) {
+                            events[oldEventType] = [];
                         };
-                        eventListener[oldEventType].push(callback);
+                        var findEventListener = function(selector, arr) {
+                            for (var i = 0, len = arr.length; i < len; i++) {
+                                if (arr[i].selector === selector) {
+                                    return arr[i];
+                                }
+                            }
+                            return false;
+                        };
+                        var eventListenerObj = findEventListener(selector, events[oldEventType]);
+                        if (eventListenerObj) {
+                            eventListenerObj.eventListener.push(callback);
+                        } else {
+                            events[oldEventType].push({
+                                eventListener: [callback],
+                                selector: selector
+                            });
+                        }
                     })
                 })
                 console.log(eventCache);
@@ -224,7 +264,7 @@
                         selector = '';
                         isDelegate = false;
                     }
-
+                    selector = selector || '';
                     var events = eventType.match(/[^\s]+/g);
                     events.forEach(function(eventType) {
                         var oldEventType = eventType;
@@ -239,22 +279,47 @@
                             if (eventCacheItem) {
                                 var events = eventCacheItem.events;
                                 if (events[eventType]) {
-                                    var eventListener = events[eventType];
+
                                     if (eventName) {
-                                        for (var name in eventListener) {
-                                            if (name === oldEventType) {
-                                                delete eventListener[name];
+                                        events[eventType][oldEventType].forEach(function(eventListenerObj) {
+                                            if (eventListenerObj.selector === selector) {
+                                                var eventListener = eventListenerObj.eventListener;
+                                                if (fn) {
+                                                    var arr = [];
+                                                    eventListener.forEach(function(callback) {
+                                                        if (callback !== fn) {
+                                                            arr.push(callback);
+                                                        }
+                                                    })
+                                                    eventListenerObj.eventListener = arr;
+                                                } else {
+                                                    eventListenerObj.eventListener = [];
+                                                }
                                             }
+                                        });
+                                    } else {
+                                        if (fn) {
+                                            for (var key in events[eventType]) {
+                                                events[eventType][key].forEach(function(eventListenerObj) {
+                                                    var arr = [];
+                                                    eventListenerObj.eventListener.forEach(function(callback) {
+                                                        if (fn !== callback) {
+                                                            arr.push(callback);
+                                                        }
+                                                    })
+                                                    eventListenerObj.eventListener = arr;
+                                                })
+                                            }
+                                        } else {
+                                            events[eventType] = {};
+                                            item.removeEventListener(eventType, Query.dispatchEvent);
                                         }
-                                        return;
                                     }
-                                    events[eventType].eventListener = {};
                                 }
                             }
                         })
                     })
                 }
-                console.log(eventCache);
                 return this;
             },
             one: function(eventType, selector, callback, useCapture) {
@@ -284,6 +349,7 @@
                     })
                 })
                 Query.isTrigger = false;
+                return this;
             },
             attr: function(name, value) {
                 if (toolkit.isString(name)) {

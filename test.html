@@ -13,28 +13,28 @@
             require(['./classes/src/xmlEngine','./classes/src/query'], function(obj,$) {
                 var ng = new obj(document.getElementsByTagName('html')[0].innerHTML);
 
-				$('div').on('click', function(event){
+				$('div').on('click.bbb','a', function(event){
 					console.log(event);
 					alert(3)
-				}).on('click.a', function(){
-					console.log(arguments)
-					alert(444)
-					$(this).off('click.a');
-				}).trigger('click.a',{},555);
-				$('div').one('click',function(){
-					alert(333)
-				})
+				}).off('click',function(){});
+
+//				$('div').on('click.ccc','a', function(event){
+//					console.log(event);
+//					alert(3)
+//				}).on('click.ccc','a', function(){
+//					console.log(arguments)
+//					alert(444)
+//				})
             })
 //            require(['./classes/src/Lexer'])
 //            require(['./classes/src/ast'])
-			var str='<script>'
         }
     </script>
 </head>
 
 
 <body class="browserscripting" id="jsref">
-	<div>fdasafdsa</div>
+	<div>fdasafdsa <a href="javascript:;">bbbbbbbbbbbbbbbb</a></div>
 	<script id="text" type="text/template">
 
 	</script>

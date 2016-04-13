@@ -12,9 +12,14 @@
         window.onload = function() {
             require(['./classes/src/xmlEngine','./classes/src/query'], function(obj,$) {
                 var ng = new obj(document.getElementsByTagName('html')[0].innerHTML);
-				console.log(ng);
+				var n=$(ng);
+				var t='';
+				var a=n.find('div');
+				a.addClass('red').each(function(item){
+					t+=item.outerHtml;
+				});
 				var $obj=$('#box');
-
+				$obj.html(t);
 				console.log($obj);
 				$obj.one('click',function(){
 					console.log($($obj))

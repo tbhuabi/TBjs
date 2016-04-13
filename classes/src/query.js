@@ -16,17 +16,17 @@
         //事件缓存
         Query.eventCache = [];
         Query.prototype.init = function(selector, context, isBrowser) {
-            context = context || document;
             this.isBrowser = isBrowser === undefined ? true : !! isBrowser;
             this.length = 0;
-            this.selector = selector;
+            this.selector = '';
             var _this = this;
             if (toolkit.isArray(selector)) {
                 selector.forEach(function(item) {
                     _this[_this.length++] = item;
                 })
             } else if (toolkit.isString(selector)) {
-                this.find(selector, context === document ? [document] : this);
+                this.selector = selector;
+                this.find(selector, context || [document]);
             } else {
                 if (selector instanceof this.init) return selector;
                 this[this.length++] = selector;
@@ -38,6 +38,11 @@
         Query.prototype.init.prototype = Query.prototype;
         toolkit.extend(Query.prototype, {
             find: function(selector, context) {
+
+                if (toolkit.isUndefined(context)) {
+                    return Query(selector, this, this.isBrowser);
+                }
+
                 var _this = this;
                 var elements = [];
 
@@ -73,6 +78,7 @@
                 toolkit.unique(elements).forEach(function(item) {
                     _this[_this.length++] = item;
                 });
+                return this;
             },
             on: function(eventType, selector, callback, useCapture, one) {
                 var eventTypeOld = eventType;
@@ -252,6 +258,19 @@
                     callback(this[i]);
                 }
                 return this;
+            },
+            html: function(htmlText) {
+                if (toolkit.isUndefined(htmlText)) return this[0] && this[0].innerHTML;
+                if (this.isBrowser) {
+                    this.each(function(item) {
+                        item.innerHTML = htmlText;
+                    })
+                } else {
+                    htmlText = htmlText.toString();
+                    this.each(function(item) {
+                        item.setInterHtml(htmlText)
+                    })
+                }
             }
         })
 

@@ -208,6 +208,21 @@
                 }
                 return false;
             },
+            removeAttribute: function(key) {
+                for (var i = 0, len = this.attributes.length; i < len; i++) {
+                    if (this.attributes[i].name === key) {
+                        this.attributes.splice(i, 1);
+                        if (key === 'class') {
+                            this.className = '';
+                            this.classList = [];
+                        } else if (key === 'id') {
+                            this.id = '';
+                        }
+                        break;
+                    }
+                }
+                this.$refresh();
+            },
             querySelectorAll: function(selector) {
                 selector = ' ' + toolkit.trim(selector);
                 var _this = this;
@@ -713,6 +728,7 @@
             this.parentNode = null;
             this.innerHTML = '';
             this.innerText = '';
+            this.id = '';
             this.outerHtml = '';
             this.classList = [];
             this.className = '';
@@ -735,6 +751,7 @@
             this.outerHtml = '';
             this.classList = [];
             this.className = '';
+            this.id = '';
             this.childNodes = [];
             this.$childNodes = [];
             this.children = [];

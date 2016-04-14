@@ -25,10 +25,10 @@ TBjs发起的初衷是想成为一个具有模块化、MVC、AMD异步加载、�
 当前目录简介及开发进度（可能因为不能及时更新，有所不同）：
 --------------------------------------------
 
-* classes	源码目录
-	- TBjs.j	框架主文件
-	- src	框架源文件
-		*	amd.js	类requriejs	未完成
-		*	ast.js	摘自angular	完成  
-		*	compiler.js			未完成
+* `classes`      源码目录
+	- `TBjs.js`      框架主文件
+	- `src`     框架源文件
+		*	`amd.js`    类requriejs	未完成
+		*	`ast.js`    摘自angular	完成  
+		*	`compiler.js`    未完成
 	

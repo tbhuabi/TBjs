@@ -22,7 +22,6 @@
         //根对象
         function RootElementEngine() {
             this.$ENGINE = true;
-            this.eventListener = {};
         };
         toolkit.extend(RootElementEngine.prototype, {
             getInnerHtml: function() {
@@ -68,17 +67,14 @@
 
                 var getChildNodesHtml = function(obj) {
                     var html = '';
-                    for (var i = 0, len = obj.childNodes.length; i < len; i++) {
-                        html += obj.childNodes[i].getOuterHtml();
+                    for (var i = 0, len = obj.$childNodes.length; i < len; i++) {
+                        html += obj.$childNodes[i].getOuterHtml();
                     }
                     return html;
                 }
 
 
                 var outerHtml = '';
-                if (this.nodeType === DOCUMENT_NODE) {
-                    outerHtml = getChildNodesHtml(this);
-                }
                 if (this.nodeType === ELEMENT_NODE) {
                     var attrHtml = getAttributeHtml(this.attributes);
                     if (ODD_TAG_LIST.indexOf(this.tagName) === -1) {
@@ -86,6 +82,10 @@
                     } else {
                         outerHtml = '<' + this.tagName + ' ' + attrHtml + '>';
                     }
+                } else if (this.nodeType === DOCUMENT_NODE) {
+                    outerHtml = getChildNodesHtml(this);
+                } else if (this.nodeType === COMMENT_NODE) {
+                    outerHtml = '<!--' + this.innerText + '-->';
                 }
 
                 this.outerHtml = outerHtml;
@@ -106,10 +106,38 @@
             }
         });
 
+        function ElementEventEngine() {};
+
+        ElementEventEngine.prototype = new RootElementEngine();
+        toolkit.extend(ElementEventEngine.prototype, {
+            constructor: ElementEventEngine,
+            addEventListener: function(eventType, fn, useCapture) {
+                useCapture = !! useCapture;
+                eventType = eventType.toLowerCase();
+                if (!toolkit.isArray(this.eventListener[eventType])) {
+                    this.eventListener[eventType] = [];
+                }
+                this.eventListener[eventType].push({
+                    fn: fn,
+                    useCapture: useCapture
+                });
+            },
+            removeEventListener: function(eventType, fn) {
+                if (toolkit.isArray(this.eventListener[eventType])) {
+                    for (var i = 0, len = this.eventListener.length; i < len; i++) {
+                        if (this.eventListener[i].fn === fn) {
+                            this.eventListener.splice(i, 1);
+                            return;
+                        }
+                    }
+                }
+            }
+        })
+
         //dom元素构造函数
 
         function ElementEngine() {};
-        ElementEngine.prototype = new RootElementEngine();
+        ElementEngine.prototype = new ElementEventEngine();
         toolkit.extend(ElementEngine.prototype, {
             constructor: ElementEngine,
             $refresh: function() {
@@ -124,8 +152,10 @@
             setInnerHtml: function(arg) {
                 var newNodeElements = new DocumentEngine(arg);
                 this.childNodes = [];
-                for (var i = 0, len = newNodeElements.childNodes.length; i < len; i++) {
-                    this.appendChild(newNodeElements.childNodes[i]);
+                this.$childNodes = [];
+                this.children = [];
+                for (var i = 0, len = newNodeElements.$childNodes.length; i < len; i++) {
+                    this.appendChild(newNodeElements.$childNodes[i]);
                 }
                 newNodeElements = null;
                 this.$refresh();
@@ -292,27 +322,6 @@
             },
             querySelector: function(selector) {
                 return this.querySelectorAll(selector)[0] || null;
-            },
-            addEventListener: function(eventType, fn, useCapture) {
-                useCapture = !! useCapture;
-                eventType = eventType.toLowerCase();
-                if (!toolkit.isArray(this.eventListener[eventType])) {
-                    this.eventListener[eventType] = [];
-                }
-                this.eventListener[eventType].push({
-                    fn: fn,
-                    useCapture: useCapture
-                });
-            },
-            removeEventListener: function(eventType, fn) {
-                if (toolkit.isArray(this.eventListener[eventType])) {
-                    for (var i = 0, len = this.eventListener.length; i < len; i++) {
-                        if (this.eventListener[i].fn === fn) {
-                            this.eventListener.splice(i, 1);
-                            return;
-                        }
-                    }
-                }
             }
         });
 
@@ -354,22 +363,33 @@
             appendChild: function(TBDomElement) {
                 if (TBDomElement.parentNode !== this) {
                     TBDomElement.parentNode = this;
-                    this.childNodes.push(TBDomElement);
-                    if (TBDomElement.nodeType === ELEMENT_NODE) {
-                        this.children.push(TBDomElement);
-                    }
+                    if (TBDomElement.nodeType === COMMENT_NODE) {
+                        this.$childNodes.push(TBDomElement);
+
+                    } else {
+                        this.childNodes.push(TBDomElement);
+                        this.$childNodes.push(TBDomElement);
+                        if (TBDomElement.nodeType === ELEMENT_NODE) {
+                            this.children.push(TBDomElement);
+                        }
+                    };
                 } else {
-                    var currentNode;
                     for (var i = 0, len = this.childNodes.length; i < len; i++) {
                         if (TBDomElement === this.childNodes[i]) {
-                            this.childNodes.splice(this.childNodes.length - 1, 0, this.childNodes.splice(i, 1));
+                            this.childNodes.push(this.childNodes.splice(i, 1));
+                            break;
+                        }
+                    }
+                    for (var i = 0, len = this.$childNodes.length; i < len; i++) {
+                        if (TBDomElement === this.$childNodes[i]) {
+                            this.$childNodes.push(this.$childNodes.splice(i, 1));
                             break;
                         }
                     }
                     if (TBDomElement.nodeType === ELEMENT_NODE) {
                         for (var i = 0, len = this.children.length; i < len; i++) {
                             if (TBDomElement === this.children[i]) {
-                                this.children.splice(this.children.length - 1, 0, this.children.splice(i, 1));
+                                this.children.push(this.children.splice(i, 1));
                                 break;
                             }
                         }
@@ -381,6 +401,12 @@
                 for (var i = 0, len = this.childNodes.length; i < len; i++) {
                     if (this.childNodes[i] === TBDomElement) {
                         this.childNodes.splice(i, 1);
+                        break;
+                    }
+                }
+                for (var i = 0, len = this.$childNodes.length; i < len; i++) {
+                    if (this.$childNodes[i] === TBDomElement) {
+                        this.$childNodes.splice(i, 1);
                         break;
                     }
                 }
@@ -396,6 +422,12 @@
             },
             insertBefore: function(TBDomElement, nextElement) {
                 var parentNode = TBDomElement.parentNode;
+                for (var i = 0, len = parentNode.$childNodes.length; i < len; i++) {
+                    if (parentNode.$childNodes[i] === TBDomElement) {
+                        parentNode.$childNodes.splice(i, 1);
+                        break;
+                    }
+                }
                 for (var i = 0, len = parentNode.childNodes.length; i < len; i++) {
                     if (parentNode.childNodes[i] === TBDomElement) {
                         parentNode.childNodes.splice(i, 1);
@@ -409,6 +441,12 @@
                     }
                 }
                 TBDomElement.parentNode = this;
+                for (var i = 0, len = this.$childNodes.length; i < len; i++) {
+                    if (this.$childNodes[i] === nextElement) {
+                        this.$childNodes.splice(i, 0, TBDomElement);
+                        break;
+                    }
+                }
                 for (var i = 0, len = this.childNodes.length; i < len; i++) {
                     if (this.childNodes[i] === nextElement) {
                         this.childNodes.splice(i, 0, TBDomElement);
@@ -427,6 +465,7 @@
 
         //document构造函数
         function DocumentEngine(htmlContent) {
+            if (!(this instanceof DocumentEngine)) return new DocumentEngine(htmlContent);
             this.$XMLContent = htmlContent;
             this.nodeType = DOCUMENT_NODE;
             this.parentNode = null;
@@ -437,6 +476,8 @@
             this.className = '';
             this.childNodes = [];
             this.children = [];
+            this.$childNodes = [];
+            this.eventListener = {};
             this.$XMLEngine();
         }
         DocumentEngine.prototype = new ElementMethodEngine();
@@ -451,6 +492,9 @@
             },
             createTextNode: function(text) {
                 return new TextElement(text);
+            },
+            createComment: function(commentText) {
+                return new CommentElement(commentText);
             },
             getElementById: function(id) {
                 function getElementById(parent) {
@@ -496,11 +540,27 @@
 
                 var TEST_TAG_REG = new RegExp('^<' + TAG_OR_PROPERTY_REG_STRING + '\\s*\/?>$|^<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*\/?>$|^<\/' + TAG_OR_PROPERTY_REG_STRING + '\\s*>$');
 
+
                 var arr = [];
 
-                function findScript(str) {
-                    var startIndex = str.indexOf('<script');
-                    if (startIndex !== -1) {
+                var findScriptOrCommentNode = function(str) {
+                    var startScriptIndex = str.indexOf('<script');
+                    var startCommentIndex = str.indexOf('<!--');
+
+                    var type, startIndex;
+                    if (startScriptIndex < startCommentIndex && startScriptIndex !== -1) {
+                        type = 'script';
+                        startIndex = startScriptIndex;
+                    } else {
+                        type = 'comment';
+                        startIndex = startCommentIndex;
+                    }
+                    if (startIndex === -1) {
+                        arr.push(str);
+                        return;
+                    }
+
+                    if (type === 'script') {
                         var beforeStr = str.substring(0, startIndex);
                         var afterStr = str.substring(startIndex, str.length);
                         if (TEST_SCRIPT_BERORE_REG.test(afterStr)) {
@@ -509,22 +569,37 @@
                                 beforeStr && arr.push(beforeStr);
                                 var body = afterStr.substring(0, closeIndex + 9);
                                 body && arr.push(body);
-                                findScript(afterStr.substring(closeIndex + 9, afterStr.length));
+                                findScriptOrCommentNode(afterStr.substring(closeIndex + 9, afterStr.length));
                                 return;
                             }
                         }
+                    } else {
+                        var beforeStr = str.substring(0, startIndex);
+                        if (beforeStr) arr.push(beforeStr);
+                        var afterStr = str.substring(startIndex, str.length);
+                        var closeIndex = afterStr.indexOf('-->');
+                        if (closeIndex === -1 || closeIndex + 3 === afterStr.length) {
+                            arr.push(afterStr);
+                        } else {
+                            var body = afterStr.substring(0, closeIndex + 3);
+                            arr.push(body);
+                            findScriptOrCommentNode(afterStr.substring(closeIndex + 3, afterStr.length));
+                        }
                     }
-                    arr.push(str)
-                }
-                findScript(this.$XMLContent);
+                };
+
+
+
+                findScriptOrCommentNode(this.$XMLContent);
 
 
 
 
                 var IS_SCRIPT_REG = /^<script/i;
+                var IS_COMMENT_REG = /^<!--/;
                 var arr1 = []; //存放第一次标签分析结果
                 arr.forEach(function(item) {
-                    if (IS_SCRIPT_REG.test(item)) {
+                    if (IS_SCRIPT_REG.test(item) || IS_COMMENT_REG.test(item)) {
                         arr1.push(item);
                         return;
                     }
@@ -535,7 +610,7 @@
 
                 var arr2 = []; //存放第二次标签分析结果
                 arr1.forEach(function(item) {
-                    if (IS_SCRIPT_REG.test(item)) {
+                    if (IS_SCRIPT_REG.test(item) || IS_COMMENT_REG.test(item)) {
                         arr2.push(item);
                         return;
                     }
@@ -562,8 +637,13 @@
                             arr3.push($3);
                         });
                         continue;
-                    }
-                    if (TEST_TAG_REG.test(arr2[i])) {
+                    } else if (TEST_TAG_REG.test(arr2[i])) {
+                        if (text !== '') {
+                            arr3.push(text);
+                            text = '';
+                        }
+                        arr3.push(arr2[i]);
+                    } else if (IS_COMMENT_REG.test(arr2[i])) {
                         if (text !== '') {
                             arr3.push(text);
                             text = '';
@@ -573,7 +653,6 @@
                         text += arr2[i];
                     }
                 }
-
                 this.$XMLBuilder(this, arr3, 0);
             },
             $XMLBuilder: function(parentNode, arr, i) {
@@ -608,12 +687,16 @@
                         }
                         return;
                     }
-                    var closeTag = /^<\/(\w+(?:-\w+)*)/.exec(currentString);
-                    if (closeTag) {
-                        closeTag = closeTag[1];
+                    if (/^<\/[a-zA-Z]\w*(?:-\w+)*/.test(currentString)) {
                         if (parentNode.parentNode) {
                             this.$XMLBuilder(parentNode.parentNode, arr, ++i);
                         }
+                        return;
+                    }
+                    if (/^<!--/.test(currentString)) {
+                        var currentElement = this.createComment(currentString.replace(/^<!--|-->$/g, ''));
+                        parentNode.appendChild(currentElement);
+                        this.$XMLBuilder(parentNode, arr, ++i);
                         return;
                     }
                     var currentElement = this.createTextNode(currentString);
@@ -635,6 +718,7 @@
             this.classList = [];
             this.className = '';
             this.attributes = [];
+            this.eventListener = {};
         }
         OddElement.prototype = new ElementEngine();
         toolkit.extend(OddElement.prototype, {
@@ -653,8 +737,10 @@
             this.classList = [];
             this.className = '';
             this.childNodes = [];
+            this.$childNodes = [];
             this.children = [];
             this.attributes = [];
+            this.eventListener = {};
         }
         EvenElement.prototype = new ElementMethodEngine();
         toolkit.extend(EvenElement.prototype, {
@@ -666,11 +752,21 @@
             this.parentNode = null;
             this.nodeType = TEXT_NODE;
             this.innerHTML = this.innerText = this.outerHtml = text;
+            this.eventListener = {};
         }
-        TextElement.prototype = new RootElementEngine();
+        TextElement.prototype = new ElementEventEngine();
         TextElement.prototype.constructor = TextElement;
 
 
+        function CommentElement(commentText) {
+            this.parentNode = null;
+            this.nodeType = COMMENT_NODE;
+            this.innerHTML = this.innerText = commentText;
+            this.outerHtml = '<!--' + commentText + '-->';
+        }
+
+        CommentElement.prototype = new RootElementEngine();
+        CommentElement.prototype.constructor = CommentElement;
 
 
 

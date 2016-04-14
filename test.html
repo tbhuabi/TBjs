@@ -5,24 +5,26 @@
     <meta charset="UTF-8">
     <title>Document</title>
     <script src="requirejs/requirejs.js" id="aaa"></script>
+
     <style>
         .red {
             color: red
         }
     </style>
+
     <script>
-        document.addEventListener('DOMContentLoaded',function(){
+        document.addEventListener('DOMContentLoaded', function() {
 
             require(['./classes/src/xmlEngine', './classes/src/query'], function(obj, $) {
                 var ng = new obj(document.getElementById('text').innerHTML);
 				console.log(ng);
-                console.log(ng.innerHTML);
+                //                console.log(ng.innerHTML);
 
+                var str = '<!-- -->'
                 $('div').find('a').on('click.bbb', function(event) {
                     console.log(event);
                     alert(3)
                 });
-
 
                 //				$('div').one('click',function(){
                 //					alert(3)
@@ -30,7 +32,7 @@
             })
             //            require(['./classes/src/Lexer'])
             //            require(['./classes/src/ast'])
-		})
+        })
     </script>
 
 
@@ -39,7 +41,13 @@
 </head>
 
 <body class="browserscripting" id="jsref">
+<!--
+    <script>
+    var a=''
+    </script>
+-->
 
+    <!---->
     <div id="wrapper">
 
         <div id="header">

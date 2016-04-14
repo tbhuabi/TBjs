@@ -490,11 +490,11 @@
 
                 var SPLIT_SCRIPT_CONTENT_REG = new RegExp('^(<script\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+' + '>|^<script\\s*>)((?:' + ALL_RGE_STRING + ')*)(<\/script>)', 'i');
 
-                var SPLIT_TAG_BEFORE_REG = new RegExp('(?!^)(?=(?:<' + TAG_AND_PROPERTY_REG_STRING + '\\s*>|<' + TAG_AND_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*>)|<\/' + TAG_AND_PROPERTY_REG_STRING + '\\s*>)');
+                var SPLIT_TAG_BEFORE_REG = new RegExp('(?!^)(?=(?:<' + TAG_AND_PROPERTY_REG_STRING + '\\s*\/?>|<' + TAG_AND_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*\/?>)|<\/' + TAG_AND_PROPERTY_REG_STRING + '\\s*>)');
 
-                var SPLIT_TAG_AFTER_REG = new RegExp('(<' + TAG_AND_PROPERTY_REG_STRING + '\\s*>|<' + TAG_AND_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*>|<\/' + TAG_AND_PROPERTY_REG_STRING + '\\s*>)((?:' + ALL_RGE_STRING + ')*)');
+                var SPLIT_TAG_AFTER_REG = new RegExp('(<' + TAG_AND_PROPERTY_REG_STRING + '\\s*\/?>|<' + TAG_AND_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*\/?>|<\/' + TAG_AND_PROPERTY_REG_STRING + '\\s*>)((?:' + ALL_RGE_STRING + ')*)');
 
-                var TEST_TAG_REG = new RegExp('^<' + TAG_AND_PROPERTY_REG_STRING + '\\s*>$|^<' + TAG_AND_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*>$|^<\/' + TAG_AND_PROPERTY_REG_STRING + '\\s*>$');
+                var TEST_TAG_REG = new RegExp('^<' + TAG_AND_PROPERTY_REG_STRING + '\\s*\/?>$|^<' + TAG_AND_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*\/?>$|^<\/' + TAG_AND_PROPERTY_REG_STRING + '\\s*>$');
 
                 var arr = [];
 
@@ -584,7 +584,7 @@
                         beginTag = beginTag[1];
 
                         var currentElement = this.createElement(beginTag);
-                        var attrStr = currentString.replace(/^<\w+(-\w+)*\s+|\s*>$/g, '');
+                        var attrStr = currentString.replace(/^<\w+(-\w+)*\s+|\s*\/?>$/g, '');
                         var attrbutes = attrStr.match(/(\w+(?:-\w+)*)(="[^"]*"|='[^']*'|[^\s>]+)?/g);
                         if (attrbutes) {
                             var attrbutesObj = {};
@@ -601,7 +601,7 @@
                         }
                         parentNode.appendChild(currentElement);
                         i++;
-                        if (currentElement.childNodes === undefined) {
+                        if (currentElement.childNodes === undefined || /\/>$/.test(currentString)) {
                             this.$XMLBuilder(parentNode, arr, i);
                         } else {
                             this.$XMLBuilder(currentElement, arr, i);

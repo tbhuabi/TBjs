@@ -45,140 +45,141 @@ TBjs发起的初衷是想成为一个具有模块化、MVC、AMD异步加载、�
 基本成型模块简介：
 -----------------------------------
 
-* xmlEngine
-	主要实现把一个html字符串解析成一个类dom树，并附带常用方法，能让后台调用dom的标准方法，方法列表如下：
-	- 根节点
-		* 属性
-			- `$XMLContent` 构建dom树传入的字符串
-            - `$childNodes` 私有属性
-            - `$ENGINE` 私有属性
-            - `nodeType`
-            - `parentNode`
-            - `innerHTML`
-            - `innerText`
-            - `outerHtml`
-            - `classList`
-            - `className`
-            - `childNodes`
-            - `children`
-            - `eventListener`
-		* 方法
-			- `$XMLBuilder`私有方法
-			- `$XMLEngine`私有方法
-			- `$refresh`私有方法
-			- `createComment`
-			- `createElement`
-			- `createTextNode`
-			- `getElementById`
-			- `getElementsByName`
-			- `appendChild`
-			- `getElementsByClassName`
-			- `getElementsByTagName`
-			- `insertBefore`
-			- `removeChild`
-			- `getAttribute`
-			- `hasAttribute`
-			- `removeAttribute`
-			- `setAttribute`
-			- `querySelector`
-			- `querySelectorAll`
-			- `setInnerHtml`
-			- `addEventListener`
-			- `removeEventListener`
-			- `getInnerHtml`
-			- `getInnerText`
-			- `getOuterHtml`
-	- 双标签节点
-		* 属性
-			- `$childNodes`私有属性
-			- `$ENGINE`私有属性
-			- `tagName`
-			- `nodeName`
-			- `parentNode`
-			- `innerHTML`
-			- `id`
-			- `innerText`
-			- `outerHtml`
-			- `classList`
-			- `className`
-			- `attributes`
-			- `eventListener`
-		* 方法
-			- `$refresh`私有方法
-			- `appendChild`
-			- `getElementsByClassName`
-			- `getElementsByTagName`
-			- `insertBefore`
-			- `removeChild`
-			- `getAttribute`
-			- `hasAttribute`
-			- `setAttribute`
-			- `removeAttribute`
-			- `querySelector`
-			- `querySelectorAll`
-			- `setInnerHtml`
-			- `addEventListener`
-			- `removeEventListener`
-			- `getInnerHtml`
-			- `getInnerText`
-			- `getOuterHtml`
-	- 单标签节点
-		* 属性
-			- `$ENGINE`私有属性
-			- `tagName`
-			- `nodeName`
-			- `nodeType`
-			- `parentNode`
-			- `innerHTML`
-			- `innerText`
-			- `outerHtml`
-			- `id`
-			- `classList`
-			- `className`
-			- `attributes`
-			- `eventListener`
-		* 方法
-			- `$refresh`私有方法
-			- `getAttribute`
-			- `setAttribute`
-			- `removeAttribute`
-			- `hasAttribute`
-			- `querySelector`
-			- `querySelectorAll`
-			- `setInnerHtml`
-			- `addEventListener`
-			- `removeEventListener`
-			- `getInnerHtml`
-			- `getInnerText`
-			- `getOuterHtml`
-	- 文本节点
-		* 属性
-			- `$ENGINE`私有属性
-			- `parentNode`
-			- `nodeType`
-			- `innerHTML`
-			- `innerText`
-			- `outerHtml`
-			- `eventListener`
-		* 方法
-			- `$refresh`私有方法
-			- `addEventListener`
-			- `removeEventListener`
-			- `getInnerHtml`
-			- `getInnerText`
-			- `getOuterHtml`
-	- 注释节点
-		* 属性
-			- `$ENGINE`私有属性
-			- `parentNode`
-			- `nodeType`
-			- `innerHTML`
-			- `innerText`
-			- `outerHtml`
-		* 方法
-			- `getInnerHtml`
-			- `getInnerText`
-			- `getOuterHtml`
+#### xmlEngine 
+
+主要实现把一个html字符串解析成一个类dom树，并附带常用方法，能让后台调用dom的标准方法，方法列表如下：
+- 根节点
+	* 属性
+		- `$XMLContent` 构建dom树传入的字符串
+		- `$childNodes` 私有属性
+		- `$ENGINE` 私有属性
+		- `nodeType`
+		- `parentNode`
+		- `innerHTML`
+		- `innerText`
+		- `outerHtml`
+		- `classList`
+		- `className`
+		- `childNodes`
+		- `children`
+		- `eventListener`
+	* 方法
+		- `$XMLBuilder`私有方法
+		- `$XMLEngine`私有方法
+		- `$refresh`私有方法
+		- `createComment`
+		- `createElement`
+		- `createTextNode`
+		- `getElementById`
+		- `getElementsByName`
+		- `appendChild`
+		- `getElementsByClassName`
+		- `getElementsByTagName`
+		- `insertBefore`
+		- `removeChild`
+		- `getAttribute`
+		- `hasAttribute`
+		- `removeAttribute`
+		- `setAttribute`
+		- `querySelector`
+		- `querySelectorAll`
+		- `setInnerHtml`
+		- `addEventListener`
+		- `removeEventListener`
+		- `getInnerHtml`
+		- `getInnerText`
+		- `getOuterHtml`
+- 双标签节点
+	* 属性
+		- `$childNodes`私有属性
+		- `$ENGINE`私有属性
+		- `tagName`
+		- `nodeName`
+		- `parentNode`
+		- `innerHTML`
+		- `id`
+		- `innerText`
+		- `outerHtml`
+		- `classList`
+		- `className`
+		- `attributes`
+		- `eventListener`
+	* 方法
+		- `$refresh`私有方法
+		- `appendChild`
+		- `getElementsByClassName`
+		- `getElementsByTagName`
+		- `insertBefore`
+		- `removeChild`
+		- `getAttribute`
+		- `hasAttribute`
+		- `setAttribute`
+		- `removeAttribute`
+		- `querySelector`
+		- `querySelectorAll`
+		- `setInnerHtml`
+		- `addEventListener`
+		- `removeEventListener`
+		- `getInnerHtml`
+		- `getInnerText`
+		- `getOuterHtml`
+- 单标签节点
+	* 属性
+		- `$ENGINE`私有属性
+		- `tagName`
+		- `nodeName`
+		- `nodeType`
+		- `parentNode`
+		- `innerHTML`
+		- `innerText`
+		- `outerHtml`
+		- `id`
+		- `classList`
+		- `className`
+		- `attributes`
+		- `eventListener`
+	* 方法
+		- `$refresh`私有方法
+		- `getAttribute`
+		- `setAttribute`
+		- `removeAttribute`
+		- `hasAttribute`
+		- `querySelector`
+		- `querySelectorAll`
+		- `setInnerHtml`
+		- `addEventListener`
+		- `removeEventListener`
+		- `getInnerHtml`
+		- `getInnerText`
+		- `getOuterHtml`
+- 文本节点
+	* 属性
+		- `$ENGINE`私有属性
+		- `parentNode`
+		- `nodeType`
+		- `innerHTML`
+		- `innerText`
+		- `outerHtml`
+		- `eventListener`
+	* 方法
+		- `$refresh`私有方法
+		- `addEventListener`
+		- `removeEventListener`
+		- `getInnerHtml`
+		- `getInnerText`
+		- `getOuterHtml`
+- 注释节点
+	* 属性
+		- `$ENGINE`私有属性
+		- `parentNode`
+		- `nodeType`
+		- `innerHTML`
+		- `innerText`
+		- `outerHtml`
+	* 方法
+		- `getInnerHtml`
+		- `getInnerText`
+		- `getOuterHtml`
 			
 ##### 使用说明：
 所有的属性都是只读的，要更改属性需调用相对应的方法，更快捷的操作是通过`query`模块来包装，就可以像jQuery一样来操作虚拟dom，demo如下：
@@ -206,21 +207,22 @@ $(document).find('#box').on('click',function(){
 
 ```
 
-* query
-	一个类jQuery的库，使用方法和jQuery基本一致，主要实现兼容浏览器端的常用dom操作和虚拟dom的快捷操作，如选择器、事件绑定解绑和委托、属性操作等。
-	方法：
-	- `find`
-	- `on`
-	- `off`
-	- `one`
-	- `trigger`
-	- `addClass`
-	- `removeClass`
-	- `hasClass`
-	- `each`
-	- `attr`
-	- `html`
-	
+#### query
+
+一个类jQuery的库，使用方法和jQuery基本一致，主要实现兼容浏览器端的常用dom操作和虚拟dom的快捷操作，如选择器、事件绑定解绑和委托、属性操作等。
+方法：
+- `find`
+- `on`
+- `off`
+- `one`
+- `trigger`
+- `addClass`
+- `removeClass`
+- `hasClass`
+- `each`
+- `attr`
+- `html`
+
 
 		
 			

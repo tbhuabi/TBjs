@@ -11,25 +11,19 @@
     <script>
         window.onload = function() {
             require(['./classes/src/xmlEngine','./classes/src/query'], function(obj,$) {
-                var ng = new obj(document.getElementsByTagName('html')[0].innerHTML);
+                var ng = new obj(document.getElementById('text').innerHTML);
 
-//				$('div').on('click.bbb','a', function(event){
-//					console.log(event);
-//					alert(3)
-//				});
-//
-//				$('div').on('click.ccc','a', function(event){
-//					console.log(event);
-//					alert(3)
-//				}).on('click.ccc','a', function(){
-//					console.log(arguments)
-//					alert(444);
-//					$('div').off('click');
-//				})
+				console.log(ng);
 
-				$('div').one('click',function(){
+				$('div').find('a').on('click.bbb', function(event){
+					console.log(event);
 					alert(3)
-				})
+				});
+
+
+//				$('div').one('click',function(){
+//					alert(3)
+//				})
             })
 //            require(['./classes/src/Lexer'])
 //            require(['./classes/src/ast'])
@@ -41,9 +35,9 @@
 <body class="browserscripting" id="jsref">
 	<div>fdasafdsa <a href="javascript:;">bbbbbbbbbbbbbbbb</a></div>
 	<script id="text" type="text/template">
+	<div a="b"b=c></div>
 
 	</script>
-    <!-- wrapper end -->
 
 
 

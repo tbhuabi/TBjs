@@ -141,7 +141,7 @@
                             })
                         } else {
                             var oldId = context[i].id;
-                            var newId = '__TBJS__QUERY__' + Date.now();
+                            var newId = ('__TBJS__QUERY__' + Math.random()+Math.random()).replace(/\./g,'');
 
                             context[i].id = newId;
 
@@ -237,7 +237,6 @@
                         }
                     })
                 })
-                console.log(eventCache);
                 return this;
             },
             off: function(eventType, selector, fn) {
@@ -317,7 +316,6 @@
                         })
                     })
                 }
-                console.log(Query.eventCache)
                 return this;
             },
             one: function(eventType, selector, callback, useCapture) {

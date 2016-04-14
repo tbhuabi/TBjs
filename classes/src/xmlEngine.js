@@ -479,12 +479,23 @@
             },
             $XMLEngine: function() {
                 //this.$XMLContent = this.$XMLContent.replace(/\s*[\n\t\r]+\s*/g, '');
-                var SPLIT_SCRIPT_REG = /(?!^)(?=<\/script)/i;
-                var TEST_SCRIPT_BERORE_REG = /^<script(?:-\w+)*(?:\s+\w+(?:-\w+)*(?:="[^"]*"|='[^']*'|=[^\s>]+)*)*\s*\/?>|<\/\w+(?:-\w+)*>/i;
-                var SPLIT_SCRIPT_CONTENT_REG = /(^<script(?:-\w+)*(?:\s+\w+(?:-\w+)*(?:="[^"]*"|='[^']*'|=[^\s>]+)*)*\s*\/?>|<\/\w+(?:-\w+)*>)((?:.|[\n\t\r\v\s])*)(<\/script>)/i;
-                var SPLIT_TAG_BEFORE_REG = /(?!^)(?=<\w+(?:-\w+)*(?:\s+\w+(?:-\w+)*(?:="[^"]*"|='[^']*'|=[^\s>]+)*)*\s*\/?>|<\/\w+(?:-\w+)*>)/;
-                var SPLIT_TAG_AFTER_REG = /(<\w+(?:-\w+)*(?:\s+\w+(?:-\w+)*(?:="[^"]*"|='[^']*'|=[^\s>]+)*)*\s*\/?>|<\/\w+(?:-\w+)*>)((?:.|\r|\n|\t|\s)*)/;
-                var TEST_TAG_REG = /^<\w+(?:-\w+)*(?:\s+\w+(?:-\w+)*(?:="[^"]*"|='[^']*'|=[^\s>]+)*)*\s*\/?>$|^<\/\w+(?:-\w+)*>$/;
+
+                var ALL_RGE_STRING = '.|[\\n\\t\\r\\v\\s]';
+                var TAG_AND_PROPERTY_REG_STRING = '\\w+(?:-\\w)*';
+                var TAG_ATTRIBUTE_VALUE_REG_STRING = '="[^"]*"|=\'[^\']*\'|=[^\\s>]+';
+                var TAG_ATTRIBUTE_REG_STRING = '\\s*' + TAG_AND_PROPERTY_REG_STRING + '(?:' + TAG_ATTRIBUTE_VALUE_REG_STRING + ')?';
+                var TAG_CLOSE_REG_STRING = '<\/' + TAG_AND_PROPERTY_REG_STRING + '>';
+
+                var TEST_SCRIPT_BERORE_REG = new RegExp('^<script\\s(' + TAG_ATTRIBUTE_REG_STRING + ')*>|^<script\\s*>', 'i');
+
+                var SPLIT_SCRIPT_CONTENT_REG = new RegExp('^(<script\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+' + '>|^<script\\s*>)((?:' + ALL_RGE_STRING + ')*)(<\/script>)', 'i');
+
+                var SPLIT_TAG_BEFORE_REG = new RegExp('(?!^)(?=(?:<' + TAG_AND_PROPERTY_REG_STRING + '\\s*>|<' + TAG_AND_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*>)|<\/' + TAG_AND_PROPERTY_REG_STRING + '\\s*>)');
+
+                var SPLIT_TAG_AFTER_REG = new RegExp('(<' + TAG_AND_PROPERTY_REG_STRING + '\\s*>|<' + TAG_AND_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*>|<\/' + TAG_AND_PROPERTY_REG_STRING + '\\s*>)((?:' + ALL_RGE_STRING + ')*)');
+
+                var TEST_TAG_REG = new RegExp('^<' + TAG_AND_PROPERTY_REG_STRING + '\\s*>$|^<' + TAG_AND_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*>$|^<\/' + TAG_AND_PROPERTY_REG_STRING + '\\s*>$');
+
                 var arr = [];
 
                 function findScript(str) {
@@ -566,13 +577,14 @@
             },
             $XMLBuilder: function(parentNode, arr, i) {
                 if (i < arr.length) {
-                    var item = arr[i];
-                    var beginTag = /^<(\w+(?:-\w+)*)/.exec(item);
+                    var currentString = arr[i];
+                    var beginTag = /^<(\w+(?:-\w+)*)/.exec(currentString);
                     if (beginTag) {
                         beginTag = beginTag[1];
 
                         var currentElement = this.createElement(beginTag);
-                        var attrbutes = item.match(/\s\w+(-\w+)*(="[^"]*"|='[^']*'|[^\s>]+)*\s*?/g);
+                        var attrStr = currentString.replace(/^<\w+(-\w+)*\s+|\s*>$/g, '');
+                        var attrbutes = attrStr.match(/(\w+(?:-\w+)*)(="[^"]*"|='[^']*'|[^\s>]+)?\s*/g);
                         if (attrbutes) {
                             var attrbutesObj = {};
                             attrbutes.filter(function(item) {
@@ -595,7 +607,7 @@
                         }
                         return;
                     }
-                    var closeTag = /^<\/(\w+(?:-\w+)*)/.exec(item);
+                    var closeTag = /^<\/(\w+(?:-\w+)*)/.exec(currentString);
                     if (closeTag) {
                         closeTag = closeTag[1];
                         if (parentNode.parentNode) {
@@ -603,7 +615,7 @@
                         }
                         return;
                     }
-                    var currentElement = this.createTextNode(item);
+                    var currentElement = this.createTextNode(currentString);
                     parentNode.appendChild(currentElement);
                     this.$XMLBuilder(parentNode, arr, ++i);
                 }

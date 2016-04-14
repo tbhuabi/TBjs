@@ -584,7 +584,7 @@
                         beginTag = beginTag[1];
 
                         var currentElement = this.createElement(beginTag);
-                        var attrStr = currentString.replace(/^<\w+(-\w+)*\s+|\s*\/?>$/g, '');
+                        var attrStr = currentString.replace(/^<\w+(-\w+)*\s*|\s*\/?>$/g, '');
                         var attrbutes = attrStr.match(/(\w+(?:-\w+)*)(="[^"]*"|='[^']*'|[^\s>]+)?/g);
                         if (attrbutes) {
                             var attrbutesObj = {};
@@ -626,7 +626,7 @@
         //单标签元素构造函数
 
         function OddElement(tagName) {
-            this.tagName = tagName;
+            this.tagName = this.nodeName = tagName;
             this.nodeType = ELEMENT_NODE;
             this.parentNode = null;
             this.innerHTML = '';
@@ -644,7 +644,7 @@
 
         //双标签元素构造函数
         function EvenElement(tagName) {
-            this.tagName = tagName;
+            this.tagName = this.nodeName = tagName;
             this.nodeType = ELEMENT_NODE;
             this.parentNode = null;
             this.innerHTML = '';

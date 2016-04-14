@@ -54,7 +54,7 @@
                         if (attr === 'className') {
                             attr = 'class';
                         }
-                        if (item.value !== null) {
+                        if (item.value !== null && item.value !== undefined) {
                             if (item.value.indexOf('"') === -1) {
                                 attr = attr + '="' + item.value + '"';
                             } else {
@@ -521,9 +521,10 @@
 
 
 
+                var IS_SCRIPT_REG = /^<script/i;
                 var arr1 = []; //存放第一次标签分析结果
                 arr.forEach(function(item) {
-                    if (item.indexOf('<script') === 0) {
+                    if (IS_SCRIPT_REG.test(item)) {
                         arr1.push(item);
                         return;
                     }
@@ -534,7 +535,7 @@
 
                 var arr2 = []; //存放第二次标签分析结果
                 arr1.forEach(function(item) {
-                    if (item.indexOf('<script') === 0) {
+                    if (IS_SCRIPT_REG.test(item)) {
                         arr2.push(item);
                         return;
                     }
@@ -550,7 +551,7 @@
                 var arr3 = []; //存入组合过滤后的dom文本元素集合;
                 var text = '';
                 for (var i = 0, len = arr2.length; i < len; i++) {
-                    if (arr2[i].indexOf('<script') === 0) {
+                    if (IS_SCRIPT_REG.test(arr2[i])) {
                         if (text !== '') {
                             arr3.push(text);
                             text = '';
@@ -584,7 +585,7 @@
 
                         var currentElement = this.createElement(beginTag);
                         var attrStr = currentString.replace(/^<\w+(-\w+)*\s+|\s*>$/g, '');
-                        var attrbutes = attrStr.match(/(\w+(?:-\w+)*)(="[^"]*"|='[^']*'|[^\s>]+)?\s*/g);
+                        var attrbutes = attrStr.match(/(\w+(?:-\w+)*)(="[^"]*"|='[^']*'|[^\s>]+)?/g);
                         if (attrbutes) {
                             var attrbutesObj = {};
                             attrbutes.filter(function(item) {

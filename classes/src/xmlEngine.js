@@ -481,20 +481,20 @@
                 //this.$XMLContent = this.$XMLContent.replace(/\s*[\n\t\r]+\s*/g, '');
 
                 var ALL_RGE_STRING = '.|[\\n\\t\\r\\v\\s]';
-                var TAG_AND_PROPERTY_REG_STRING = '\\w+(?:-\\w)*';
+                var TAG_OR_PROPERTY_REG_STRING = '[a-zA-Z]\\w*(?:-\\w+)*';
                 var TAG_ATTRIBUTE_VALUE_REG_STRING = '="[^"]*"|=\'[^\']*\'|=[^\\s>]+';
-                var TAG_ATTRIBUTE_REG_STRING = '\\s*' + TAG_AND_PROPERTY_REG_STRING + '(?:' + TAG_ATTRIBUTE_VALUE_REG_STRING + ')?';
-                var TAG_CLOSE_REG_STRING = '<\/' + TAG_AND_PROPERTY_REG_STRING + '>';
+                var TAG_ATTRIBUTE_REG_STRING = '\\s*' + TAG_OR_PROPERTY_REG_STRING + '(?:' + TAG_ATTRIBUTE_VALUE_REG_STRING + ')?';
+                var TAG_CLOSE_REG_STRING = '<\/' + TAG_OR_PROPERTY_REG_STRING + '>';
 
                 var TEST_SCRIPT_BERORE_REG = new RegExp('^<script\\s(' + TAG_ATTRIBUTE_REG_STRING + ')*>|^<script\\s*>', 'i');
 
                 var SPLIT_SCRIPT_CONTENT_REG = new RegExp('^(<script\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+' + '>|^<script\\s*>)((?:' + ALL_RGE_STRING + ')*)(<\/script>)', 'i');
 
-                var SPLIT_TAG_BEFORE_REG = new RegExp('(?!^)(?=(?:<' + TAG_AND_PROPERTY_REG_STRING + '\\s*\/?>|<' + TAG_AND_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*\/?>)|<\/' + TAG_AND_PROPERTY_REG_STRING + '\\s*>)');
+                var SPLIT_TAG_BEFORE_REG = new RegExp('(?!^)(?=(?:<' + TAG_OR_PROPERTY_REG_STRING + '\\s*\/?>|<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*\/?>)|<\/' + TAG_OR_PROPERTY_REG_STRING + '\\s*>)');
 
-                var SPLIT_TAG_AFTER_REG = new RegExp('(<' + TAG_AND_PROPERTY_REG_STRING + '\\s*\/?>|<' + TAG_AND_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*\/?>|<\/' + TAG_AND_PROPERTY_REG_STRING + '\\s*>)((?:' + ALL_RGE_STRING + ')*)');
+                var SPLIT_TAG_AFTER_REG = new RegExp('(<' + TAG_OR_PROPERTY_REG_STRING + '\\s*\/?>|<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*\/?>|<\/' + TAG_OR_PROPERTY_REG_STRING + '\\s*>)((?:' + ALL_RGE_STRING + ')*)');
 
-                var TEST_TAG_REG = new RegExp('^<' + TAG_AND_PROPERTY_REG_STRING + '\\s*\/?>$|^<' + TAG_AND_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*\/?>$|^<\/' + TAG_AND_PROPERTY_REG_STRING + '\\s*>$');
+                var TEST_TAG_REG = new RegExp('^<' + TAG_OR_PROPERTY_REG_STRING + '\\s*\/?>$|^<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*\/?>$|^<\/' + TAG_OR_PROPERTY_REG_STRING + '\\s*>$');
 
                 var arr = [];
 

@@ -547,18 +547,19 @@
                     var startScriptIndex = str.indexOf('<script');
                     var startCommentIndex = str.indexOf('<!--');
 
-                    var type, startIndex;
-                    if (startScriptIndex < startCommentIndex && startScriptIndex !== -1) {
-                        type = 'script';
-                        startIndex = startScriptIndex;
-                    } else {
-                        type = 'comment';
-                        startIndex = startCommentIndex;
-                    }
+
+                    var list = [startScriptIndex, startCommentIndex].sort();
+
+                    var startIndex = list[0] === -1 ? list[1] : list[0];
+
                     if (startIndex === -1) {
                         arr.push(str);
                         return;
                     }
+
+                    var type = startIndex === startScriptIndex ? 'script' : 'comment';
+
+
 
                     if (type === 'script') {
                         var beforeStr = str.substring(0, startIndex);
@@ -591,8 +592,6 @@
 
 
                 findScriptOrCommentNode(this.$XMLContent);
-
-
 
 
                 var IS_SCRIPT_REG = /^<script/i;

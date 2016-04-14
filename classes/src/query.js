@@ -237,6 +237,7 @@
                         }
                     })
                 })
+				console.log(eventCache);
                 return this;
             },
             off: function(eventType, selector, fn) {

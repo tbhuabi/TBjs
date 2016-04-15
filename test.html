@@ -17,9 +17,15 @@
         document.addEventListener('DOMContentLoaded', function() {
 
             require(['./classes/src/xmlEngine', './classes/src/query'], function(obj, $) {
-                var ng = new obj(document.getElementById('text').innerHTML);
+				var text=document.getElementById('text').innerHTML;
+				var i=0;
+				var date1=Date.now();
+				while(i<1000){
+					var ng = new obj(text);
+					i++;
+				}
+				console.log((Date.now()-date1)/1000)
 
-                				console.log(ng);
                 //				console.log(ng.innerHTML);
 //                $('div').on('click', function() {
 //					alert(1)

@@ -14,7 +14,7 @@
 
         }
         toolkit(TBModule.prototype, {
-            $new: function() {
+            $derive: function() {
 
             }
         })

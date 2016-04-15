@@ -581,13 +581,16 @@
                         var afterStr = str.substring(startIndex, str.length);
                         if (TEST_SCRIPT_BERORE_REG.test(afterStr)) {
                             var closeIndex = afterStr.indexOf('</script>');
-                            if (closeIndex !== -1) {
-                                beforeStr && arr.push(beforeStr);
-                                var body = afterStr.substring(0, closeIndex + 9);
-                                body && arr.push(body);
-                                findScriptOrCommentNode(afterStr.substring(closeIndex + 9, afterStr.length));
-                                return;
+                            if (closeIndex === -1) {
+								//如果没有找到结尾标签，添加一个，主要是防止在词法分析时，正则匹配内存溢出的问题
+                                closeIndex = afterStr.length;
+                                afterStr += '</script>';
                             }
+                            beforeStr && arr.push(beforeStr);
+                            var body = afterStr.substring(0, closeIndex + 9);
+                            arr.push(body);
+                            if (closeIndex + 9 === afterStr.length) return;
+                            findScriptOrCommentNode(afterStr.substring(closeIndex + 9, afterStr.length));
                         }
                     } else {
                         var beforeStr = str.substring(0, startIndex);

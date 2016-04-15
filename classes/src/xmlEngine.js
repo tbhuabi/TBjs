@@ -38,8 +38,8 @@
                 return innerHTML;
             },
             getOuterHtml: function() {
-                if (this.outerHtml) {
-                    return this.outerHtml;
+                if (this.outerHTML) {
+                    return this.outerHTML;
                 }
                 if (this.nodeType === TEXT_NODE) {
                     return this.innerText;
@@ -88,7 +88,7 @@
                     outerHtml = '<!--' + this.innerText + '-->';
                 }
 
-                this.outerHtml = outerHtml;
+                this.outerHTML = outerHtml;
                 return outerHtml;
             },
             getInnerText: function() {
@@ -141,7 +141,7 @@
         toolkit.extend(ElementEngine.prototype, {
             constructor: ElementEngine,
             $refresh: function() {
-                this.innerHTML = this.outerHtml = this.innerText = '';
+                this.innerHTML = this.outerHTML = this.innerText = '';
                 this.getOuterHtml();
                 this.getInnerHtml();
                 this.getInnerText();
@@ -486,7 +486,7 @@
             this.parentNode = null;
             this.innerHTML = '';
             this.innerText = '';
-            this.outerHtml = '';
+            this.outerHTML = '';
             this.classList = [];
             this.className = '';
             this.childNodes = [];
@@ -732,7 +732,7 @@
             this.innerHTML = '';
             this.innerText = '';
             this.id = '';
-            this.outerHtml = '';
+            this.outerHTML = '';
             this.classList = [];
             this.className = '';
             this.attributes = [];
@@ -751,7 +751,7 @@
             this.parentNode = null;
             this.innerHTML = '';
             this.innerText = '';
-            this.outerHtml = '';
+            this.outerHTML = '';
             this.classList = [];
             this.className = '';
             this.id = '';
@@ -770,7 +770,7 @@
         function TextElement(text) {
             this.parentNode = null;
             this.nodeType = TEXT_NODE;
-            this.innerHTML = this.innerText = this.outerHtml = text;
+            this.innerHTML = this.innerText = this.outerHTML = text;
             this.eventListener = {};
         }
         TextElement.prototype = new ElementEventEngine();
@@ -781,7 +781,7 @@
             this.parentNode = null;
             this.nodeType = COMMENT_NODE;
             this.innerHTML = this.innerText = commentText;
-            this.outerHtml = '<!--' + commentText + '-->';
+            this.outerHTML = '<!--' + commentText + '-->';
         }
 
         CommentElement.prototype = new RootElementEngine();

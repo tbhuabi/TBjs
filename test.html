@@ -2,7 +2,7 @@
 <html id="text">
 
 <head>
-<!--   -->
+    <!--   -->
     <meta charset="UTF-8">
     <title>Document</title>
     <script src="requirejs/requirejs.js" id="aaa"></script>
@@ -17,34 +17,14 @@
         document.addEventListener('DOMContentLoaded', function() {
 
             require(['./classes/src/xmlEngine', './classes/src/query'], function(obj, $) {
-				var text=document.getElementById('text').innerHTML;
-				var i=0;
-				var date1=Date.now();
-				while(i<1000){
+                var text = document.getElementById('text').innerHTML;
+                var i = 0;
+                var date1 = Date.now();
+                while (i < 10000) {
 					var ng = new obj(text);
-					i++;
-				}
-				console.log((Date.now()-date1)/1000)
-
-                //				console.log(ng.innerHTML);
-//                $('div').on('click', function() {
-//					alert(1)
-//                }).on('click', function() {
-//
-//					alert(2)
-//                }).on('click.aaa', function() {
-//					alert(3)
-//
-//                }).on('click.aaa', 'a', function() {
-//					alert(4)
-//
-//                }).on('click.bbb', 'b',function() {
-//					alert(5)
-//
-//                }).on('click.bbb', 'b', function() {
-//					alert(6)
-//
-//                })
+                    i++;
+                }
+                console.log((Date.now() - date1) / 1000)
 
             })
             //            require(['./classes/src/Lexer'])
@@ -59,7 +39,7 @@
 
 <body class="browserscripting" id="jsref">
 
-<img src="" alt="">
+    <img src="" alt="">
 </body>
 
 </html>

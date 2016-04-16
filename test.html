@@ -18,17 +18,9 @@
 
             require(['./classes/src/xmlEngine', './classes/src/query'], function(obj, $) {
                 var text = document.getElementById('text').innerHTML;
-                var i = 0;
-                var date1 = Date.now();
-                while (i < 10000) {
-					var ng = new obj(text);
-                    i++;
-                }
-                console.log((Date.now() - date1) / 1000)
-
+				window.ng = new obj(text);
+				window.a=$(ng);
             })
-            //            require(['./classes/src/Lexer'])
-            //            require(['./classes/src/ast'])
         })
     </script>
 

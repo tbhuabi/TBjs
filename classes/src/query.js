@@ -373,7 +373,7 @@
                         })
                     } else {
                         this.each(function(item) {
-                            item.setAttribute('className', toolkit.trim(item.className + ' ' + className));
+                            item.setAttribute('class', toolkit.trim(item.className + ' ' + className));
                         })
                     }
                 }

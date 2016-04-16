@@ -231,7 +231,7 @@
 
 
 
-                var ALL_SELECTOR_REG = /^\s+(?!>|\[|:first-child|:last-child|\+)/;
+                var ALL_SELECTOR_REG = /^\s+\*?(?!>|\[|:first-child|:last-child|\+)/;
                 var TAG_SELECTOR_REG = /^(\w+(?:-\w+)*)/;
                 var ID_SELECTOR_REG = /^#(\w+(?:-\w+)*)/;
                 var CLASSNAME_SELECTOR_REG = /^\.(\w+(?:-\w+)*)/;

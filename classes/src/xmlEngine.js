@@ -11,7 +11,7 @@
         var toolkit = require('./toolkit');
 
 
-        var ODD_TAG_LIST = ['IMG', 'INPUT', 'BR', 'HR', 'PARAM', 'META', 'LINK'];
+        var ODD_TAG_LIST = ['img', 'input', 'br', 'hr', 'param', 'meta', 'link'];
 
 
         var ELEMENT_NODE = 1;
@@ -257,7 +257,7 @@
                             })
                         } else if (TAG_SELECTOR_REG.test(selector)) {
                             nextSelector = selector.replace(TAG_SELECTOR_REG, function(selector, tagName) {
-                                if (currentElement.tagName === tagName) {
+                                if (currentElement.tagName === tagName.toUpperCase()) {
                                     parentElements.push(currentElement);
                                 }
                                 return '';

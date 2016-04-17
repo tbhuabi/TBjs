@@ -67,8 +67,8 @@
 
                 var getChildNodesHtml = function(obj) {
                     var html = '';
-                    for (var i = 0, len = obj.$childNodes.length; i < len; i++) {
-                        html += obj.$childNodes[i].getOuterHtml();
+                    for (var i = 0, len = obj.childNodes.length; i < len; i++) {
+                        html += obj.childNodes[i].getOuterHtml();
                     }
                     return html;
                 }
@@ -152,10 +152,9 @@
             setInnerHtml: function(arg) {
                 var newNodeElements = new DocumentEngine(arg);
                 this.childNodes = [];
-                this.$childNodes = [];
                 this.children = [];
-                for (var i = 0, len = newNodeElements.$childNodes.length; i < len; i++) {
-                    this.appendChild(newNodeElements.$childNodes[i]);
+                for (var i = 0, len = newNodeElements.childNodes.length; i < len; i++) {
+                    this.appendChild(newNodeElements.childNodes[i]);
                 }
                 newNodeElements = null;
                 this.$refresh();
@@ -378,26 +377,14 @@
             appendChild: function(TBDomElement) {
                 if (TBDomElement.parentNode !== this) {
                     TBDomElement.parentNode = this;
-                    if (TBDomElement.nodeType === COMMENT_NODE) {
-                        this.$childNodes.push(TBDomElement);
-
-                    } else {
-                        this.childNodes.push(TBDomElement);
-                        this.$childNodes.push(TBDomElement);
-                        if (TBDomElement.nodeType === ELEMENT_NODE) {
-                            this.children.push(TBDomElement);
-                        }
-                    };
+                    this.childNodes.push(TBDomElement);
+                    if (TBDomElement.nodeType === ELEMENT_NODE) {
+                        this.children.push(TBDomElement);
+                    }
                 } else {
                     for (var i = 0, len = this.childNodes.length; i < len; i++) {
                         if (TBDomElement === this.childNodes[i]) {
                             this.childNodes.push(this.childNodes.splice(i, 1));
-                            break;
-                        }
-                    }
-                    for (var i = 0, len = this.$childNodes.length; i < len; i++) {
-                        if (TBDomElement === this.$childNodes[i]) {
-                            this.$childNodes.push(this.$childNodes.splice(i, 1));
                             break;
                         }
                     }
@@ -419,12 +406,6 @@
                         break;
                     }
                 }
-                for (var i = 0, len = this.$childNodes.length; i < len; i++) {
-                    if (this.$childNodes[i] === TBDomElement) {
-                        this.$childNodes.splice(i, 1);
-                        break;
-                    }
-                }
                 if (TBDomElement.nodeType === ELEMENT_NODE) {
                     for (var i = 0, len = this.children.length; i < len; i++) {
                         if (this.children[i] === TBDomElement) {
@@ -437,12 +418,6 @@
             },
             insertBefore: function(TBDomElement, nextElement) {
                 var parentNode = TBDomElement.parentNode;
-                for (var i = 0, len = parentNode.$childNodes.length; i < len; i++) {
-                    if (parentNode.$childNodes[i] === TBDomElement) {
-                        parentNode.$childNodes.splice(i, 1);
-                        break;
-                    }
-                }
                 for (var i = 0, len = parentNode.childNodes.length; i < len; i++) {
                     if (parentNode.childNodes[i] === TBDomElement) {
                         parentNode.childNodes.splice(i, 1);
@@ -456,12 +431,6 @@
                     }
                 }
                 TBDomElement.parentNode = this;
-                for (var i = 0, len = this.$childNodes.length; i < len; i++) {
-                    if (this.$childNodes[i] === nextElement) {
-                        this.$childNodes.splice(i, 0, TBDomElement);
-                        break;
-                    }
-                }
                 for (var i = 0, len = this.childNodes.length; i < len; i++) {
                     if (this.childNodes[i] === nextElement) {
                         this.childNodes.splice(i, 0, TBDomElement);
@@ -491,7 +460,6 @@
             this.className = '';
             this.childNodes = [];
             this.children = [];
-            this.$childNodes = [];
             this.eventListener = {};
             this.$XMLEngine();
         }
@@ -563,7 +531,9 @@
                     var startCommentIndex = str.indexOf('<!--');
 
 
-                    var list = [startScriptIndex, startCommentIndex].sort();
+                    var list = [startScriptIndex, startCommentIndex].sort(function(n, m) {
+                        return n - m;
+                    });
 
                     var startIndex = list[0] === -1 ? list[1] : list[0];
 
@@ -582,7 +552,7 @@
                         if (TEST_SCRIPT_BERORE_REG.test(afterStr)) {
                             var closeIndex = afterStr.indexOf('</script>');
                             if (closeIndex === -1) {
-								//如果没有找到结尾标签，添加一个，主要是防止在词法分析时，正则匹配内存溢出的问题
+                                //如果没有找到结尾标签，添加一个，主要是防止在词法分析时，正则匹配内存溢出的问题
                                 closeIndex = afterStr.length;
                                 afterStr += '</script>';
                             }
@@ -756,7 +726,6 @@
             this.className = '';
             this.id = '';
             this.childNodes = [];
-            this.$childNodes = [];
             this.children = [];
             this.attributes = [];
             this.eventListener = {};

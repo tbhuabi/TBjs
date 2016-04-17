@@ -47,15 +47,14 @@ angular各种好，但2.0跳崖式升级，想必大家的有所诟病，另外�
 
 主要实现把一个html字符串解析成一个类dom树，并附带常用方法，能让后台调用dom的标准方法，方法列表如下：
 - 根节点
-	* 属性
+	* 属性 
 		- `$XMLContent` 构建dom树传入的字符串
-		- `$childNodes` 私有属性
 		- `$ENGINE` 私有属性
 		- `nodeType`
 		- `parentNode`
 		- `innerHTML`
 		- `innerText`
-		- `outerHtml`
+		- `outerHTML`
 		- `classList`
 		- `className`
 		- `childNodes`
@@ -89,7 +88,6 @@ angular各种好，但2.0跳崖式升级，想必大家的有所诟病，另外�
 		- `getOuterHtml`
 - 双标签节点
 	* 属性
-		- `$childNodes`私有属性
 		- `$ENGINE`私有属性
 		- `tagName`
 		- `nodeName`
@@ -97,7 +95,7 @@ angular各种好，但2.0跳崖式升级，想必大家的有所诟病，另外�
 		- `innerHTML`
 		- `id`
 		- `innerText`
-		- `outerHtml`
+		- `outerHTML`
 		- `classList`
 		- `className`
 		- `attributes`
@@ -130,7 +128,7 @@ angular各种好，但2.0跳崖式升级，想必大家的有所诟病，另外�
 		- `parentNode`
 		- `innerHTML`
 		- `innerText`
-		- `outerHtml`
+		- `outerHTML`
 		- `id`
 		- `classList`
 		- `className`
@@ -157,7 +155,7 @@ angular各种好，但2.0跳崖式升级，想必大家的有所诟病，另外�
 		- `nodeType`
 		- `innerHTML`
 		- `innerText`
-		- `outerHtml`
+		- `outerHTML`
 		- `eventListener`
 	* 方法
 		- `$refresh`私有方法
@@ -173,7 +171,7 @@ angular各种好，但2.0跳崖式升级，想必大家的有所诟病，另外�
 		- `nodeType`
 		- `innerHTML`
 		- `innerText`
-		- `outerHtml`
+		- `outerHTML`
 	* 方法
 		- `getInnerHtml`
 		- `getInnerText`

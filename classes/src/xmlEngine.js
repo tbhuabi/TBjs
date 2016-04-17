@@ -11,7 +11,7 @@
         var toolkit = require('./toolkit');
 
 
-        var ODD_TAG_LIST = ['img', 'input', 'br', 'hr', 'param', 'meta', 'link'];
+        var ODD_TAG_LIST = ['IMG', 'INPUT', 'BR', 'HR', 'PARAM', 'META', 'LINK'];
 
 
         var ELEMENT_NODE = 1;
@@ -76,11 +76,12 @@
 
                 var outerHtml = '';
                 if (this.nodeType === ELEMENT_NODE) {
+					var tagName=this.tagName.toLowerCase();
                     var attrHtml = getAttributeHtml(this.attributes);
-                    if (ODD_TAG_LIST.indexOf(this.tagName) === -1) {
-                        outerHtml = '<' + this.tagName + (attrHtml ? ' ' + attrHtml : '') + '>' + getChildNodesHtml(this) + '</' + this.tagName + '>';
+                    if (ODD_TAG_LIST.indexOf(tagName) === -1) {
+                        outerHtml = '<' + tagName + (attrHtml ? ' ' + attrHtml : '') + '>' + getChildNodesHtml(this) + '</' + tagName + '>';
                     } else {
-                        outerHtml = '<' + this.tagName + ' ' + attrHtml + '>';
+                        outerHtml = '<' + tagName + ' ' + attrHtml + '>';
                     }
                 } else if (this.nodeType === DOCUMENT_NODE) {
                     outerHtml = getChildNodesHtml(this);
@@ -696,7 +697,7 @@
         //单标签元素构造函数
 
         function OddElement(tagName) {
-            this.tagName = this.nodeName = tagName;
+            this.tagName = this.nodeName = tagName.toUpperCase();
             this.nodeType = ELEMENT_NODE;
             this.parentNode = null;
             this.innerHTML = '';
@@ -716,7 +717,7 @@
 
         //双标签元素构造函数
         function EvenElement(tagName) {
-            this.tagName = this.nodeName = tagName;
+            this.tagName = this.nodeName = tagName.toUpperCase();
             this.nodeType = ELEMENT_NODE;
             this.parentNode = null;
             this.innerHTML = '';

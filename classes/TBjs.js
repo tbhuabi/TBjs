@@ -19,7 +19,14 @@
             version: '1.0.0',
             module: TBModule,
             $http: $http,
-            $: Query
+            $: Query,
+            directive: function(directiveName, fnController) {
+                directiveName = directiveName.replace(/-(\w)/g, function(str, $1) {
+                    return $1.toUpperCase();
+                })
+                this.$directives[directiveName] = fnController;
+                return this;
+            }
         };
         module.exports = TB;
     })

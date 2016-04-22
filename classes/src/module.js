@@ -15,6 +15,7 @@
         }
         Module.prototype.$init = function(moduleName, obj) {
             this.$moduleName = moduleName;
+            this.$directives = {};
             obj = obj || {};
             if (toolkit.isFunction(obj.model)) {
                 obj.model.call(this);
@@ -35,13 +36,6 @@
             },
             $http: function() {
 
-				return this;
-            },
-            $directive: function(directiveName, fnController) {
-                directiveName = directiveName.replace(/-(\w)/g, function(str, $1) {
-                    return $1.toUpperCase();
-                })
-                this.directives[directiveName] = fnController;
                 return this;
             }
         })

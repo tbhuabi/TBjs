@@ -1,56 +1,49 @@
-(function(factory) {
-    if (typeof exports === 'undefined') {
-        factory(define)
-    } else {
-        factory(function(self) {
-            self(require, exports, module);
-        });
+var $HttpProvider = function $HttpProvider() {
+
+    this.$get = function() {
+        return Http;
+    };
+	this.interceptors=[];
+
+    var options = {
+        common: "application/json, text/plain, */*",
+        get: {
+            method: 'get',
+            requestHeaders: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            params: null,
+            data: null,
+            transformRequest: []
+        },
+        post: {
+            method: 'post',
+            requestHeaders: {
+                'Content-Type': 'application/json;charset=utf-8'
+            }
+        }
+    };
+
+	var config=function(){
+
+	};
+
+
+    function Http(data, options) {
+        return new Http.prototype.init(data, options);
     }
-})(function(define) {
-    define(function(require, exports, module) {
-        var toolkit = require('./toolkit');
-		var Promise=require('./promise');
+    Http.prototype.init = function(data, options) {
+    };
+    Http.prototype.init.prototype = Http.prototype;
+    extend(Http.prototype, {
+        success: function(data) {
 
-		function Http(data,options){
-			return new Http.prototype.init(data,options);
+        },
+        error: function() {
+
+        },
+		timeout: function(){
+
 		}
-		//interceptors
-		Http.prototype.init=function(data,options){
-			this.options={
-
-			};
-		};
-		Http.prototype.init.prototype=Http.prototype;
-		toolkit.extend(Http.prototype,{
-			options:{
-				common:"application/json, text/plain, */*",
-				get:{
-					method:'get',
-					requestHeaders:{
-						'Content-Type': 'application/json;charset=utf-8'
-					},
-					params:null,
-					data:null,
-					transformRequest:[]
-				},
-				post:{
-					method:'post',
-					requestHeaders:{
-						'Content-Type': 'application/json;charset=utf-8'
-					}
-				}
-			},
-			config: function(options){
-
-			},
-			success: function(data){
-
-			},
-			error: function(){
-
-			}
-		})
-
-        module.exports = Http;
     })
-})
+};

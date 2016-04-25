@@ -6,30 +6,31 @@ var $ModuleProvider = function $ModuleProvider() {
         return Module;
     };
 
-    function Module(moduleName, obj) {
-		if (!(this instanceof Module)) return new Module(moduleName, obj);
-        this.$moduleName = moduleName;
-        obj = obj || {};
-        if (isFunction(obj.model)) {
-            obj.model.call(this);
-            modules[moduleName] = this;
-        } else if (isObject(obj.model)) {
-            extend(this, obj.model);
-            modules[moduleName] = this;
-        } else {
-            throw new Error('要初始化一个模块，model一定是一个构造函数或一个对象');
-        }
+    function Module(moduleName, callback) {
+        return new Module.prototype.$init(moduleName, callback)
     }
+    Module.prototype.$init = function(moduleName, callback) {
+        this.$moduleName = moduleName;
+        this.$directives = {};
+        this.$service = {};
+        this.$controllers = {};
+    };
+    Module.prototype.$init.prototype = Module.prototype;
     extend(Module.prototype, {
-        $new: function(moduleName, obj) {
-            function a() {}
-            a.prototype = this;
-            var newModule = new a();
-            this.$init.call(newModule, moduleName, obj);
-            return newModule;
+        controller: function(controllerName, callback) {
+            this.$controllers[controllerName] = callback;
         },
-        $apply: function() {
+        directive: function(directiveName, callback) {
+            this.$directives[directiveName] = callback;
+        },
+        service: function(serviceName, callback) {
+            this.$service[serviceName] = callback;
+        },
+		factory: function(serviceName,callback){
 
-        }
+		},
+		provider: function(serviceName,callback){
+
+		}
     })
 };

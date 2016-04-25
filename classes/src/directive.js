@@ -1,21 +1,26 @@
-(function(factory) {
-    if (typeof exports === 'undefined') {
-        factory(define)
-    } else {
-        factory(function(self) {
-            self(require, exports, module);
-        });
+var $DirectiveProvider = function $DirectiveProvider() {
+
+    this.$get = function() {
+        return directive;
+    };
+
+    function Directive() {
+        this.directives = {};
     }
-})(function(define) {
-    define(function(require, exports, module) {
-        var toolkit = require('./toolkit');
 
-		function Directive(directiveName,callback){
-			this.directives={};
-
-		}
-
-
-
+    extend(Directive.prototype, {
+        directive: function(directiveName, callback) {
+            this.directives[directiveName] = callback;
+        }
     })
-})
+
+    var directive = new Directive();
+    directive.directive('vmClick', function() {
+        return function(model, element, attrs) {
+            element.on('click', function() {
+                model.$parse(attrs.vmClick);
+                model.$apply();
+            })
+        }
+    })
+}

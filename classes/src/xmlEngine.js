@@ -1,5 +1,5 @@
 var $XmlEngineProvider = function $XmlEngineProvider() {
-
+    if (!(this instanceof $XmlEngineProvider)) return new $XmlEngineProvider();
     this.$get = function() {
         return DocumentEngine;
     };

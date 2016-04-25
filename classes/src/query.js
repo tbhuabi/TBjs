@@ -1,7 +1,9 @@
 var $QueryProvider = function $QueryProvider() {
 
+    if (!(this instanceof $QueryProvider)) return new $QueryProvider();
+
     this.$get = function() {
-		return Query;
+        return Query;
     };
     var triggerParams = null;
     var eventCache = [];

@@ -5,8 +5,13 @@
     <!--   -->
     <meta charset="UTF-8">
     <title>Document</title>
-    <script src="requirejs/requirejs.js" id="aaa"></script>
-
+    <script src="classes/src/toolkit.js"></script>
+    <script src="classes/src/http.js"></script>
+    <script src="classes/src/query.js"></script>
+    <script src="classes/src/xmlEngine.js"></script>
+    <script src="classes/src/module.js"></script>
+    <script src="classes/src/bootstrap.js"></script>
+    <script src="classes/TBjs.js"></script>
     <style>
         .red {
             color: red
@@ -14,36 +19,11 @@
     </style>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-
-            //            require(['./classes/src/xmlEngine', './classes/src/query'], function(obj, $) {
-            //                var text = document.getElementById('text').innerHTML;
-            //                window.ng = new obj(text);
-            //                window.a = $(ng);
-            //            })
-
-            require(['./classes/TBjs'], function(TB) {
-                window.TB = TB;
-                var myModule = TB.module('myModule', {
-                    model: function() {
-                        this.a = 'aaa'
-                    }
-                })
-                var myModuleB = myModule.$new('myModuleB', {
-                    model: function() {
-                        this.b = 'bbbbb'
-                    }
-                })
-                var myModuleC = myModuleB.$new('myModuleC', {
-                    model: function() {
-                        this.c = 'cccccc'
-                    }
-                })
-                console.log(myModule)
-                console.log(myModuleB)
-                myModuleC.$directive('click', function() {}).$directive('mouseup', function() {})
-                console.log(myModuleC)
-            })
+        var app = TB.module('app', {
+            model: function() {
+                this.a = 'aaa'
+            },
+			template: '<div class="red">{{a}}</div>'
         })
     </script>
 </head>

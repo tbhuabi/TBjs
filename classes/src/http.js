@@ -1,5 +1,5 @@
 var $HttpProvider = function $HttpProvider() {
-
+	if (!(this instanceof $HttpProvider)) return new $HttpProvider();
     this.$get = function() {
         return Http;
     };

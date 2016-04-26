@@ -1,17 +1,21 @@
 <!DOCTYPE html>
-<html id="text">
+<html ng-app>
 
 <head>
     <!--   -->
     <meta charset="UTF-8">
     <title>Document</title>
+<!--
     <script src="classes/src/toolkit.js"></script>
     <script src="classes/src/http.js"></script>
     <script src="classes/src/query.js"></script>
     <script src="classes/src/xmlEngine.js"></script>
+    <script src="classes/src/scope.js"></script>
     <script src="classes/src/module.js"></script>
     <script src="classes/src/bootstrap.js"></script>
     <script src="classes/TBjs.js"></script>
+-->
+    <script src="angular/angular.js"></script>
     <style>
         .red {
             color: red
@@ -19,17 +23,39 @@
     </style>
 
     <script>
-        var app = TB.module('app', {
-            model: function() {
-                this.a = 'aaa'
-            },
-			template: '<div class="red">{{a}}</div>'
-        })
+
+//		var app=Tb.module('module');
+//		app.controller('myControl',function(){
+//			var _this=this;
+//			this.$http({
+//				url:''
+//			}).success(function(data){
+//				_this.data=data;
+//			})
+//			this.directive('ng-model',function(ele){
+//				ele.on('click',function(){
+//
+//				})
+//			})
+//		})
+//		app.controller('myControl',['$http',function($http){
+//			var _this=this;
+//			$http({
+//				url:''
+//			}).success(function(data){
+//				_this.data=data;
+//			})
+//		}])
+
+
+//		var app=angular.module('app',[]);
+//		a.directive('aaa',function(){})
     </script>
 </head>
 
 <body>
-
+	<input type="text" ng-model="a.b">
+	<div>{{a.b}}</div>
 </body>
 
 </html>

@@ -230,7 +230,6 @@ var $QueryProvider = function $QueryProvider() {
                     }
                 })
             })
-            console.log(eventCache);
             return this;
         },
         off: function(eventType, selector, fn) {

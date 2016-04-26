@@ -159,7 +159,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
                     if (this.attributes[i].name === attributes) {
                         this.attributes[i].value = value;
                         this.className = this.getAttribute('class');
-                        this.classList = this.className.match(/[^\s]+/g) || [];
+                        this.classList = this.className.match(/\S+/g) || [];
                         this.id = this.getAttribute('id');
                         this.$refresh();
                         return;
@@ -180,7 +180,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
                 }
             }
             this.className = this.getAttribute('class');
-            this.classList = this.className.match(/[^\s]+/g) || [];
+            this.classList = this.className.match(/\S+/g) || [];
             this.id = this.getAttribute('id');
             this.$refresh();
         },

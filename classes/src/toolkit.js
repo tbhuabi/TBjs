@@ -19,6 +19,11 @@ var extend = function(obj, properties) {
         obj[i] = properties[i];
     }
 };
+var forEach = function(arr, fn) {
+    for (var i = 0, len = arr.length; i < len; i++) {
+        fn(arr[i]);
+    }
+};
 var unique = function(arr) {
     if (arr.length < 2) {
         return arr;

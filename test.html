@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html ng-app>
+<html>
 
 <head>
     <!--   -->
     <meta charset="UTF-8">
     <title>Document</title>
-<!--
+
     <script src="classes/src/toolkit.js"></script>
     <script src="classes/src/http.js"></script>
     <script src="classes/src/query.js"></script>
@@ -14,8 +14,8 @@
     <script src="classes/src/module.js"></script>
     <script src="classes/src/bootstrap.js"></script>
     <script src="classes/TBjs.js"></script>
--->
-    <script src="angular/angular.js"></script>
+
+    <!--    <script src="angular/angular.js"></script>-->
     <style>
         .red {
             color: red
@@ -23,39 +23,66 @@
     </style>
 
     <script>
-
-//		var app=Tb.module('module');
-//		app.controller('myControl',function(){
-//			var _this=this;
-//			this.$http({
-//				url:''
-//			}).success(function(data){
-//				_this.data=data;
-//			})
-//			this.directive('ng-model',function(ele){
-//				ele.on('click',function(){
-//
-//				})
-//			})
-//		})
-//		app.controller('myControl',['$http',function($http){
-//			var _this=this;
-//			$http({
-//				url:''
-//			}).success(function(data){
-//				_this.data=data;
-//			})
-//		}])
-
-
-//		var app=angular.module('app',[]);
-//		a.directive('aaa',function(){})
+        //        (function() {
+         //
+         //            var ngApp = angular.module('app', []);
+         //            ngApp.directive('test', function() {
+         //                return function() {
+         //                    alert(1111)
+         //                }
+         //            }).service('ser1', function() {
+         //                this.a = 'a';
+         //                console.log('333')
+         //            }).service('ser2', ['ser1',
+         //                function(a) {
+         //                    console.log(a.a + 'b');
+         //                }
+         //            ]).controller('myControl', ['$scope', 'ser2',
+         //                function($scope, b) {
+         //                    $scope.test = function() {
+         //                        alert(3333)
+         //                    }
+         //                    console.log(b)
+         //                }
+         //            ]).directive('top', ['ser1',function() {
+         //                return {
+         //                    restrict: 'EA',
+         //                    link: function(a, b, c) {
+         //                        alert(333)
+         //                    }
+         //                }
+         //            }])
+         //            angular.element(document).ready(function() {
+         //                angular.bootstrap(document, ['app'])
+         //            })
+         //        })()
+        var app = TB.module('module');
+        app.factory('a', function() {
+            return {
+                a: 'a'
+            }
+        }).service('b', ['a',
+            function(a) {
+                this.b = 'b' + a.a
+            }
+        ]).provider('c', function() {
+            this.$get = ['a', 'b',
+                function(a, b) {
+                    console.log(a.a + '----' + b.b);
+                    return 'ccccc'
+                }
+            ]
+        }).factory('d', ['c',
+            function() {
+                alert(333)
+            }
+        ])
     </script>
 </head>
 
-<body>
-	<input type="text" ng-model="a.b">
-	<div>{{a.b}}</div>
+<body ng-controller="myControl">
+    <top></top>
+    <div test top='a' ng-click="test()">fdsafdsafdsaa</div>
 </body>
 
 </html>

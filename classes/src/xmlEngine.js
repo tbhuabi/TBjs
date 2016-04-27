@@ -1,5 +1,9 @@
+var ELEMENT_NODE = 1;
+var TEXT_NODE = 3;
+var COMMENT_NODE = 8;
+var DOCUMENT_NODE = 9;
+
 var $XmlEngineProvider = function $XmlEngineProvider() {
-    if (!(this instanceof $XmlEngineProvider)) return new $XmlEngineProvider();
     this.$get = function() {
         return DocumentEngine;
     };
@@ -7,10 +11,6 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
     var ODD_TAG_LIST = ['img', 'input', 'br', 'hr', 'param', 'meta', 'link'];
 
 
-    var ELEMENT_NODE = 1;
-    var TEXT_NODE = 3;
-    var COMMENT_NODE = 8;
-    var DOCUMENT_NODE = 9;
 
     //根对象
     function RootElementEngine() {

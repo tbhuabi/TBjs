@@ -1,28 +1,20 @@
 var $ModuleProvider = function $ModuleProvider() {
 
     if (!(this instanceof $ModuleProvider)) return new $ModuleProvider();
-    var $injector = function(services, factoryFn) {
-        if (isFunction(factoryFn)) {
-            return {
-                args: [],
-                factory: factoryFn
-            }
-        } else if (isArray(factoryFn)) {
-            var fn = factoryFn.pop();
+
+    var injector = function(module, factoryFunction) {
+        if (isFunction(factoryFunction)) {
+            return factoryFunction;
+        }
+        if (isArray(factoryFunction)) {
+            var fn = factoryFunction.pop();
             var args = [];
-            factoryFn.forEach(function(item) {
-                var service = services[item];
-                if (!item) {
-                    throw new Error('当前服务：' + item + '，没有注册');
-                }
-                if (!isFunction(item.$get)) {
-                    throw new Error('provider：' + item + '必须实现$get方法');
-                }
-                args.push(service.$get());
+            forEach(factoryFunction, function(item) {
+                item = trim(item);
+                args.push(module.$services[item]);
             })
-            return {
-                args: args,
-                factory: fn
+            return function factory() {
+                fn.apply(this, args);
             }
         }
     };
@@ -31,7 +23,9 @@ var $ModuleProvider = function $ModuleProvider() {
     };
 
     function Module(moduleName, dependence) {
-        return new Module.prototype.$init(moduleName, dependence)
+        var instanceModule = new Module.prototype.$init(moduleName, dependence);
+        return instanceModule;
+
     }
     Module.prototype.$init = function(moduleName, dependence) {
         this.$moduleName = moduleName;
@@ -42,46 +36,27 @@ var $ModuleProvider = function $ModuleProvider() {
     Module.prototype.$init.prototype = Module.prototype;
     extend(Module.prototype, {
         controller: function(controllerName, factoryFunction) {
-            var injectorObj = $injector(this.$services, factoryFunction);
-            this.$controllers[controllerName] = function() {
-                this.$get = function() {
-                    var scope = new Scope();
-                    return injectorObj.factory.apply(scope, injectorObj.args);
-                }
-            };
+            this.$controllers[controllerName] = injector(this, factoryFunction);
             return this;
         },
         directive: function(directiveName, factoryFunction) {
-            var injectorObj = $injector(this.$services, factoryFunction);
-            this.$directives[directiveName] = function() {
-                this.$get = function() {
-
-                };
-            };
+            this.$directives[directiveName] = injector(this, factoryFunction);
             return this;
         },
         factory: function(serviceName, factoryFunction) {
-            var injectorObj = $injector(this.$services, factoryFunction);
-            this.provider(serviceName, function() {
-                this.$get = function() {
-                    return injectorObj.factory.apply(undefined, injectorObj.args);
-                }
+            return this.provider(serviceName, function() {
+                this.$get = factoryFunction;
             })
-            return this;
         },
         service: function(serviceName, factoryFunction) {
-            var injectorObj = $injector(this.$services, factoryFunction);
-            this.provider(serviceName, function() {
-                this.$get = function() {
-                    var Factory = function() {};
-                    var obj = new Factory();
-                    return injectorObj.factory.apply(obj, injectorObj.args);
-                }
+            return this.provider(serviceName, function() {
+                this.$get = factoryFunction;
             })
-            return this;
         },
         provider: function(serviceName, factoryFunction) {
-            this.$services[serviceName] = factoryFunction;
+            var service = new factoryFunction();
+            var Factory = injector(this, service.$get);
+            this.$services[serviceName] = new Factory();
             return this;
         }
     })

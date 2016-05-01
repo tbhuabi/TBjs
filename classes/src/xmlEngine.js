@@ -461,7 +461,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
         var arr = [];
 
         var findScriptOrCommentNode = function(str) {
-            var startScriptIndex = str.indexOf('<script');
+            var startScriptIndex = str.search(/<script/i);
             var startCommentIndex = str.indexOf('<!--');
 
 

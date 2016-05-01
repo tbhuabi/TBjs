@@ -1,3 +1,5 @@
+var modules = {};
+
 var TB = {
     version: '1.0.0',
     module: $ModuleProvider().$get(),

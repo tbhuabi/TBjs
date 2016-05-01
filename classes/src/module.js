@@ -2,61 +2,41 @@ var $ModuleProvider = function $ModuleProvider() {
 
     if (!(this instanceof $ModuleProvider)) return new $ModuleProvider();
 
-    var injector = function(module, factoryFunction) {
-        if (isFunction(factoryFunction)) {
-            return factoryFunction;
-        }
-        if (isArray(factoryFunction)) {
-            var fn = factoryFunction.pop();
-            var args = [];
-            forEach(factoryFunction, function(item) {
-                item = trim(item);
-                args.push(module.$services[item]);
-            })
-            return function factory() {
-                fn.apply(this, args);
-            }
-        }
-    };
     this.$get = function() {
         return Module;
     };
 
     function Module(moduleName, dependence) {
         var instanceModule = new Module.prototype.$init(moduleName, dependence);
+        modules[moduleName] = instanceModule;
         return instanceModule;
 
     }
     Module.prototype.$init = function(moduleName, dependence) {
         this.$moduleName = moduleName;
-        this.$directives = {};
-        this.$services = {};
-        this.$controllers = {};
+        this.$invokeQueue = [];
     };
+
     Module.prototype.$init.prototype = Module.prototype;
     extend(Module.prototype, {
         controller: function(controllerName, factoryFunction) {
-            this.$controllers[controllerName] = injector(this, factoryFunction);
+            this.$invokeQueue.push(['$controllerProvider', 'register', arguments]);
             return this;
         },
         directive: function(directiveName, factoryFunction) {
-            this.$directives[directiveName] = injector(this, factoryFunction);
+            this.$invokeQueue.push(['$directiveProvider', 'register', arguments]);
             return this;
         },
         factory: function(serviceName, factoryFunction) {
-            return this.provider(serviceName, function() {
-                this.$get = factoryFunction;
-            })
+            this.$invokeQueue.push(['$providerProvider', 'factory', arguments]);
+            return this;
         },
         service: function(serviceName, factoryFunction) {
-            return this.provider(serviceName, function() {
-                this.$get = factoryFunction;
-            })
+            this.$invokeQueue.push(['$providerProvider', 'service', arguments]);
+            return this;
         },
         provider: function(serviceName, factoryFunction) {
-            var service = new factoryFunction();
-            var Factory = injector(this, service.$get);
-            this.$services[serviceName] = new Factory();
+            this.$invokeQueue.push(['$providerProvider', 'provider', arguments]);
             return this;
         }
     })

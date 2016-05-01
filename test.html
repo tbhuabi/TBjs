@@ -15,7 +15,7 @@
     <script src="classes/src/bootstrap.js"></script>
     <script src="classes/TBjs.js"></script>
 
-    <script src="angular/angular.js"></script>
+    <!--    <script src="angular/angular.js"></script>-->
     <style>
         .red {
             color: red
@@ -23,63 +23,12 @@
     </style>
 
     <script>
-		var ngApp;
-        (function() {
+        window.onload = function() {
 
-            ngApp = angular.module('app', []);
-            ngApp.directive('test', function() {
-                return function() {
-                    alert(1111)
-                }
-            }).service('ser1', function() {
-                this.a = 'a';
-                console.log('333')
-            }).service('ser2', ['ser1',
-                function(a) {
-                    console.log(a.a + 'b');
-                }
-            ]).controller('myControl', ['$scope', 'ser2',
-                function($scope, b) {
-                    $scope.test = function() {
-                        alert(3333)
-                    }
-                    console.log(b)
-                }
-            ]).directive('top', ['ser1',
-                function() {
-                    return {
-                        restrict: 'EA',
-                        link: function(a, b, c) {
-                            alert(333)
-                        }
-                    }
-                }
-            ])
-//            angular.element(document).ready(function() {
-//                angular.bootstrap(document, ['app'])
-//            })
-        })()
-//         var app = TB.module('module');
-//        app.factory('a', function() {
-//            return {
-//                a: 'a'
-//            }
-//        }).service('b', ['a',
-//            function(a) {
-//                this.b = 'b' + a.a
-//            }
-//        ]).provider('c', function() {
-//            this.$get = ['a', 'b',
-//                function(a, b) {
-//                    console.log(a.a + '----' + b.b);
-//                    return 'ccccc'
-//                }
-//            ]
-//        }).factory('d', ['c',
-//            function() {
-//                alert(333)
-//            }
-//        ])
+            var domEngine = (new $XmlEngineProvider()).$get();
+            var dom = domEngine(document.getElementsByTagName('html')[0].outerHTML);
+			console.log(dom)
+        }
     </script>
 </head>
 

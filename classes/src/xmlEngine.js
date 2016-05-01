@@ -445,17 +445,17 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
         var TAG_OR_PROPERTY_REG_STRING = '[a-zA-Z]\\w*(?:-\\w+)*';
         var TAG_ATTRIBUTE_VALUE_REG_STRING = '="[^"]*"|=\'[^\']*\'|=[^\\s>]+';
         var TAG_ATTRIBUTE_REG_STRING = '\\s*' + TAG_OR_PROPERTY_REG_STRING + '(?:' + TAG_ATTRIBUTE_VALUE_REG_STRING + ')?';
-        var TAG_CLOSE_REG_STRING = '<\/' + TAG_OR_PROPERTY_REG_STRING + '>';
+        var TAG_CLOSE_REG_STRING = '</' + TAG_OR_PROPERTY_REG_STRING + '>';
 
         var TEST_SCRIPT_BERORE_REG = new RegExp('^<script\\s(' + TAG_ATTRIBUTE_REG_STRING + ')*>|^<script\\s*>', 'i');
 
-        var SPLIT_SCRIPT_CONTENT_REG = new RegExp('^(<script\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+' + '>|^<script\\s*>)((?:' + ALL_RGE_STRING + ')*)(<\/script>)', 'i');
+        var SPLIT_SCRIPT_CONTENT_REG = new RegExp('^(<script\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+' + '>|^<script\\s*>)((?:' + ALL_RGE_STRING + ')*)(</script>)', 'i');
 
-        var SPLIT_TAG_BEFORE_REG = new RegExp('(?!^)(?=(?:<' + TAG_OR_PROPERTY_REG_STRING + '\\s*\/?>|<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*\/?>)|<\/' + TAG_OR_PROPERTY_REG_STRING + '\\s*>)');
+        var SPLIT_TAG_BEFORE_REG = new RegExp('(?!^)(?=(?:<' + TAG_OR_PROPERTY_REG_STRING + '\\s*/?>|<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*/?>)|</' + TAG_OR_PROPERTY_REG_STRING + '\\s*>)');
 
-        var SPLIT_TAG_AFTER_REG = new RegExp('(<' + TAG_OR_PROPERTY_REG_STRING + '\\s*\/?>|<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*\/?>|<\/' + TAG_OR_PROPERTY_REG_STRING + '\\s*>)((?:' + ALL_RGE_STRING + ')*)');
+        var SPLIT_TAG_AFTER_REG = new RegExp('(<' + TAG_OR_PROPERTY_REG_STRING + '\\s*/?>|<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*/?>|</' + TAG_OR_PROPERTY_REG_STRING + '\\s*>)((?:' + ALL_RGE_STRING + ')*)');
 
-        var TEST_TAG_REG = new RegExp('^<' + TAG_OR_PROPERTY_REG_STRING + '\\s*\/?>$|^<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*\/?>$|^<\/' + TAG_OR_PROPERTY_REG_STRING + '\\s*>$');
+        var TEST_TAG_REG = new RegExp('^<' + TAG_OR_PROPERTY_REG_STRING + '\\s*/?>$|^<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*/?>$|^</' + TAG_OR_PROPERTY_REG_STRING + '\\s*>$');
 
 
         var arr = [];
@@ -484,11 +484,12 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
                 var beforeStr = str.substring(0, startIndex);
                 var afterStr = str.substring(startIndex, str.length);
                 if (TEST_SCRIPT_BERORE_REG.test(afterStr)) {
-                    var closeIndex = afterStr.indexOf('</script>');
+                    var scriptTagName = afterStr.slice(1, 7);
+                    var closeIndex = afterStr.search(new RegExp('</' + scriptTagName + '>', 'i'));
                     if (closeIndex === -1) {
                         //如果没有找到结尾标签，添加一个，主要是防止在词法分析时，正则匹配内存溢出的问题
                         closeIndex = afterStr.length;
-                        afterStr += '</script>';
+                        afterStr += '</' + scriptTagName + '>';
                     }
                     beforeStr && arr.push(beforeStr);
                     var body = afterStr.substring(0, closeIndex + 9);
@@ -647,7 +648,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
         this.childNodes = [];
         this.children = [];
         this.eventListener = {};
-        xmlBuilder(this, htmlContent);
+        xmlEngine(this, htmlContent);
     }
     DocumentEngine.prototype = new ElementMethodEngine();
     extend(DocumentEngine.prototype, {

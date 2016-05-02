@@ -9,10 +9,24 @@ var bootstrap = function(context, modules) {
 };
 
 var initModule = function(TBModule) {
-    var module = {};
-    forEach(TBModule.$invokeQueue, function(item) {
 
-    })
+    var $ServiceProvider = function $ServiceProvider(moduleName) {
+        this.$moduleName = moduleName || null;
+        this.$get = function() {
+			return new Services();
+        };
+        var services = function service() {
+            this.$moduleName = null;
+        }
+        for (var key in TBModule.$services) {
+            var factory = TBModule.$services[key];
+            if (isArray(factory)) {
+
+            }
+            services.prototype[key] = (new TBModule.$services[key]()).$get();
+        }
+    }
+
 };
 
 //var injector = function(module, factoryFunction) {

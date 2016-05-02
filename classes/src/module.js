@@ -14,29 +14,23 @@ var $ModuleProvider = function $ModuleProvider() {
     }
     Module.prototype.$init = function(moduleName, dependence) {
         this.$moduleName = moduleName;
-        this.$invokeQueue = [];
+        this.$controllers = {};
+        this.$directives = {};
+        this.$services = {};
     };
 
     Module.prototype.$init.prototype = Module.prototype;
     extend(Module.prototype, {
         controller: function(controllerName, factoryFunction) {
-            this.$invokeQueue.push(['$controllerProvider', 'register', arguments]);
+            this.$controllers[controllerName] = factoryFunction;
             return this;
         },
         directive: function(directiveName, factoryFunction) {
-            this.$invokeQueue.push(['$directiveProvider', 'register', arguments]);
-            return this;
-        },
-        factory: function(serviceName, factoryFunction) {
-            this.$invokeQueue.push(['$providerProvider', 'factory', arguments]);
+            this.$directives[directiveName] = factoryFunction;
             return this;
         },
         service: function(serviceName, factoryFunction) {
-            this.$invokeQueue.push(['$providerProvider', 'service', arguments]);
-            return this;
-        },
-        provider: function(serviceName, factoryFunction) {
-            this.$invokeQueue.push(['$providerProvider', 'provider', arguments]);
+            this.$services[serviceName] = factoryFunction;
             return this;
         }
     })

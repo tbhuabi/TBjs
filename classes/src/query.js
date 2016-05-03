@@ -8,7 +8,6 @@ var $QueryProvider = function $QueryProvider() {
     var triggerParams = null;
     var eventCache = [];
     var findEventCache = function(element) {
-        var eventCache = eventCache;
         for (var i = 0, len = eventCache.length; i < len; i++) {
             if (eventCache[i].element === element) {
                 return eventCache[i];
@@ -52,7 +51,7 @@ var $QueryProvider = function $QueryProvider() {
                 }
             } else {
                 for (var type in events) {
-                    var eventListenerCollection = events[key];
+                    var eventListenerCollection = events[type];
                     eventListenerCollection.forEach(function(eventListenerObj) {
                         var eventListener = eventListenerObj.eventListener;
                         eventListener.forEach(function(fn) {
@@ -166,7 +165,6 @@ var $QueryProvider = function $QueryProvider() {
             eventTypes = trim(eventTypes);
             if (!eventTypes) return this;
 
-            var eventCache = eventCache;
             if (isFunction(selector)) {
                 useCapture = callback;
                 callback = selector;
@@ -233,7 +231,6 @@ var $QueryProvider = function $QueryProvider() {
             return this;
         },
         off: function(eventType, selector, fn) {
-            var eventCache = eventCache;
             var _this = this;
             if (arguments.length === 0) {
                 this.each(function(item) {

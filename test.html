@@ -28,6 +28,11 @@
             var domEngine = (new $XmlEngineProvider()).$get();
             var dom = domEngine(document.getElementsByTagName('html')[0].outerHTML);
             console.log(dom)
+            TB.$('div').on('click', function() {
+                alert(333)
+            }).on('click.a', function() {
+                alert(4444)
+            }).trigger('click.b')
         }
 
         var app = TB.app('app');
@@ -44,7 +49,7 @@
         ]).service('d', ['c',
             function() {}
         ]);
-        TB.bootstrap(null, ['app'])
+        TB.bootstrap(null, ['app']);
     </script>
 </head>
 

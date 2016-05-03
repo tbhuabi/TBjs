@@ -1,8 +1,8 @@
-var TBModules = {};
+var applications = {};
 
 var TB = {
     version: '1.0.0',
-    module: $ModuleProvider().$get(),
+    app: $AppProvider().$get(),
     $http: $HttpProvider().$get(),
     $: $QueryProvider().$get(),
     bootstrap: bootstrap

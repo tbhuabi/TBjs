@@ -11,7 +11,7 @@
     <script src="classes/src/query.js"></script>
     <script src="classes/src/xmlEngine.js"></script>
     <script src="classes/src/scope.js"></script>
-    <script src="classes/src/module.js"></script>
+    <script src="classes/src/main.js"></script>
     <script src="classes/src/bootstrap.js"></script>
     <script src="classes/TBjs.js"></script>
 
@@ -30,7 +30,7 @@
             console.log(dom)
         }
 
-        var app = TB.module('app');
+        var app = TB.app('app');
         app.service('a', function() {
             return 'aaaa';
         }).service('b', ['a',

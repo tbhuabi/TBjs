@@ -1,17 +1,17 @@
 var bootstrap = function(context, modules) {
-    modules.forEach(function(moduleName) {
-        var TBModule = TBModules[moduleName]
-        if (!TBModule) {
-            throw new Error('模块' + moduleName + '未注册');
+    modules.forEach(function(appName) {
+        var app = applications[appName]
+        if (!app) {
+            throw new Error('模块' + appName + '未注册');
         }
-        initModule(TBModule, moduleName);
+        initModule(app, appName);
     })
 
-    function initModule(TBModule, moduleName) {
+    function initModule(app, appName) {
 
         var serviceCache = {};
 
-        var $services = TBModule.$services;
+        var $services = app.$services;
 
         var createInjector = function(factoryFunction) {
             if (isFunction(factoryFunction)) {
@@ -23,14 +23,14 @@ var bootstrap = function(context, modules) {
                 forEach(factoryFunction, function(item) {
                     var serviceItem = serviceCache[item];
                     if (serviceItem) {
-                        serviceItem.$moduleName = moduleName;
+                        serviceItem.$appName = appName;
                         args.push(serviceItem.$get());
                     } else {
                         if (!$services[item]) {
                             throw new Error('模块：' + moduleName + '中，service：' + item + '未注册');
                         }
                         var serviceInstance = createInjector($services[item]);
-                        serviceInstance.$moduleName = moduleName;
+                        serviceInstance.$appName = appName;
                         serviceCache[item] = serviceInstance;
                         args.push(serviceInstance.$get());
                     }
@@ -55,7 +55,7 @@ var bootstrap = function(context, modules) {
         }
 
         function $ServiceProvider(factoryFunction) {
-            this.$moduleName = null;
+            this.$appName = null;
             this.$get = function() {
                 return factoryFunction();
             };

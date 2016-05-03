@@ -1,26 +1,26 @@
-var $ModuleProvider = function $ModuleProvider() {
+var $AppProvider = function $AppProvider() {
 
-    if (!(this instanceof $ModuleProvider)) return new $ModuleProvider();
+    if (!(this instanceof $AppProvider)) return new $AppProvider();
 
     this.$get = function() {
-        return Module;
+        return App;
     };
 
-    function Module(moduleName, dependence) {
-        var instanceModule = new Module.prototype.$init(moduleName, dependence);
-        TBModules[moduleName] = instanceModule;
-        return instanceModule;
+    function App(appName, dependence) {
+        var instanceApp = new App.prototype.$init(appName, dependence);
+        applications[appName] = instanceApp;
+        return instanceApp;
 
     }
-    Module.prototype.$init = function(moduleName, dependence) {
-        this.$moduleName = moduleName;
+    App.prototype.$init = function(appName, dependence) {
+        this.$appName = appName;
         this.$controllers = {};
         this.$directives = {};
         this.$services = {};
     };
 
-    Module.prototype.$init.prototype = Module.prototype;
-    extend(Module.prototype, {
+    App.prototype.$init.prototype = App.prototype;
+    extend(App.prototype, {
         controller: function(controllerName, factoryFunction) {
             this.$controllers[controllerName] = factoryFunction;
             return this;

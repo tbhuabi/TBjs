@@ -96,8 +96,8 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
                     text += this.childNodes[i].getInnerText();
                 }
             }
-            this.innerText = text.replace(/[\n\t\r]/g, '');
-            return this.innerText;
+            this.innerText = text;
+            return text;
         }
     });
 
@@ -739,7 +739,8 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
     function TextElement(text) {
         this.parentNode = null;
         this.nodeType = TEXT_NODE;
-        this.innerHTML = this.innerText = this.outerHTML = text;
+        this.innerHTML = this.outerHTML = text;
+        this.innerText = text.replace(/[\n\t\r\v]/g, '');
         this.eventListener = {};
     }
     TextElement.prototype = new ElementEventEngine();

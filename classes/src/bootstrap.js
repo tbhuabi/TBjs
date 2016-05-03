@@ -1,47 +1,65 @@
 var bootstrap = function(context, modules) {
-    modules.forEach(function(mod) {
-        var TBModule = TBModules[mod]
+    modules.forEach(function(moduleName) {
+        var TBModule = TBModules[moduleName]
         if (!TBModule) {
-            throw new Error('模块' + mod + '未注册');
+            throw new Error('模块' + moduleName + '未注册');
         }
-        initModule(TBModule);
+        initModule(TBModule, moduleName);
     })
-};
 
-var initModule = function(TBModule) {
+    function initModule(TBModule, moduleName) {
 
-    var $ServiceProvider = function $ServiceProvider(moduleName) {
-        this.$moduleName = moduleName || null;
-        this.$get = function() {
-			return new Services();
-        };
-        var services = function service() {
-            this.$moduleName = null;
-        }
-        for (var key in TBModule.$services) {
-            var factory = TBModule.$services[key];
-            if (isArray(factory)) {
+        var serviceCache = {};
 
+        var $services = TBModule.$services;
+
+        var createInjector = function(factoryFunction) {
+            if (isFunction(factoryFunction)) {
+                return new $ServiceProvider(factoryFunction);
             }
-            services.prototype[key] = (new TBModule.$services[key]()).$get();
+            if (isArray(factoryFunction)) {
+                var fn = factoryFunction.pop();
+                var args = [];
+                forEach(factoryFunction, function(item) {
+                    var serviceItem = serviceCache[item];
+                    if (serviceItem) {
+                        serviceItem.$moduleName = moduleName;
+                        args.push(serviceItem.$get());
+                    } else {
+                        if (!$services[item]) {
+                            throw new Error('模块：' + moduleName + '中，service：' + item + '未注册');
+                        }
+                        var serviceInstance = createInjector($services[item]);
+                        serviceInstance.$moduleName = moduleName;
+                        serviceCache[item] = serviceInstance;
+                        args.push(serviceInstance.$get());
+                    }
+                })
+                return new $ServiceProvider(function factory() {
+                    var result = fn.apply(this, args);
+                    var instance;
+                    if (isFunction(result)) {
+                        result = new result();
+                    }
+                    if (isObject(result) && isFunction(result.$get)) {
+                        return result.$get();
+                    }
+                    return result;
+                })
+            }
+        };
+        for (var key in $services) {
+            if (serviceCache.hasOwnProperty(key)) continue;
+            var factory = createInjector($services[key]);
+            serviceCache[key] = factory;
         }
-    }
 
+        function $ServiceProvider(factoryFunction) {
+            this.$moduleName = null;
+            this.$get = function() {
+                return factoryFunction();
+            };
+        }
+
+    };
 };
-
-//var injector = function(module, factoryFunction) {
-//    if (isFunction(factoryFunction)) {
-//        return factoryFunction;
-//    }
-//    if (isArray(factoryFunction)) {
-//        var fn = factoryFunction.pop();
-//        var args = [];
-//        forEach(factoryFunction, function(item) {
-//            item = trim(item);
-//            args.push(module.$services[item]);
-//        })
-//        return function factory() {
-//            fn.apply(this, args);
-//        }
-//    }
-//};

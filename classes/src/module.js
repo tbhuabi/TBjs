@@ -8,7 +8,7 @@ var $ModuleProvider = function $ModuleProvider() {
 
     function Module(moduleName, dependence) {
         var instanceModule = new Module.prototype.$init(moduleName, dependence);
-        modules[moduleName] = instanceModule;
+        TBModules[moduleName] = instanceModule;
         return instanceModule;
 
     }

@@ -27,8 +27,24 @@
 
             var domEngine = (new $XmlEngineProvider()).$get();
             var dom = domEngine(document.getElementsByTagName('html')[0].outerHTML);
-			console.log(dom)
+            console.log(dom)
         }
+
+        var app = TB.module('app');
+        app.service('a', function() {
+            return 'aaaa';
+        }).service('b', ['a',
+            function(a) {
+                return 'bbbb' + a;
+            }
+        ]).service('c', ['b',
+            function(b) {
+                console.log(b)
+            }
+        ]).service('d', ['c',
+            function() {}
+        ]);
+        TB.bootstrap(null, ['app'])
     </script>
 </head>
 

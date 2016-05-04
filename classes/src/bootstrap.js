@@ -23,14 +23,12 @@ var bootstrap = function(context, modules) {
                 forEach(factoryFunction, function(item) {
                     var serviceItem = serviceCache[item];
                     if (serviceItem) {
-                        serviceItem.$appName = appName;
                         args.push(serviceItem.$get());
                     } else {
                         if (!$services[item]) {
                             throw new Error('模块：' + moduleName + '中，service：' + item + '未注册');
                         }
                         var serviceInstance = createInjector($services[item]);
-                        serviceInstance.$appName = appName;
                         serviceCache[item] = serviceInstance;
                         args.push(serviceInstance.$get());
                     }
@@ -55,11 +53,11 @@ var bootstrap = function(context, modules) {
         }
 
         function $ServiceProvider(factoryFunction) {
-            this.$appName = null;
+            this.$appName = appName;
             this.$get = function() {
                 return factoryFunction();
             };
         }
-
+		console.log(serviceCache)
     };
 };

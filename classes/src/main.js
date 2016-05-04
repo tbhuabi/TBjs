@@ -14,15 +14,15 @@ var $AppProvider = function $AppProvider() {
     }
     App.prototype.$init = function(appName, dependence) {
         this.$appName = appName;
-        this.$controllers = {};
+        this.$modules = {};
         this.$directives = {};
         this.$services = {};
     };
 
     App.prototype.$init.prototype = App.prototype;
     extend(App.prototype, {
-        controller: function(controllerName, factoryFunction) {
-            this.$controllers[controllerName] = factoryFunction;
+        module: function(moduleName, factoryFunction) {
+            this.$modules[moduleName] = factoryFunction;
             return this;
         },
         directive: function(directiveName, factoryFunction) {

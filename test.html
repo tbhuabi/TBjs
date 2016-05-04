@@ -25,37 +25,34 @@
     <script>
         window.onload = function() {
 
-            var domEngine = (new $XmlEngineProvider()).$get();
-            var dom = domEngine(document.getElementsByTagName('html')[0].outerHTML);
-            console.log(dom)
-            TB.$('div').on('click', function() {
-                alert(333)
-            }).on('click.a', function() {
-                alert(4444)
-            }).trigger('click.b')
+			var app = TB.app('app');
+			app.service('a', function() {
+				return 'aaaa';
+			}).service('b', ['a',
+				function(a) {
+					return 'bbbb' + a;
+				}
+			]).service('c', ['b',
+				function(b) {
+					console.log(b)
+				}
+			]).service('d', ['c',
+				function() {}
+			]).module('myModule',function(services){
+				this.name='TanBo'+services.b;
+				this.age=34
+			});
+			TB.bootstrap(document.body, ['app']);
         }
 
-        var app = TB.app('app');
-        app.service('a', function() {
-            return 'aaaa';
-        }).service('b', ['a',
-            function(a) {
-                return 'bbbb' + a;
-            }
-        ]).service('c', ['b',
-            function(b) {
-                console.log(b)
-            }
-        ]).service('d', ['c',
-            function() {}
-        ]);
-        TB.bootstrap(null, ['app']);
     </script>
 </head>
 
-<body ng-controller="myControl">
-    <top aaa></top>
-    <div test top='a' ng-click="test()">fdsafdsafdsaa</div>
+<body>
+    <div tb-module="myModule">
+    	<div>{{name}}</div>
+    	<div>{{age}}</div>
+    </div>
 </body>
 
 </html>

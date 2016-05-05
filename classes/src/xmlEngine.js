@@ -1,7 +1,7 @@
-var ELEMENT_NODE = 1;
-var TEXT_NODE = 3;
-var COMMENT_NODE = 8;
-var DOCUMENT_NODE = 9;
+var ELEMENT_NODE_TYPE = 1;
+var TEXT_NODE_TYPE = 3;
+var COMMENT_NODE_TYPE = 8;
+var DOCUMENT_NODE_TYPE = 9;
 
 var $XmlEngineProvider = function $XmlEngineProvider() {
     this.$get = function() {
@@ -21,6 +21,8 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
         getInnerHtml: function() {
             if (this.innerHTML) {
                 return this.innerHTML;
+            } else if (this.nodeType === TEXT_NODE_TYPE || this.nodeType === COMMENT_NODE_TYPE) {
+                return this.textContent;
             }
             var innerHTML = '';
             if (this.childNodes) {
@@ -34,9 +36,10 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
         getOuterHtml: function() {
             if (this.outerHTML) {
                 return this.outerHTML;
-            }
-            if (this.nodeType === TEXT_NODE) {
-                return this.innerText;
+            } else if (this.nodeType === TEXT_NODE_TYPE) {
+                return this.textContent;
+            } else if (this.nodeType === COMMENT_NODE_TYPE) {
+                return '<!--' + this.textContent + '-->';
             }
 
             var getAttributeHtml = function(attributes) {
@@ -69,7 +72,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
 
 
             var outerHtml = '';
-            if (this.nodeType === ELEMENT_NODE) {
+            if (this.nodeType === ELEMENT_NODE_TYPE) {
                 var tagName = this.tagName.toLowerCase();
                 var attrHtml = getAttributeHtml(this.attributes);
                 if (ODD_TAG_LIST.indexOf(tagName) === -1) {
@@ -77,18 +80,16 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
                 } else {
                     outerHtml = '<' + tagName + ' ' + attrHtml + '>';
                 }
-            } else if (this.nodeType === DOCUMENT_NODE) {
+            } else if (this.nodeType === DOCUMENT_NODE_TYPE) {
                 outerHtml = getChildNodesHtml(this);
-            } else if (this.nodeType === COMMENT_NODE) {
-                outerHtml = '<!--' + this.innerText + '-->';
             }
 
             this.outerHTML = outerHtml;
             return outerHtml;
         },
         getInnerText: function() {
-            if (this.innerText) {
-                return this.innerText;
+            if (this.textContent) {
+                return this.textContent;
             }
             var text = '';
             if (this.childNodes) { //单标签没有子级
@@ -96,7 +97,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
                     text += this.childNodes[i].getInnerText();
                 }
             }
-            this.innerText = text;
+            this.textContent = text;
             return text;
         }
     });
@@ -371,7 +372,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
             if (TBDomElement.parentNode !== this) {
                 TBDomElement.parentNode = this;
                 this.childNodes.push(TBDomElement);
-                if (TBDomElement.nodeType === ELEMENT_NODE) {
+                if (TBDomElement.nodeType === ELEMENT_NODE_TYPE) {
                     this.children.push(TBDomElement);
                 }
             } else {
@@ -381,7 +382,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
                         break;
                     }
                 }
-                if (TBDomElement.nodeType === ELEMENT_NODE) {
+                if (TBDomElement.nodeType === ELEMENT_NODE_TYPE) {
                     for (var i = 0, len = this.children.length; i < len; i++) {
                         if (TBDomElement === this.children[i]) {
                             this.children.push(this.children.splice(i, 1));
@@ -399,7 +400,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
                     break;
                 }
             }
-            if (TBDomElement.nodeType === ELEMENT_NODE) {
+            if (TBDomElement.nodeType === ELEMENT_NODE_TYPE) {
                 for (var i = 0, len = this.children.length; i < len; i++) {
                     if (this.children[i] === TBDomElement) {
                         this.children.splice(i, 1);
@@ -638,7 +639,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
     function DocumentEngine(htmlContent) {
         if (!(this instanceof DocumentEngine)) return new DocumentEngine(htmlContent);
         this.$XMLContent = htmlContent;
-        this.nodeType = DOCUMENT_NODE;
+        this.nodeType = DOCUMENT_NODE_TYPE;
         this.parentNode = null;
         this.innerHTML = '';
         this.innerText = '';
@@ -697,7 +698,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
 
     function OddElement(tagName) {
         this.tagName = this.nodeName = tagName.toUpperCase();
-        this.nodeType = ELEMENT_NODE;
+        this.nodeType = ELEMENT_NODE_TYPE;
         this.parentNode = null;
         this.innerHTML = '';
         this.innerText = '';
@@ -717,7 +718,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
     //双标签元素构造函数
     function EvenElement(tagName) {
         this.tagName = this.nodeName = tagName.toUpperCase();
-        this.nodeType = ELEMENT_NODE;
+        this.nodeType = ELEMENT_NODE_TYPE;
         this.parentNode = null;
         this.innerHTML = '';
         this.innerText = '';
@@ -738,9 +739,9 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
     //文本节点构造函数
     function TextElement(text) {
         this.parentNode = null;
-        this.nodeType = TEXT_NODE;
-        this.innerHTML = this.outerHTML = text;
-        this.innerText = text.replace(/[\n\t\r\v]/g, '');
+        this.nodeType = TEXT_NODE_TYPE;
+        this.nodeName = '#text';
+        this.textContent = text.replace(/[\n\t\r\v]/g, '');
         this.eventListener = {};
     }
     TextElement.prototype = new ElementEventEngine();
@@ -749,9 +750,9 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
 
     function CommentElement(commentText) {
         this.parentNode = null;
-        this.nodeType = COMMENT_NODE;
-        this.innerHTML = this.innerText = commentText;
-        this.outerHTML = '<!--' + commentText + '-->';
+        this.nodeType = COMMENT_NODE_TYPE;
+        this.nodeName = '#comment';
+        this.textContent = commentText;
     }
 
     CommentElement.prototype = new RootElementEngine();

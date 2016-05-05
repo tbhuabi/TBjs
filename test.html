@@ -11,6 +11,9 @@
     <script src="classes/src/query.js"></script>
     <script src="classes/src/xmlEngine.js"></script>
     <script src="classes/src/scope.js"></script>
+    <script src="classes/src/service.js"></script>
+    <script src="classes/src/directive.js"></script>
+    <script src="classes/src/module.js"></script>
     <script src="classes/src/main.js"></script>
     <script src="classes/src/bootstrap.js"></script>
     <script src="classes/TBjs.js"></script>
@@ -25,34 +28,45 @@
     <script>
         window.onload = function() {
 
-			var app = TB.app('app');
-			app.service('a', function() {
-				return 'aaaa';
-			}).service('b', ['a',
-				function(a) {
-					return 'bbbb' + a;
-				}
-			]).service('c', ['b',
-				function(b) {
-					console.log(b)
-				}
-			]).service('d', ['c',
-				function() {}
-			]).module('myModule',function(services){
-				this.name='TanBo'+services.b;
-				this.age=34
-			});
-			TB.bootstrap(document.body, ['app']);
-        }
+            var app = TB.app('app');
+            app.service('a', function() {
+                return 'aaaa';
+            }).service('b', ['a',
+                function(a) {
+                    return 'bbbb' + a;
+                }
+            ]).service('c', ['b',
+                function(b) {
+                    console.log(b)
+                }
+            ]).service('d', ['c',
+                function() {}
+            ]).module('myModule', function(services) {
+                this.name = 'TanBo' + services.b;
+                this.age = 34
+            }).directive('tbModule', function() {
+                return {
+                    priority: 0,
+                    controller: function(data, element, services) {
 
+                    }
+                }
+            });
+            TB.bootstrap(document.body, ['app']);
+            console.log(app)
+        }
     </script>
 </head>
 
 <body>
     <div tb-module="myModule">
-    	<div>{{name}}</div>
-    	<div>{{age}}</div>
+        <div>{{name}}</div>
+        <div>{{age}}</div>
+        <!--      fdsafdsa  -->
     </div>
+    <input type="text">
+    <input type="checkbox">
+    <div></div>
 </body>
 
 </html>

@@ -1,4 +1,44 @@
-var bootstrap = function(context, modules) {
+var bootstrap = function(element, modules) {
+    var applicationsInstance = {};
+    var XmlEngine = (new $XmlEngineProvider()).$get();
+    var findTbModuleElement = function(element) {
+        if (element.nodeType === ELEMENT_NODE_TYPE && element.getAttribute('tb-module')) {
+            var vDom = new XmlEngine('');
+            createDomMap(element, vDom, vDom);
+            console.log(vDom)
+            return;
+        }
+        forEach(element.childNodes, function(ele) {
+            findTbModuleElement(ele);
+        })
+    };
+    var createDomMap = function(element, context, vDom) {
+        var attributes = element.attributes;
+        var currentVDom;
+        if (element.nodeType === ELEMENT_NODE_TYPE) {
+            var obj = {};
+            forEach(attributes, function(attr) {
+                obj[attr.name] = attr.value;
+            })
+            currentVDom = vDom.createElement(element.nodeName);
+            currentVDom.setAttribute(obj);
+            context.appendChild(currentVDom);
+            forEach(element.childNodes, function(child) {
+                createDomMap(child, currentVDom, vDom);
+            })
+        } else if (element.nodeType === TEXT_NODE_TYPE) {
+            currentVDom = vDom.createTextNode(element.textContent);
+            context.appendChild(currentVDom);
+        } else if (element.nodeType === COMMENT_NODE_TYPE) {
+            currentVDom = vDom.createComment(element.textContent);
+            context.appendChild(currentVDom);
+        }
+    };
+
+
+    findTbModuleElement(element)
+
+
     modules.forEach(function(appName) {
         var app = applications[appName]
         if (!app) {
@@ -9,55 +49,63 @@ var bootstrap = function(context, modules) {
 
     function initModule(app, appName) {
 
-        var serviceCache = {};
+        var servicesCache = {};
+        var modulesCache = {};
+        var directivesCache = {};
+
+        applicationsInstance[appName] = {
+            services: servicesCache,
+            modules: modulesCache,
+            directives: directivesCache
+        };
 
         var $services = app.$services;
+        var $modules = app.$modules;
+        var $directives = app.$directives;
 
         var createInjector = function(factoryFunction) {
-            if (isFunction(factoryFunction)) {
-                return new $ServiceProvider(factoryFunction);
+            factoryFunction = isFunction(factoryFunction) ? [factoryFunction] : factoryFunction;
+            var len = factoryFunction.length - 1;
+            var fn = factoryFunction[len];
+            var args = [];
+            for (var i = 0; i < len; i++) {
+                var key = factoryFunction[i];
+                var serviceInstance = servicesCache[i];
+                if (serviceInstance) {
+                    args.push(serviceInstance.$get());
+                } else {
+                    if (!$services[key]) {
+                        throw new Error('应用：' + appName + '中，service：' + key + '未注册');
+                    }
+                    var serviceProvider = createInjector($services[key]);
+                    servicesCache[key] = serviceProvider;
+                    args.push(serviceProvider.$get());
+                }
             }
-            if (isArray(factoryFunction)) {
-                var fn = factoryFunction.pop();
-                var args = [];
-                forEach(factoryFunction, function(item) {
-                    var serviceItem = serviceCache[item];
-                    if (serviceItem) {
-                        args.push(serviceItem.$get());
-                    } else {
-                        if (!$services[item]) {
-                            throw new Error('模块：' + moduleName + '中，service：' + item + '未注册');
-                        }
-                        var serviceInstance = createInjector($services[item]);
-                        serviceCache[item] = serviceInstance;
-                        args.push(serviceInstance.$get());
-                    }
-                })
-                return new $ServiceProvider(function factory() {
-                    var result = fn.apply(this, args);
-                    var instance;
-                    if (isFunction(result)) {
-                        result = new result();
-                    }
-                    if (isObject(result) && isFunction(result.$get)) {
-                        return result.$get();
-                    }
-                    return result;
-                })
-            }
+            return new $ServiceProvider(appName, function factory() {
+                var result = fn.apply(this, args);
+                var instance;
+                if (isFunction(result)) {
+                    result = new result();
+                }
+                if (isObject(result) && isFunction(result.$get)) {
+                    return result.$get();
+                }
+                return result;
+            })
         };
         for (var key in $services) {
-            if (serviceCache.hasOwnProperty(key)) continue;
-            var factory = createInjector($services[key]);
-            serviceCache[key] = factory;
+            if (servicesCache.hasOwnProperty(key)) continue;
+            var serviceItem = $services[key];
+            var factory = createInjector(serviceItem);
+            servicesCache[key] = factory;
         }
-
-        function $ServiceProvider(factoryFunction) {
-            this.$appName = appName;
-            this.$get = function() {
-                return factoryFunction();
-            };
+        for (var key in $directives) {
+            directivesCache[key] = new $DirectiveProvider(appName, $directives[key]);
         }
-		console.log(serviceCache)
+        for (var key in $modules) {
+            modulesCache[key] = new $ModuleProvider(appName, $directives[key]);
+        }
+        console.log(applicationsInstance);
     };
 };

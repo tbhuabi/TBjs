@@ -91,6 +91,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
             if (this.textContent) {
                 return this.textContent;
             }
+            if (this.nodeType === ELEMENT_NODE_TYPE || this.nodeType === DOCUMENT_NODE_TYPE) return;
             var text = '';
             if (this.childNodes) { //单标签没有子级
                 for (var i = 0, len = this.childNodes.length; i < len; i++) {

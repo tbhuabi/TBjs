@@ -103,7 +103,9 @@ myApp.service('serviceD', function() {
     }
 })
 ```
-######  返回一个构造函数，如果实例化后有$get方法，那么在module中，service会注入$get方法的返回值
+######  返回一个构造函数
+
+如果实例化后有$get方法，那么在module中，service会注入$get方法的返回值
 ```javascript
 myApp.service('serviceE', function() {
     return function() {

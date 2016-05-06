@@ -88,17 +88,18 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
             return outerHtml;
         },
         getInnerText: function() {
-            if (this.textContent) {
+            if (this.nodeType === TEXT_NODE_TYPE) {
                 return this.textContent;
+            } else if (this.nodeType === COMMENT_NODE_TYPE) {
+                return;
             }
-            if (this.nodeType === ELEMENT_NODE_TYPE || this.nodeType === DOCUMENT_NODE_TYPE) return;
             var text = '';
             if (this.childNodes) { //单标签没有子级
                 for (var i = 0, len = this.childNodes.length; i < len; i++) {
-                    text += this.childNodes[i].getInnerText();
+                    text += this.childNodes[i].getInnerText() || '';
                 }
             }
-            this.textContent = text;
+            this.innerText = text;
             return text;
         }
     });

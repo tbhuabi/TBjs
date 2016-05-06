@@ -320,7 +320,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
 
                 }
                 if (selector === nextSelector) {
-                    throw new Error(selector + '不是一个正确的选择器！');
+                    throwError(selector + '不是一个正确的选择器！');
                 }
                 parentElements = unique(parentElements);
                 if (nextSelector) {

@@ -1,11 +1,12 @@
 var bootstrap = function(element, modules) {
     var applicationsInstance = {};
     var XmlEngine = (new $XmlEngineProvider()).$get();
+    var vDomElements = [];
     var findTbModuleElement = function(element) {
         if (element.nodeType === ELEMENT_NODE_TYPE && element.getAttribute('tb-module')) {
             var vDom = new XmlEngine('');
             createDomMap(element, vDom, vDom);
-            console.log(vDom)
+            vDomElements.push(vDom);
             return;
         }
         forEach(element.childNodes, function(ele) {
@@ -42,7 +43,7 @@ var bootstrap = function(element, modules) {
     modules.forEach(function(appName) {
         var app = applications[appName]
         if (!app) {
-            throw new Error('模块' + appName + '未注册');
+            throwError('模块' + appName + '未注册');
         }
         initModule(app, appName);
     })
@@ -75,7 +76,7 @@ var bootstrap = function(element, modules) {
                     args.push(serviceInstance.$get());
                 } else {
                     if (!$services[key]) {
-                        throw new Error('应用：' + appName + '中，service：' + key + '未注册');
+                        throwError('应用：' + appName + '中，service：' + key + '未注册');
                     }
                     var serviceProvider = createInjector($services[key]);
                     servicesCache[key] = serviceProvider;
@@ -106,6 +107,18 @@ var bootstrap = function(element, modules) {
         for (var key in $modules) {
             modulesCache[key] = new $ModuleProvider(appName, $directives[key]);
         }
+
+        forEach(vDomElements, function(vDom) {
+            var moduleName = vDom.children[0].getAttribute('tb-module');
+            if (moduleName) {
+                if (!modulesCache[moduleName]) {
+                    throwError(moduleName + '模块未注册');
+                }
+                applicationsInstance[appName].virtualDom = vDom;
+            } else {
+                throwError('指令tb-module必须指定一个模块名！');
+            }
+        })
         console.log(applicationsInstance);
     };
 };

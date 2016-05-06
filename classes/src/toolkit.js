@@ -10,6 +10,10 @@ var isArray = Array.isArray || isType('Array');
 var isFunction = isType('Function');
 var isUndefined = isType('Undefined');
 
+var throwError = function(errorMsg) {
+    throw new Error(errorMsg);
+};
+
 var trim = function(str) {
     return str.replace(/^\s+|\s+$/g, '');
 };

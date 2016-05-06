@@ -29,7 +29,7 @@ extend(AST.prototype, {
 
         if (this.tokens.length !== 0) {
             //如果项目构建完，但当前的词法单元并未用完，则判定当前表达式不正确
-            throw new Error('表达式：' + text + '中，' + this.tokens[0] + '没用使用');
+            throwError('表达式：' + text + '中，' + this.tokens[0] + '没用使用');
         }
         return value;
     },
@@ -221,7 +221,7 @@ extend(AST.prototype, {
             primary = this.constant();
         } else {
             //如果以上所有情况都不匹配，则判定表达式不正确
-            throw new Error(this.peek().text + '不是一个正确的表达式');
+            throwError(this.peek().text + '不是一个正确的表达式');
         }
         var next;
         //有可能出现取属性：[1,2][0]，{key:value}[key]，a.b.c
@@ -249,7 +249,7 @@ extend(AST.prototype, {
                 }
             } else {
                 //如果以上所有情况都不符合，则判定当前表达式不正确
-                throw new Error(next.text + '不是一个正确的表达式');
+                throwError(next.text + '不是一个正确的表达式');
             }
         }
         return primary;
@@ -293,7 +293,7 @@ extend(AST.prototype, {
                 } else if (this.peek().identifier) {
                     property.key = this.identifier();
                 } else {
-                    throw new Error(this.peek().text + ' 不能作为一个标识符或属性名');
+                    throwError(this.peek().text + ' 不能作为一个标识符或属性名');
                 }
                 this.consume(':');
                 property.value = this.expression();
@@ -314,7 +314,7 @@ extend(AST.prototype, {
                 value: token.text
             }
         }
-        throw new Error(token.text + ' 不能作为一个标识符或属性名');
+        throwError(token.text + ' 不能作为一个标识符或属性名');
     },
     constant: function() {
         return {
@@ -362,7 +362,7 @@ extend(AST.prototype, {
             var token = this.expect(e1);
             if (token) return token;
         }
-        throw new Error('解析表达式出错，' + this.text + ' 中缺少' + e1);
+        throwError('解析表达式出错，' + this.text + ' 中缺少' + e1);
     },
     constants: {
         'true': {

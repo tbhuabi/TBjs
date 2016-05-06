@@ -63,7 +63,7 @@ extend(Lexer.prototype, {
                     this.index += token.length;
                 } else {
                     //如果以上条件都不符合，则断定为当前不是一个合法的表达式
-                    throw new Error(this.text + '不是一个合法的表达式');
+                    throwError(this.text + '不是一个合法的表达式');
                 }
             }
         }
@@ -97,10 +97,10 @@ extend(Lexer.prototype, {
             if (currentText === '.') {
                 //如果是以小数点开头，
                 if (!this.isNumber(this.peek())) {
-                    throw new Error('解析数字' + value + '出错，.后面不能为' + this.peek());
+                    throwError('解析数字' + value + '出错，.后面不能为' + this.peek());
                 }
                 if (appearedDot) {
-                    throw new Error('解析数字' + value + '出错，后面不能为.');
+                    throwError('解析数字' + value + '出错，后面不能为.');
                 }
                 value += currentText;
                 appearedDot = true;
@@ -119,7 +119,7 @@ extend(Lexer.prototype, {
                     //如果当前是+-号，
                     //并且没有下一位，或者且下一位不是数字，并且当前值的最后一位是e，则断定数字解析出错
                     //这里只能是+-号，因为数字会走前面的分支
-                    throw new Error(value + currentText + '不是一个正确的数字')
+                    throwError(value + currentText + '不是一个正确的数字')
                 } else {
                     break;
                 }
@@ -159,7 +159,7 @@ extend(Lexer.prototype, {
                         value += String.fromCharCode(parseInt(hexCode, 16));
                         this.index += 4; //加4是因为后面的this.index++
                     } else {
-                        throw new Error('转义\\' + hexCode + '失败，或者\\' + hexCode + '不是一个合法的nuicode字符');
+                        throwError('转义\\' + hexCode + '失败，或者\\' + hexCode + '不是一个合法的nuicode字符');
                     }
                 } else {
                     value += ESCAPE[currentText] || currentText;

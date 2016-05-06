@@ -49,6 +49,7 @@ angular各种好，但2.0跳崖式升级，想必大家的有所诟病，另外�
 
 例用范例：
 -----------------------------------
+**以下demo是当前开发进度下可能的预览，正式发布时可能有所更改**
 ##### 注册一个应用
 ```javascript
 var TB = require('TBjs');
@@ -59,13 +60,13 @@ TBjs的service跟angular不同，TBjs对service的定义是当调用某个已注
 虽然你也可以通过service的返回值来返回一个常量，但并不推荐这么做。
 service方法会跟据不同的返回值，做出不同的响应，为了防止迷惑，把所有可能的情况列举如下：
 
-* 返回一个常量
+###### 返回一个常量
 ```javascript
 myApp.service('serviceA', function() {
     return 'a';
 })
 ```
-* 返回一个对象
+###### 返回一个对象
 ```javascript
 myApp.service('serviceB', function() {
     return {
@@ -74,7 +75,7 @@ myApp.service('serviceB', function() {
     }
 })
 ```
-* 返回一个对象，并提供一个$get方法
+###### 返回一个对象，并提供一个$get方法
 
 如果返回一个对象，并且有$get方法，那么在module中，service会注入$get方法的返回值
 
@@ -90,7 +91,8 @@ myApp.service('serviceC', function() {
         }
     }
 })
-* 返回一个构造函数
+```
+######  返回一个构造函数
 如果service返回的是一个函数，那么这个函数一定会被当成一个构造函数来调用，如果使用中确实须要返回一个函数，请通过$get方法返回
 
 ```javascript
@@ -101,7 +103,7 @@ myApp.service('serviceD', function() {
     }
 })
 ```
-* 返回一个构造函数，如果实例化后有$get方法，那么在module中，service会注入$get方法的返回值
+######  返回一个构造函数，如果实例化后有$get方法，那么在module中，service会注入$get方法的返回值
 ```javascript
 myApp.service('serviceE', function() {
     return function() {
@@ -114,7 +116,7 @@ myApp.service('serviceE', function() {
     }
 })
 ```
-* service中的依赖注入
+######  service中的依赖注入
 依赖注入同angular一样，以数组的方式传入，最后一个元素为函数，函数参数会按照数组的书写顺序依次传入
 ```javascript
 myApp.service('serviceF', ['serviceA', 'serviceB',
@@ -124,186 +126,70 @@ myApp.service('serviceF', ['serviceA', 'serviceB',
 ])
 ```
 
+##### 给myApp注册指令
 
-基本成型模块简介：
------------------------------------
+指令是指在DOM元素中的一些有特殊行为的属性，TBjs的指令和Angular的指令不同，demo如下：
 
-#### xmlEngine 
-
-主要实现把一个html字符串解析成一个类dom树，并附带常用方法，能让后台调用dom的标准方法，方法列表如下：
-- 根节点
-	* 属性 
-		- `$XMLContent` 构建dom树传入的字符串
-		- `$ENGINE` 私有属性
-		- `nodeType`
-		- `parentNode`
-		- `innerHTML`
-		- `innerText`
-		- `outerHTML`
-		- `classList`
-		- `className`
-		- `childNodes`
-		- `children`
-		- `eventListener`
-	* 方法
-		- `$XMLBuilder`私有方法
-		- `$XMLEngine`私有方法
-		- `$refresh`私有方法
-		- `createComment`
-		- `createElement`
-		- `createTextNode`
-		- `getElementById`
-		- `getElementsByName`
-		- `appendChild`
-		- `getElementsByClassName`
-		- `getElementsByTagName`
-		- `insertBefore`
-		- `removeChild`
-		- `getAttribute`
-		- `hasAttribute`
-		- `removeAttribute`
-		- `setAttribute`
-		- `querySelector`
-		- `querySelectorAll`
-		- `setInnerHtml`
-		- `addEventListener`
-		- `removeEventListener`
-		- `getInnerHtml`
-		- `getInnerText`
-		- `getOuterHtml`
-- 双标签节点
-	* 属性
-		- `$ENGINE`私有属性
-		- `tagName`
-		- `nodeName`
-		- `parentNode`
-		- `innerHTML`
-		- `id`
-		- `innerText`
-		- `outerHTML`
-		- `classList`
-		- `className`
-		- `attributes`
-		- `eventListener`
-	* 方法
-		- `$refresh`私有方法
-		- `appendChild`
-		- `getElementsByClassName`
-		- `getElementsByTagName`
-		- `insertBefore`
-		- `removeChild`
-		- `getAttribute`
-		- `hasAttribute`
-		- `setAttribute`
-		- `removeAttribute`
-		- `querySelector`
-		- `querySelectorAll`
-		- `setInnerHtml`
-		- `addEventListener`
-		- `removeEventListener`
-		- `getInnerHtml`
-		- `getInnerText`
-		- `getOuterHtml`
-- 单标签节点
-	* 属性
-		- `$ENGINE`私有属性
-		- `tagName`
-		- `nodeName`
-		- `nodeType`
-		- `parentNode`
-		- `innerHTML`
-		- `innerText`
-		- `outerHTML`
-		- `id`
-		- `classList`
-		- `className`
-		- `attributes`
-		- `eventListener`
-	* 方法
-		- `$refresh`私有方法
-		- `getAttribute`
-		- `setAttribute`
-		- `removeAttribute`
-		- `hasAttribute`
-		- `querySelector`
-		- `querySelectorAll`
-		- `setInnerHtml`
-		- `addEventListener`
-		- `removeEventListener`
-		- `getInnerHtml`
-		- `getInnerText`
-		- `getOuterHtml`
-- 文本节点
-	* 属性
-		- `$ENGINE`私有属性
-		- `parentNode`
-		- `nodeType`
-		- `innerHTML`
-		- `innerText`
-		- `outerHTML`
-		- `eventListener`
-	* 方法
-		- `$refresh`私有方法
-		- `addEventListener`
-		- `removeEventListener`
-		- `getInnerHtml`
-		- `getInnerText`
-		- `getOuterHtml`
-- 注释节点
-	* 属性
-		- `$ENGINE`私有属性
-		- `parentNode`
-		- `nodeType`
-		- `innerHTML`
-		- `innerText`
-		- `outerHTML`
-	* 方法
-		- `getInnerHtml`
-		- `getInnerText`
-		- `getOuterHtml`
-			
-##### 使用说明：
-所有的属性都是只读的，要更改属性需调用相对应的方法，更快捷的操作是通过`query`模块来包装，就可以像jQuery一样来操作虚拟dom，demo如下：
 ```javascript
-// 虚拟dom使用示例
-var $ = require('query');
-var XMLEngine = require('xmlEngine');
-var document = new XMLEngine('htmlText');
-var box = document.getElementById('#box');
-box.addEventListener('click', function(){
-	this.setAttribute('class', 'container');
-}, false);
-
-//通过query模块包装后的示例
-//注意此处，query模块如果直接传入选择器，会默认使用全局的document，也就是说，在浏览器端，也是可以像jQuery一样使用的
-$('#box').on('click',function(){
-	$(this).addClass('container');
-})
-
-//也可以这样
-
-$(document).find('#box').on('click',function(){
-	$(this).addClass('container');
-})
-
+myApp.directive('myDirective', function() {
+    return function(data, virtualDom, services) {
+        //your code
+    }
+});
 ```
+或者
+```javascript
+myApp.directive('myDirective', function() {
+    return {
+        priority: 0,
+        controller: function(data, virtualDom, services) {
+            //your code
+        }
+    }
+});
+```
+参数说明：
+* data：当前作用域的数据对象
+* virtualDom：应用当前指令的虚拟dom
+* services：当前指令所属application的服务集合
+如果直接返回一个函数，TBjs会把这个函数当作`controller`来使用，并传入相应函数，但指令应用执行的优先级交由TBjs自动处理。
+如果返回的是一个对象，TBjs会跟据这个对象的`priority`属性的值来确定优先级，并根据对应优先级来调用`controller`函数。
+指令优先级顺序在TBjs开发完成后，将会在文档中公布。
 
-#### query
+##### 给myApp注册模块
 
-一个类jQuery的库，使用方法和jQuery基本一致，主要实现兼容浏览器端的常用dom操作和虚拟dom的快捷操作，如选择器、事件绑定解绑和委托、属性操作等。
-方法：
-- `find`
-- `on`
-- `off`
-- `one`
-- `trigger`
-- `addClass`
-- `removeClass`
-- `hasClass`
-- `each`
-- `attr`
-- `html`
+TBjs的模块是一个包含数据模型，视图模板的集合，有点类似于Angular中controller和direcitve的一部分，更像是React中component的概念，demo如下：
 
+如果直接返回一个函数，那么这个函数将会被当做构造函数来调用，并传入当前module所属的已实例化的application的服务的集合
+```javascript
+myApp.module('myModule', function() {
+    return function(services) {
+        this.name = '张三';
+        this.age = 24;
+        var _this = this;
+        this.changeName = function() {
+            _this.name = '李四';
+        }
+    }
+})
+```
+或者这样
+```javascript
+myApp.module('myModule', function() {
+    return {
+        template: '一个模板字符串',
+        templateUrl: '一个模板字符串的url地址',
+        model: function(services) {
+            this.name = '张三';
+            this.age = 24;
+            var _this = this;
+            this.changeName = function() {
+                _this.name = '李四';
+            }
+        }
+    }
+})
+```
 
 		
 			

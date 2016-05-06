@@ -27,40 +27,23 @@ angular各种好，但2.0跳崖式升级，想必大家的有所诟病，另外�
 * `classes`		源码目录
 	- `TBjs.js`		框架主文件
 	- `src`			框架源文件
-		amd.js
-		: 类requirejs的AMD模块化框架
-		ast.js
-		: 构建抽象语法树
-		bootstrap.js
-		: 启动已注册的应用
-		compiler.js
-		: 编译需要实例化的应用
-		directive.js
-		: 指令提供者
-		http.js
-		: 数据交互模块
-		lexer.js
-		: 模板语法，词法分析器
-		main.js
-		: 注册应用的入口
-		module.js
-		: MVC模块提供者
-		parse.js
-		: 解析模板语法的入口
-		promise.js
-		: 异步回调金字塔解决方案
-		query.js
-		: 类jQuery的DOM及虚拟DOM的类库
-		scope.js
-		: 构建模块作用域
-		service.js
-		: 服务提供者
-		toolkit.js
-		: 工具函数集合
-		value.js
-		: 根据当前作用域，求出模板表达式的值
-		xmlEngine.js
-		: 虚拟DOM引擎
+		+ `amd.js`  类requirejs的AMD模块化框架
+		+ `ast.js`  构建抽象语法树
+		+ `bootstrap.js`  启动已注册的应用
+		+ `compiler.js`  编译需要实例化的应用
+		+ `directive.js`  指令提供者
+		+ `http.js`  数据交互模块
+		+ `lexer.js`  模板语法，词法分析器
+		+ `main.js`  注册应用的入口
+		+ `module.js`  MVC模块提供者
+		+ `parse.js`  解析模板语法的入口
+		+ `promise.js`  异步回调金字塔解决方案
+		+ `query.js`  类jQuery的DOM及虚拟DOM的类库
+		+ `scope.js`  构建模块作用域
+		+ `service.js`  服务提供者
+		+ `toolkit.js`  工具函数集合
+		+ `value.js`  根据当前作用域，求出模板表达式的值
+		+ `xmlEngine.js`  虚拟DOM引擎
 * `test.html`	测试文件
 
 

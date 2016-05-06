@@ -47,6 +47,83 @@ angular各种好，但2.0跳崖式升级，想必大家的有所诟病，另外�
 * `test.html`	测试文件
 
 
+例用范例：
+-----------------------------------
+##### 注册一个应用
+```javascript
+var TB = require('TBjs');
+var myApp = TB.app('myApplication');
+```
+##### 给myApp注册通用服务
+TBjs的service跟angular不同，TBjs对service的定义是当调用某个已注册的服务时，一定会更新视图或数据，当使用时需要一些公共的字面量或函数时，推荐用AMD或commonjs规范，通过require函数来引入，这样可以保证服务的单一性，以降低复杂度。
+虽然你也可以通过service的返回值来返回一个常量，但并不推荐这么做。
+service方法会跟据不同的返回值，做出不同的响应，为了防止迷惑，把所有可能的情况列举如下：
+
+* 返回一个常量
+```javascript
+myApp.service('serviceA', function() {
+    return 'a';
+})
+```
+* 返回一个对象
+```javascript
+myApp.service('serviceB', function() {
+    return {
+        name: '张三',
+        age: 24
+    }
+})
+```
+* 返回一个对象，并提供一个$get方法
+
+如果返回一个对象，并且有$get方法，那么在module中，service会注入$get方法的返回值
+
+```javascript
+
+myApp.service('serviceC', function() {
+    return {
+        $get: function() {
+            return {
+                name: '张三',
+                age: 24,
+            }
+        }
+    }
+})
+* 返回一个构造函数
+如果service返回的是一个函数，那么这个函数一定会被当成一个构造函数来调用，如果使用中确实须要返回一个函数，请通过$get方法返回
+
+```javascript
+myApp.service('serviceD', function() {
+    return function() {
+        this.name = '张三';
+        this.age = 24;
+    }
+})
+```
+* 返回一个构造函数，如果实例化后有$get方法，那么在module中，service会注入$get方法的返回值
+```javascript
+myApp.service('serviceE', function() {
+    return function() {
+        this.$get = function() {
+            return {
+                name: '张三',
+                age: 24,
+            }
+        }
+    }
+})
+```
+* service中的依赖注入
+依赖注入同angular一样，以数组的方式传入，最后一个元素为函数，函数参数会按照数组的书写顺序依次传入
+```javascript
+myApp.service('serviceF', ['serviceA', 'serviceB',
+    function(serviceA, serviceB) {
+		//your code
+    }
+])
+```
+
 
 基本成型模块简介：
 -----------------------------------

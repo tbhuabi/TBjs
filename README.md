@@ -154,6 +154,7 @@ myApp.directive('myDirective', function() {
 * data：当前作用域的数据对象
 * virtualDom：应用当前指令的虚拟dom
 * services：当前指令所属application的服务集合
+
 如果直接返回一个函数，TBjs会把这个函数当作`controller`来使用，并传入相应函数，但指令应用执行的优先级交由TBjs自动处理。  
 
 如果返回的是一个对象，TBjs会跟据这个对象的`priority`属性的值来确定优先级，并根据对应优先级来调用`controller`函数。

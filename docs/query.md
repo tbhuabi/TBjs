@@ -19,15 +19,44 @@ var $elements = ('div p>a.link[href=www.github.com]');
 ```
 如果要操作虚拟dom，因时间问题，当前实现的选择器有，可以自由组合
 
-|传入参数	|说明		|
-|--|--|
-|`.class`		|类选择器|
-|`#box	`	|id选择器|
-|`div	`	|标签选择器|
-|`[href] `或 `[href=www.github.com]` 或 `[href='www.github.com']`	|属性选择器|
-|`:first-child`	|第一个子元素|
-|`:last-child`	|	最后一个子元素|
-|`+p`		|兄弟节点|
+<table>
+	<thead>
+		<tr>
+			<th>传入参数</th>
+			<th>说明</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>.class</td>
+			<td>类选择器</td>
+		</tr>
+		<tr>
+			<td>#box</td>
+			<td>id选择器</td>
+		</tr>
+		<tr>
+			<td>div</td>
+			<td>标签选择器</td>
+		</tr>
+		<tr>
+			<td>[href]或 [href=www.github.com] 或 [href='www.github.com']</td>
+			<td>属性选择器</td>
+		</tr>
+		<tr>
+			<td>:first-child</td>
+			<td>第一个子元素</td>
+		</tr>
+		<tr>
+			<td>:last-child</td>
+			<td>最后一个子元素</td>
+		</tr>
+		<tr>
+			<td>+p</td>
+			<td>兄弟节点</td>
+		</tr>
+	</tbody>
+</table>
 
 当然也少不了`find`方法：
 

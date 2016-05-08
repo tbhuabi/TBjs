@@ -3,7 +3,13 @@ TBjs开发文档
 关于我：
 ------------------------
 QQ：464328895 
-由于本人能力有限，且读书少，英语更是烂上加烂，所以希望有兴趣的童鞋一起参于开发
+由于本人能力有限，且读书少，英语更是烂上加烂，所以希望有兴趣的童鞋一起参于开发。
+
+#### 部分文档
+
+* [query.js](https://github.com/18616392776/TBjs/blob/master/docs/query.md)一个兼容DOM和虚拟DOM的类jQuery工具库 
+* [xmlEngine.js](https://github.com/18616392776/TBjs/blob/master/docs/xmlEngine.md)虚拟DOM
+
 
 
 #### 当前前端框架及类库的一些限制（见识所限，难免谬误）：

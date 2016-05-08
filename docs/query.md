@@ -1,6 +1,6 @@
 query.js简介
 ====================
-query.js是TBjs框架的一部分，主要是实现兼容dom及虚拟dom（查看虚拟dom文档，请[点我](../)）的快捷dom操作，api也基本和jQuery保持一致，但并不等同于jQuery，也并没有全部实现jQuery中的方法。当前已的API及demo示例如下。
+query.js是TBjs框架的一部分，主要是实现兼容dom及虚拟dom（查看虚拟dom文档，请[点我](https://github.com/18616392776/TBjs/blob/master/docs/xmlEngine.md)）的快捷dom操作，api也基本和jQuery保持一致，但并不等同于jQuery，也并没有全部实现jQuery中的方法。当前已的API及demo示例如下。
 
 请先点击右侧的download按扭，下载整个项目，然后打开`test.html`，添加如下代码。
 
@@ -18,16 +18,16 @@ var $div = $('div');
 var $elements = ('div p>a.link[href=www.github.com]');
 ```
 如果要操作虚拟dom，因时间问题，当前实现的选择器有，可以自由组合
-|传入参数	|说明		|
-|:--:|:--:|
 
-|.class		|类选择器|
-|#box		|id选择器|
-|div		|标签选择器|
-|[href] 或 [href=www.github.com] 或 [href='www.github.com']	|属性选择器|
-|:first-child	|第一个子元素|
-|:last-child	|	最后一个子元素|
-|+p		|兄弟节点|
+|传入参数	|说明		|
+|--|--|
+|`.class`		|类选择器|
+|`#box	`	|id选择器|
+|`div	`	|标签选择器|
+|`[href] `或 `[href=www.github.com]` 或 `[href='www.github.com']`	|属性选择器|
+|`:first-child`	|第一个子元素|
+|`:last-child`	|	最后一个子元素|
+|`+p`		|兄弟节点|
 
 当然也少不了`find`方法：
 

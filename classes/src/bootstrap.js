@@ -1,18 +1,9 @@
 var bootstrap = function(element, modules) {
     var applicationsInstance = {};
     var XmlEngine = (new $XmlEngineProvider()).$get();
-    var vDomElements = [];
-    var findTbModuleElement = function(element) {
-        if (element.nodeType === ELEMENT_NODE_TYPE && element.getAttribute('tb-module')) {
-            var vDom = new XmlEngine('');
-            createDomMap(element, vDom, vDom);
-            vDomElements.push(vDom);
-            return;
-        }
-        forEach(element.childNodes, function(ele) {
-            findTbModuleElement(ele);
-        })
-    };
+
+    var vDom = new XmlEngine('');
+    vDom.$targetElement = element;
     var createDomMap = function(element, context, vDom) {
         var attributes = element.attributes;
         var currentVDom;
@@ -34,11 +25,9 @@ var bootstrap = function(element, modules) {
             currentVDom = vDom.createComment(element.textContent);
             context.appendChild(currentVDom);
         }
+        currentVDom.$targetElement = element;
     };
-
-
-    findTbModuleElement(element)
-
+    createDomMap(element, vDom, vDom);
 
     modules.forEach(function(appName) {
         var app = applications[appName]
@@ -57,7 +46,8 @@ var bootstrap = function(element, modules) {
         applicationsInstance[appName] = {
             services: servicesCache,
             modules: modulesCache,
-            directives: directivesCache
+            directives: directivesCache,
+            virtualDom: vDom
         };
 
         var $services = app.$services;
@@ -108,17 +98,17 @@ var bootstrap = function(element, modules) {
             modulesCache[key] = new $ModuleProvider(appName, $directives[key]);
         }
 
-        forEach(vDomElements, function(vDom) {
-            var moduleName = vDom.children[0].getAttribute('tb-module');
-            if (moduleName) {
-                if (!modulesCache[moduleName]) {
-                    throwError(moduleName + '模块未注册');
-                }
-                applicationsInstance[appName].virtualDom = vDom;
-            } else {
-                throwError('指令tb-module必须指定一个模块名！');
-            }
-        })
+        //        forEach(vDomElements, function(vDom) {
+        //            var moduleName = vDom.children[0].getAttribute('tb-module');
+        //            if (moduleName) {
+        //                if (!modulesCache[moduleName]) {
+        //                    throwError(moduleName + '模块未注册');
+        //                }
+        //                applicationsInstance[appName].virtualDom = vDom;
+        //            } else {
+        //                throwError('指令tb-module必须指定一个模块名！');
+        //            }
+        //        })
         console.log(applicationsInstance);
     };
 };

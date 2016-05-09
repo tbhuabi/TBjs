@@ -52,14 +52,20 @@
                     }
                 }
             });
-            TB.bootstrap(document.body, ['app']);
-            console.log(app)
+            var app2 = TB.app('app2');
+            app2.service('a', function() {
+                return 'aaaaaaaaaaa33'
+            }).module('myModule2', function() {
+                this.bbb = 'bbb'
+            })
+            TB.bootstrap(document.body, ['app','app2']);
+            //console.log(app)
         }
     </script>
 </head>
 
 <body>
-    <div tb-module="myModule">
+    <div tb-module="myModule2">
         <div>{{name}}</div>
         <div>{{age}}</div>
         <!--      fdsafdsa  -->
@@ -67,8 +73,8 @@
         <app>fdsfa</app>
     </div>
     <input type="text">
-    <input type="checkbox">
-    <div></div>
+    <input type="checkbox" checked>
+    <div tb-module="myModule2"></div>
 </body>
 
 </html>

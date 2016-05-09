@@ -641,6 +641,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
     function DocumentEngine(htmlContent) {
         if (!(this instanceof DocumentEngine)) return new DocumentEngine(htmlContent);
         this.$XMLContent = htmlContent;
+        this.$targetElement = null;
         this.nodeType = DOCUMENT_NODE_TYPE;
         this.parentNode = null;
         this.innerHTML = '';
@@ -699,6 +700,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
     //单标签元素构造函数
 
     function OddElement(tagName) {
+        this.$targetElement = null;
         this.tagName = this.nodeName = tagName.toUpperCase();
         this.nodeType = ELEMENT_NODE_TYPE;
         this.parentNode = null;
@@ -719,6 +721,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
 
     //双标签元素构造函数
     function EvenElement(tagName) {
+        this.$targetElement = null;
         this.tagName = this.nodeName = tagName.toUpperCase();
         this.nodeType = ELEMENT_NODE_TYPE;
         this.parentNode = null;
@@ -740,6 +743,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
 
     //文本节点构造函数
     function TextElement(text) {
+        this.$targetElement = null;
         this.parentNode = null;
         this.nodeType = TEXT_NODE_TYPE;
         this.nodeName = '#text';
@@ -751,6 +755,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
 
 
     function CommentElement(commentText) {
+        this.$targetElement = null;
         this.parentNode = null;
         this.nodeType = COMMENT_NODE_TYPE;
         this.nodeName = '#comment';

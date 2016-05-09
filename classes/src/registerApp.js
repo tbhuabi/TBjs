@@ -7,19 +7,14 @@ var $AppProvider = function $AppProvider() {
     };
 
     function App(appName, dependence) {
-        var instanceApp = new App.prototype.$init(appName, dependence);
-        applications[appName] = instanceApp;
-        return instanceApp;
+        if (!(this instanceof App)) return new App(appName, dependence);
+        applications[appName] = this;
 
-    }
-    App.prototype.$init = function(appName, dependence) {
         this.$appName = appName;
         this.$modules = {};
         this.$directives = {};
         this.$services = {};
-    };
-
-    App.prototype.$init.prototype = App.prototype;
+    }
     extend(App.prototype, {
         module: function(moduleName, factoryFunction) {
             this.$modules[moduleName] = factoryFunction;

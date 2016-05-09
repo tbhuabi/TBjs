@@ -14,7 +14,7 @@
     <script src="classes/src/service.js"></script>
     <script src="classes/src/directive.js"></script>
     <script src="classes/src/module.js"></script>
-    <script src="classes/src/main.js"></script>
+    <script src="classes/src/registerApp.js"></script>
     <script src="classes/src/bootstrap.js"></script>
     <script src="classes/TBjs.js"></script>
 
@@ -27,6 +27,12 @@
 
     <script>
         window.onload = function() {
+
+            var domEngine = new $XmlEngineProvider().$get();
+//            var vDom = domEngine('<input type="checkbox" checked>');
+            var vDom = domEngine(document.body.innerHTML);
+            console.log(vDom);
+			document.body.innerHTML=vDom.innerHTML;
 
             var app = TB.app('app');
             app.service('a', function() {
@@ -58,7 +64,7 @@
             }).module('myModule2', function() {
                 this.bbb = 'bbb'
             })
-            TB.bootstrap(document.body, ['app','app2']);
+            TB.bootstrap(document.body, ['app', 'app2']);
             //console.log(app)
         }
     </script>

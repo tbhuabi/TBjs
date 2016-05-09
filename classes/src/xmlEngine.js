@@ -158,30 +158,20 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
             this.$refresh();
         },
         setAttribute: function(attributes, value) {
-            if (isString(attributes)) {
-                for (var i = 0, len = this.attributes.length; i < len; i++) {
-                    if (this.attributes[i].name === attributes) {
-                        this.attributes[i].value = value;
-                        this.className = this.getAttribute('class');
-                        this.classList = this.className.match(/\S+/g) || [];
-                        this.id = this.getAttribute('id');
-                        this.$refresh();
-                        return;
-                    }
+            var item;
+            for (var i = 0, len = this.attributes.length; i < len; i++) {
+                if (this.attributes[i].name === attributes) {
+                    item = this.attributes[i];
+                    break;
                 }
-                var obj = {};
-                obj.name = attributes;
-                obj.value = value;
-                this.attributes.push(obj);
-            } else if (isObject(attributes)) {
-                for (var i in attributes) {
-                    if (!this.hasAttribute(i)) {
-                        this.attributes.push({
-                            name: i,
-                            value: attributes[i]
-                        })
-                    }
-                }
+            }
+            if (!item) {
+                item = {};
+                this.attributes.push(item);
+            }
+            item.name = attributes;
+            if (!isUndefined(value)) {
+                item.value = value;
             }
             this.className = this.getAttribute('class');
             this.classList = this.className.match(/\S+/g) || [];
@@ -599,17 +589,15 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
                 var attrStr = currentString.replace(GET_TAG_ATTRIBUTES_REG, '');
                 var attrbutes = attrStr.match(MATCH_ATTRIBUTE_REG);
                 if (attrbutes) {
-                    var attrbutesObj = {};
                     attrbutes.filter(function(item) {
                         item = trim(item);
                         item.replace(SPLIT_ATTRIBUTE_REG, function(str, $1, $2) {
                             if ($2) {
                                 $2 = $2.replace(TRIM_QUOTE_REG, '');
                             }
-                            attrbutesObj[$1] = $2;
+                            currentElement.setAttribute($1, $2);
                         })
                     })
-                    currentElement.setAttribute(attrbutesObj);
                 }
                 parentNode.appendChild(currentElement);
                 i++;

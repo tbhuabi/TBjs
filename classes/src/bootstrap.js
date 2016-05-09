@@ -97,18 +97,5 @@ var bootstrap = function(element, modules) {
         for (var key in $modules) {
             modulesCache[key] = new $ModuleProvider(appName, $directives[key]);
         }
-
-        //        forEach(vDomElements, function(vDom) {
-        //            var moduleName = vDom.children[0].getAttribute('tb-module');
-        //            if (moduleName) {
-        //                if (!modulesCache[moduleName]) {
-        //                    throwError(moduleName + '模块未注册');
-        //                }
-        //                applicationsInstance[appName].virtualDom = vDom;
-        //            } else {
-        //                throwError('指令tb-module必须指定一个模块名！');
-        //            }
-        //        })
-        console.log(applicationsInstance);
     };
 };

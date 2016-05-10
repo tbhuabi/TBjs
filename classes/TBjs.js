@@ -3,5 +3,8 @@ var TB = {
     app: $AppProvider().$get(),
     $http: $HttpProvider().$get(),
     $: $QueryProvider().$get(),
-    bootstrap: bootstrap
+    bootstrap: function(element, applications) {
+        var TBjsInit = injector($provider.bootstrap.instance.$get());
+        TBjsInit(element, applications);
+    }
 };

@@ -12,7 +12,7 @@ var ESCAPE = {
     "'": "'",
     '"': '"'
 };
-
+var lexerMinErr = minErr('Lexer');
 
 function Lexer() {}
 
@@ -63,7 +63,7 @@ extend(Lexer.prototype, {
                     this.index += token.length;
                 } else {
                     //如果以上条件都不符合，则断定为当前不是一个合法的表达式
-                    throwError(this.text + '不是一个合法的表达式');
+                    throw lexerMinErr('lexer', '{0}不是一个合法的表达式', this.text);
                 }
             }
         }
@@ -97,10 +97,10 @@ extend(Lexer.prototype, {
             if (currentText === '.') {
                 //如果是以小数点开头，
                 if (!this.isNumber(this.peek())) {
-                    throwError('解析数字' + value + '出错，.后面不能为' + this.peek());
+                    throw lexerMinErr('readNumber', '解析数字{0}出错，.后面不能为{1}！', value, this.peek());
                 }
                 if (appearedDot) {
-                    throwError('解析数字' + value + '出错，后面不能为.');
+                    throw lexerMinErr('readNumber', '解析数字{0}' + value + '出错，后面不能为.！', value);
                 }
                 value += currentText;
                 appearedDot = true;
@@ -119,7 +119,7 @@ extend(Lexer.prototype, {
                     //如果当前是+-号，
                     //并且没有下一位，或者且下一位不是数字，并且当前值的最后一位是e，则断定数字解析出错
                     //这里只能是+-号，因为数字会走前面的分支
-                    throwError(value + currentText + '不是一个正确的数字')
+                    throw lexerMinErr('readNumber', '{0}{1}不是一个正确的数字！', value, currentText);
                 } else {
                     break;
                 }
@@ -159,7 +159,7 @@ extend(Lexer.prototype, {
                         value += String.fromCharCode(parseInt(hexCode, 16));
                         this.index += 4; //加4是因为后面的this.index++
                     } else {
-                        throwError('转义\\' + hexCode + '失败，或者\\' + hexCode + '不是一个合法的nuicode字符');
+                        throw lexerMinErr('readString', '转义\\{0}失败，或者\\{0}不是一个合法的nuicode字符', hexCode);
                     }
                 } else {
                     value += ESCAPE[currentText] || currentText;

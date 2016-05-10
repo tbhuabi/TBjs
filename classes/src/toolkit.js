@@ -1,18 +1,41 @@
+function minErr(module) {
+    return function() {
+        var args = arguments;
+        var code = args[0];
+        var template = args[1];
+        var msg = '[' + (module ? module + ':' : '') + code + ']  ';
+        var index = 0;
+        msg += template.replace(/\{(\d+)\}/g, function(str, $1) {
+            index = +$1;
+            return args[index + 2] ? args[index + 2] : str;
+        })
+
+        msg += '\nhttp://www.TBjs.org?' + module + '=' + code;
+        //        var params = [];
+        //        index += 2;
+        //        for (; index < args.length; index++) {
+        //            params.push(msg + '#/?' + encodeURIComponent(args[index]));
+        //        }
+        //        if (params.length) {
+        //            msg += params.join('');
+        //        }
+        return new Error(msg);
+    }
+}
+
+
 function isType(type) {
     return function(obj) {
         return {}.toString.call(obj) == '[object ' + type + ']';
     }
 };
-
 var isObject = isType('Object');
 var isString = isType('String');
 var isArray = Array.isArray || isType('Array');
 var isFunction = isType('Function');
 var isUndefined = isType('Undefined');
 
-var throwError = function(errorMsg) {
-    throw new Error(errorMsg);
-};
+
 
 var trim = function(str) {
     return str.replace(/^\s+|\s+$/g, '');

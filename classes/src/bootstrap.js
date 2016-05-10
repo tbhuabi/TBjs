@@ -1,4 +1,7 @@
 var bootstrap = function(element, modules) {
+
+    var bootstrapMinErr = minErr('bootstrap');
+
     var applicationsInstance = {};
     var XmlEngine = (new $XmlEngineProvider()).$get();
 
@@ -32,7 +35,7 @@ var bootstrap = function(element, modules) {
     modules.forEach(function(appName) {
         var app = applications[appName]
         if (!app) {
-            throwError('模块' + appName + '未注册');
+            throw bootstrapMinErr('initiation', '模块{0}未注册', appName);
         }
         initModule(app, appName);
     })
@@ -66,7 +69,7 @@ var bootstrap = function(element, modules) {
                     args.push(serviceInstance.$get());
                 } else {
                     if (!$services[key]) {
-                        throwError('应用：' + appName + '中，service：' + key + '未注册');
+                        throw bootstrapMinErr('injector','应用：{0}中，service：{1}未注册！',appName,key);
                     }
                     var serviceProvider = createInjector($services[key]);
                     servicesCache[key] = serviceProvider;

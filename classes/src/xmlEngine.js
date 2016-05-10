@@ -4,6 +4,7 @@ var COMMENT_NODE_TYPE = 8;
 var DOCUMENT_NODE_TYPE = 9;
 
 var $XmlEngineProvider = function $XmlEngineProvider() {
+    var xmlMinErr = minErr('$XmlEngine');
     this.$get = function() {
         return DocumentEngine;
     };
@@ -310,7 +311,7 @@ var $XmlEngineProvider = function $XmlEngineProvider() {
 
                 }
                 if (selector === nextSelector) {
-                    throwError(selector + '不是一个正确的选择器！');
+                    throw xmlMinErr('qureySelectorAll', '{0}不是一个正确的选择器！', selector);
                 }
                 parentElements = unique(parentElements);
                 if (nextSelector) {

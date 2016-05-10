@@ -18,6 +18,8 @@ AST.Property = 'Property'; //属性表达式
 AST.ObjectExpression = 'ObjectExpression'; //对象表达式
 AST.ThisExpression = 'ThisExpression'; //this表达式
 
+var astMinErr = minErr('AST');
+
 extend(AST.prototype, {
     ast: function(text) {
         this.text = text;
@@ -29,7 +31,7 @@ extend(AST.prototype, {
 
         if (this.tokens.length !== 0) {
             //如果项目构建完，但当前的词法单元并未用完，则判定当前表达式不正确
-            throwError('表达式：' + text + '中，' + this.tokens[0] + '没用使用');
+            throw astMinErr('ast', '表达式：{0}中，{1}没用使用', text, this.tokens[0]);
         }
         return value;
     },
@@ -221,7 +223,7 @@ extend(AST.prototype, {
             primary = this.constant();
         } else {
             //如果以上所有情况都不匹配，则判定表达式不正确
-            throwError(this.peek().text + '不是一个正确的表达式');
+            throw astMinErr('primary', '{0}不是一个正确的表达式', this.peek().text);
         }
         var next;
         //有可能出现取属性：[1,2][0]，{key:value}[key]，a.b.c
@@ -249,7 +251,7 @@ extend(AST.prototype, {
                 }
             } else {
                 //如果以上所有情况都不符合，则判定当前表达式不正确
-                throwError(next.text + '不是一个正确的表达式');
+                throw astMinErr('primary', '{0}不是一个正确的表达式', next.text);
             }
         }
         return primary;
@@ -293,7 +295,7 @@ extend(AST.prototype, {
                 } else if (this.peek().identifier) {
                     property.key = this.identifier();
                 } else {
-                    throwError(this.peek().text + ' 不能作为一个标识符或属性名');
+                    throw astMinErr('object', '{0}不能作为一个标识符或属性名！', this.peek().text);
                 }
                 this.consume(':');
                 property.value = this.expression();
@@ -314,7 +316,7 @@ extend(AST.prototype, {
                 value: token.text
             }
         }
-        throwError(token.text + ' 不能作为一个标识符或属性名');
+        throw astMinErr('identifier', '{0}不能作为一个标识符或属性名！', token.text);
     },
     constant: function() {
         return {
@@ -362,7 +364,7 @@ extend(AST.prototype, {
             var token = this.expect(e1);
             if (token) return token;
         }
-        throwError('解析表达式出错，' + this.text + ' 中缺少' + e1);
+        throw astMinErr('comsume', '解析表达式出错，{0}中缺少{1}！', this.text, e1);
     },
     constants: {
         'true': {

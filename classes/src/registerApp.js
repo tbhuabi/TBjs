@@ -13,7 +13,7 @@ var $AppProvider = function $AppProvider() {
         this.$appName = appName;
         this.$modules = {};
         this.$directives = {};
-        this.$services = {};
+        this.$provider = {};
     }
     extend(App.prototype, {
         module: function(moduleName, factoryFunction) {
@@ -24,8 +24,8 @@ var $AppProvider = function $AppProvider() {
             this.$directives[directiveName] = factoryFunction;
             return this;
         },
-        service: function(serviceName, factoryFunction) {
-            this.$services[serviceName] = factoryFunction;
+        provider: function(providerName, factoryFunction) {
+            this.$services[providerName] = factoryFunction;
             return this;
         }
     })

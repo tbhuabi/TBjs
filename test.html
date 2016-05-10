@@ -34,38 +34,6 @@
             console.log(vDom);
 			document.body.innerHTML=vDom.innerHTML;
 
-            var app = TB.app('app');
-            app.service('a', function() {
-                return 'aaaa';
-            }).service('b', ['a',
-                function(a) {
-                    return 'bbbb' + a;
-                }
-            ]).service('c', ['b',
-                function(b) {
-                    console.log(b)
-                }
-            ]).service('d', ['c',
-                function() {}
-            ]).module('myModule', function(services) {
-                this.name = 'TanBo' + services.b;
-                this.age = 34
-            }).directive('tbModule', function() {
-                return {
-                    priority: 0,
-                    controller: function(data, element, services) {
-
-                    }
-                }
-            });
-            var app2 = TB.app('app2');
-            app2.service('a', function() {
-                return 'aaaaaaaaaaa33'
-            }).module('myModule2', function() {
-                this.bbb = 'bbb'
-            })
-            TB.bootstrap(document.body, ['app', 'app2','app3']);
-            //console.log(app)
         }
     </script>
 </head>

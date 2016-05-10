@@ -1,5 +1,3 @@
-var applications = {};
-
 var TB = {
     version: '1.0.0',
     app: $AppProvider().$get(),

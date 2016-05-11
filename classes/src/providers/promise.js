@@ -1,4 +1,4 @@
-var $PromiseProvider = function $PromiseProvider() {
+function $PromiseProvider() {
 
     this.$get = function() {
         return Promise;

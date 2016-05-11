@@ -1,4 +1,4 @@
-var $QueryProvider = function $QueryProvider() {
+function $QueryProvider() {
 
     if (!(this instanceof $QueryProvider)) return new $QueryProvider();
 

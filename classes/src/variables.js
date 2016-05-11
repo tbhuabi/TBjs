@@ -4,4 +4,3 @@ var COMMENT_NODE_TYPE = 8;
 var DOCUMENT_NODE_TYPE = 9;
 
 var $provider = {};
-var injector;

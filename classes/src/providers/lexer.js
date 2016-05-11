@@ -1,4 +1,4 @@
-var $LexerProvider = function $LexerProvider() {
+function $LexerProvider() {
     this.$get = function() {
 		return Lexer;
     };

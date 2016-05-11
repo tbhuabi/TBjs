@@ -1,4 +1,4 @@
-var $CompilerProvider = function $CompilerProvider() {
+function $CompilerProvider() {
     var compileElementNode = function(elementNode) {
 
     };

@@ -1,17 +1,3 @@
-function $AppCacheProvider() {
-    var applications = {};
-    this.$get = function() {
-        return {
-            get: function(key) {
-                return applications[key];
-            },
-            set: function(key, app) {
-                applications[key] = app;
-            }
-        }
-    };
-}
-
 function $AppProvider() {
 
     if (!(this instanceof $AppProvider)) return new $AppProvider();

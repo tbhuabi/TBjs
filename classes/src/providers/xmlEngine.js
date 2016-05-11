@@ -1,4 +1,4 @@
-var $XmlEngineProvider = function $XmlEngineProvider() {
+function $XmlEngineProvider() {
     var xmlMinErr = minErr('$XmlEngine');
     this.$get = function() {
         return DocumentEngine;

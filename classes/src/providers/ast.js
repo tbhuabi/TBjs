@@ -1,4 +1,4 @@
-var $AstProvider = function $AstProvider() {
+function $AstProvider() {
     this.$get = function() {
 		return AST;
     };

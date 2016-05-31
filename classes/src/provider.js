@@ -33,5 +33,6 @@ providerCache.addProvider({
     $query: $QueryProvider,
     $registerApp: $AppProvider,
     $value: $ValueProvider,
-    $xmlEngine: $XmlEngineProvider
+    $xmlEngine: $XmlEngineProvider,
+	$directive: $DirectiveProvider
 })

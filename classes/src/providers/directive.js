@@ -1,4 +1,4 @@
-var $DirectiveProvider = function $DirectiveProvider(appName, factoryFunction) {
+function $DirectiveProvider(appName, factoryFunction) {
     this.$appName = appName;
     this.$get = function() {
         return factoryFunction();

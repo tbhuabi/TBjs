@@ -43,6 +43,7 @@ var extend = function(obj, properties) {
     for (var i in properties) {
         obj[i] = properties[i];
     }
+	return obj;
 };
 var forEach = function(arr, fn) {
     for (var i = 0, len = arr.length; i < len; i++) {

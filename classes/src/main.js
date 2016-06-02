@@ -36,6 +36,7 @@ function init(global) {
                 appCache[appName] = appCache[appName] || {};
                 var methods = appCache[appName];
                 var appInstance = {
+                    appName: appName,
                     requires: requires,
                     directive: addMethodSuffix('Directive'),
                     provider: addMethodSuffix('Provider'),
@@ -60,30 +61,25 @@ function init(global) {
             keys.forEach(function(appName) {
                 var app = appCache[appName];
                 var requires = app.requires;
-                requires.forEach(function(key) {
-                    instanceApp(key, appName);
+                requires.forEach(function(requireAppName) {
+                    injectorApp(appName, requireAppName);
                 })
+                console.log(app)
             })
         }
 
-        function instanceApp(key, appName) {
-            if (!appCache[key]) {
-                throw injectorErr('instance', '应用{0}注入依赖{1}失败，{1}未注册！', appName, key);
+        function injectorApp(appName, requireAppName) {
+            var dependApp = appCache[requireAppName];
+            if (!dependApp) {
+                throw injectorErr('instance', '应用{0}注入依赖{1}失败，{1}未注册！', appName, requireAppName);
             }
-            var dependApp = applicationsInstance[key];
-            if (dependApp) {
-                applicationsInstance[appName] = {
-                    provider: extend({}, dependApp.provider),
-                    directive: extend({}, dependApp.directive),
-                    module: extend({}, dependApp.module)
-                };
-            } else {
-                var requires = appCache[key].requires;
-                requires.forEach(function(dependKey) {
-                    instanceApp(dependKey, key);
-                })
-
-            }
+            var requires = dependApp.requires || [];
+            requires.forEach(function(key) {
+                injectorApp(requireAppName, key);
+            })
+            appCache[appName].provider = extend({}, dependApp.provider);
+            appCache[appName].directive = extend({}, dependApp.directive);
+            appCache[appName].module = extend({}, dependApp.module);
         }
     })
 }

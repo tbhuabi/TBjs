@@ -10,43 +10,39 @@ function $HttpProvider() {
         return arr.join('&');
     }
     this.$get = ['$promise', function($promise) {
-        return Http;
 
-        function Http(data) {
+        return function http(data) {
             data = data || {};
 
             data.method = data.method || 'get';
-            data.async = data.async === undefined ? true : !!data.async;
-
             var xhr = new XMLHttpRequest();
 
-            var method = _this.config[data.method.toLowerCase()];
-            for (var key in method.requestHeaders) {
-                xhr.setRequestHeader(key, method.requestHeaders[key]);
-            }
-            var paramsString = transferParams(data.params);
-            paramsString = paramsString ? '?' + paramsString : '';
+            return new $promise(function(succ, fail) {
+                var method = _this.config[data.method.toLowerCase()];
+                for (var key in method.requestHeaders) {
+                    xhr.setRequestHeader(key, method.requestHeaders[key]);
+                }
+                var paramsString = transferParams(data.params);
+                paramsString = paramsString ? '?' + paramsString : '';
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        succ(xhr.responseText);
+                    } else {
+                        fail(xhr);
+                    }
+                };
 
-            switch (data.method.toUpperCase()) {
-                case 'GET':
-                    xhr.open('GET', data.url + paramsString, data.async);
-                    xhr.send();
-                case 'POST':
-                    xhr.open('POST', data.url + paramsString, data.async);
-                    xhr.open(JSON.stringify(data.data));
-            }
+                switch (data.method.toUpperCase()) {
+                    case 'GET':
+                        xhr.open('GET', data.url + paramsString, true);
+                        xhr.send();
+                    case 'POST':
+                        xhr.open('POST', data.url + paramsString, true);
+                        xhr.open(JSON.stringify(data.data));
+                }
+
+            })
         }
-        extend(Http.prototype, {
-            success: function(data) {
-
-            },
-            error: function() {
-
-            },
-            timeout: function() {
-
-            }
-        })
     }];
     this.interceptors = [];
 

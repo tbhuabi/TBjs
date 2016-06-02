@@ -2073,6 +2073,9 @@
                 instanceInjector.invoke(fn)
             }
         });
+		setTimeout(function(){
+			console.log(instanceCache)
+		})
         return instanceInjector;
 
         function supportObject(delegate) {

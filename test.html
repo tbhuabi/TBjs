@@ -4,22 +4,22 @@
 <head>
     <!--   -->
     <meta charset="UTF-8">
-    <title>Document</title>
+    <title>tbjs</title>
 
     <script src="classes/src/toolkit.js"></script>
+	<script src="classes/src/providers/ast.js"></script>
     <script src="classes/src/variables.js"></script>
     <script src="classes/src/providers/http.js"></script>
     <script src="classes/src/providers/query.js"></script>
     <script src="classes/src/providers/xmlEngine.js"></script>
-<!--    <script src="classes/src/providers/scope.js"></script>-->
-<!--    <script src="classes/src/provider.js"></script>-->
-    <script src="classes/src/providers/directive.js"></script>
     <script src="classes/src/providers/module.js"></script>
-    <script src="classes/src/providers/registerApp.js"></script>
-    <script src="classes/src/bootstrap.js"></script>
+    <script src="classes/src/providers/compiler.js"></script>
+    <script src="classes/src/providers/lexer.js"></script>
+    <script src="classes/src/providers/model.js"></script>
+    <script src="classes/src/providers/parse.js"></script>
+    <script src="classes/src/providers/promise.js"></script>
+    <script src="classes/src/providers/value.js"></script>
     <script src="classes/src/main.js"></script>
-    <script src="classes/TBjs.js"></script>
-
     <!--    <script src="angular/angular.js"></script>-->
     <style>
         .red {
@@ -28,7 +28,10 @@
     </style>
 
     <script>
-
+		var app=TBjs.app('app',['TB'])
+		window.onload=function(){
+			TBjs.bootstrap(document.body,['app'])
+		}
     </script>
 </head>
 

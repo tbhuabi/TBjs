@@ -14,16 +14,14 @@ function init(global) {
         TB: {
             requires: [],
             provider: {
-                $astProvider: $AstProvider,
                 $compileProvider: $CompilerProvider,
                 $httpProvider: $HttpProvider,
-                $lexerProvider: $LexerProvider,
                 $modelProvider: $ModelProvider,
                 $parseProvider: $ParseProvider,
                 $promiseProvider: $PromiseProvider,
                 $queryProvider: $QueryProvider,
                 $valueProvider: $ValueProvider,
-                $xmlEngineProvider: $XmlEngineProvider,
+                $virtualDomProvider: $VirtualDomProvider,
             },
             directive: {},
             module: {}
@@ -55,27 +53,50 @@ function init(global) {
     });
     ensure(TBjs, 'bootstrap', function() {
         var applicationsInstance = {};
-        var injectorErr = minErr('injector');
+        var builderErr = minErr('builder');
 
         return function(element, keys) {
             keys.forEach(function(appName) {
                 var app = appCache[appName];
                 var requires = app.requires;
                 requires.forEach(function(requireAppName) {
-                    injectorApp(appName, requireAppName);
+                    appBuilder(appName, requireAppName);
                 })
-                console.log(app)
+				var vDom = new VirtualDom('');
+				vDom.$targetElement = element;
+				createDomMap(element, vDom, vDom);
             })
         }
 
-        function injectorApp(appName, requireAppName) {
+        function createDomMap(element, context, vDom) {
+            var attributes = element.attributes;
+            var currentVDom;
+            if (element.nodeType === ELEMENT_NODE_TYPE) {
+                currentVDom = vDom.createElement(element.nodeName);
+                forEach(attributes, function(attr) {
+					currentVDom.setAttribute(attr.name,attr.value);
+                })
+                context.appendChild(currentVDom);
+                forEach(element.childNodes, function(child) {
+                    createDomMap(child, currentVDom, vDom);
+                })
+            } else if (element.nodeType === TEXT_NODE_TYPE) {
+                currentVDom = vDom.createTextNode(element.textContent);
+                context.appendChild(currentVDom);
+            } else if (element.nodeType === COMMENT_NODE_TYPE) {
+                currentVDom = vDom.createComment(element.textContent);
+                context.appendChild(currentVDom);
+            }
+            currentVDom.$targetElement = element;
+        };
+
+        function appBuilder(appName, requireAppName) {
             var dependApp = appCache[requireAppName];
             if (!dependApp) {
-                throw injectorErr('instance', '应用{0}注入依赖{1}失败，{1}未注册！', appName, requireAppName);
+                throw builderErr('injector', '应用{0}注入依赖{1}失败，{1}未注册！', appName, requireAppName);
             }
-            var requires = dependApp.requires || [];
-            requires.forEach(function(key) {
-                injectorApp(requireAppName, key);
+            dependApp.requires.forEach(function(key) {
+                appBuilder(requireAppName, key);
             })
             appCache[appName].provider = extend({}, dependApp.provider);
             appCache[appName].directive = extend({}, dependApp.directive);

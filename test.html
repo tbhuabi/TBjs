@@ -7,11 +7,10 @@
     <title>tbjs</title>
 
     <script src="classes/src/toolkit.js"></script>
-	<script src="classes/src/providers/ast.js"></script>
-    <script src="classes/src/variables.js"></script>
+    <script src="classes/src/providers/ast.js"></script>
     <script src="classes/src/providers/http.js"></script>
     <script src="classes/src/providers/query.js"></script>
-    <script src="classes/src/providers/xmlEngine.js"></script>
+    <script src="classes/src/providers/virtualDom.js"></script>
     <script src="classes/src/providers/compiler.js"></script>
     <script src="classes/src/providers/lexer.js"></script>
     <script src="classes/src/providers/model.js"></script>
@@ -27,12 +26,12 @@
     </style>
 
     <script>
-		var app=TBjs.app('app',['TB']);
-		var a2=TBjs.app('a2',['app']);
-		window.onload=function(){
-			TBjs.bootstrap(document.body,['app'])
-			TBjs.bootstrap(document.body,['a2'])
-		}
+        var app = TBjs.app('app', ['TB']);
+        var a2 = TBjs.app('a2', ['app']);
+        window.onload = function() {
+            TBjs.bootstrap(document.body, ['app'])
+            TBjs.bootstrap(document.body, ['a2'])
+        }
     </script>
 </head>
 

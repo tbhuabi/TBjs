@@ -1,20 +1,34 @@
-function App(appName, dependence) {
-    this.$appName = appName;
-    this.$modules = {};
-    this.$directives = {};
-    this.$provider = {};
-}
-extend(App.prototype, {
-    module: function(moduleName, factoryFunction) {
-        this.$modules[moduleName] = factoryFunction;
-        return this;
-    },
-    directive: function(directiveName, factoryFunction) {
-        this.$directives[directiveName] = factoryFunction;
-        return this;
-    },
-    provider: function(providerName, factoryFunction) {
-        this.$services[providerName] = factoryFunction;
-        return this;
+/**
+ * 向全局抛出TBjs
+ * @param   {window|global} global 全局对象
+ * @returns {function} app方法
+ */
+function init(global) {
+    var tbMinErr = minErr('TB');
+
+    function ensure(obj, name, factory) {
+        return obj[name] || (obj[name] = factory())
     }
-})
+
+    var TBjs = ensure(global, 'TBjs', Object);
+    var appFactory = ensure(TBjs, 'app', function() {
+        var applications = {};
+        return function app(appName, requires) {
+
+            return ensure(applications, appName, function() {
+                return {
+					requires:requires,
+                    directive: function(){
+						console.log(applications);
+						console.log(TBjs)
+					},
+                    provider: '',
+                    module: ''
+                }
+            })
+        }
+    });
+    var rootApplication = appFactory('TB', []);
+    rootApplication.directive('')
+}
+init(window);

@@ -17,6 +17,7 @@
     <script src="classes/src/providers/module.js"></script>
     <script src="classes/src/providers/registerApp.js"></script>
     <script src="classes/src/bootstrap.js"></script>
+    <script src="classes/src/main.js"></script>
     <script src="classes/TBjs.js"></script>
 
     <!--    <script src="angular/angular.js"></script>-->
@@ -27,18 +28,7 @@
     </style>
 
     <script>
-        window.onload = function() {
 
-            var domEngine = new $XmlEngineProvider().$get();
-//            var vDom = domEngine('<input type="checkbox" checked>');
-            var vDom = domEngine(document.body.innerHTML);
-            console.log(vDom);
-			document.body.innerHTML=vDom.innerHTML;
-
-
-//			/\"DocContent\":\\s*\[^\"]*\",/
-
-        }
     </script>
 </head>
 

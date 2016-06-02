@@ -1,8 +1,6 @@
 function minErr(module) {
-    return function() {
+    return function(code, template) {
         var args = arguments;
-        var code = args[0];
-        var template = args[1];
         var msg = '[' + (module ? module + ':' : '') + code + ']  ';
         var index = 0;
         msg += template.replace(/\{(\d+)\}/g, function(str, $1) {

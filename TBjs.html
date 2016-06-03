@@ -17,6 +17,10 @@
 				console.log(arguments)
 				alert(333)
 			}
+		}).module('nav',function(){
+			return function(){
+				this.name='tb'
+			}
 		})
 		window.onload=function(){
 			console.log(app)

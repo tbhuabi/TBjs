@@ -145,8 +145,8 @@ function init(global) {
                 appBuilder(requireAppName, key);
             })
             extend(appCache[appName].provider, dependApp.provider);
-            extend(appCache[appName].provider, dependApp.directive);
-            extend(appCache[appName].provider, dependApp.module);
+            extend(appCache[appName].directive, dependApp.directive);
+            extend(appCache[appName].module, dependApp.module);
         }
     })
 }

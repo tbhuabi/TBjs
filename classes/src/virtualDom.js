@@ -1,4 +1,4 @@
-var xmlMinErr = minErr('$XmlEngine');
+var virtualDom = minErr('virtualDom');
 var ELEMENT_NODE_TYPE = 1;
 var TEXT_NODE_TYPE = 3;
 var COMMENT_NODE_TYPE = 8;
@@ -305,7 +305,7 @@ extend(ElementEngine.prototype, {
 
             }
             if (selector === nextSelector) {
-                throw xmlMinErr('qureySelectorAll', '{0}不是一个正确的选择器！', selector);
+                throw virtualDom('qureySelectorAll', '{0}不是一个正确的选择器！', selector);
             }
             parentElements = unique(parentElements);
             if (nextSelector) {

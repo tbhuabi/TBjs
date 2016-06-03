@@ -1,26 +1,26 @@
 function Module(app, obj, model) {
-    var _this = this;
-    _this.app = app;
+    var self = this;
+    self.app = app;
     obj = obj || {};
     var Model = obj.model || noop;
     Model.prototype = model;
-    _this.model = new Model();
+    self.model = new Model();
 
     if (obj.template) {
         if (isString(obj.template)) {
-            _this.element = new VirtualDom(obj.template);
-			_this.build();
+            self.element = new VirtualDom(obj.template);
+			self.build();
         } else {
-            _this.element = new VirtualDom('');
-            createDomMap(obj.template, _this.element, _this.element);
-			_this.build();
+            self.element = new VirtualDom('');
+            createDomMap(obj.template, self.element, self.element);
+			self.build();
         }
     } else if (obj.templateUrl) {
         http({
             url: obj.templateUrl
         }).then(function(response) {
-            _this.element = new VirtualDom(response);
-			_this.build();
+            self.element = new VirtualDom(response);
+			self.build();
         })
     }
 }

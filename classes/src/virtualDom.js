@@ -14,27 +14,29 @@ function RootElementEngine() {
 };
 extend(RootElementEngine.prototype, {
     getInnerHtml: function() {
-        if (this.innerHTML) {
-            return this.innerHTML;
-        } else if (this.nodeType === TEXT_NODE_TYPE || this.nodeType === COMMENT_NODE_TYPE) {
-            return this.textContent;
+        var self = this;
+        if (self.innerHTML) {
+            return self.innerHTML;
+        } else if (self.nodeType === TEXT_NODE_TYPE || self.nodeType === COMMENT_NODE_TYPE) {
+            return self.textContent;
         }
         var innerHTML = '';
-        if (this.childNodes) {
-            for (var i = 0, len = this.childNodes.length; i < len; i++) {
-                innerHTML += this.childNodes[i].getOuterHtml();
+        if (self.childNodes) {
+            for (var i = 0, len = self.childNodes.length; i < len; i++) {
+                innerHTML += self.childNodes[i].getOuterHtml();
             }
         }
-        this.innerHTML = innerHTML;
+        self.innerHTML = innerHTML;
         return innerHTML;
     },
     getOuterHtml: function() {
-        if (this.outerHTML) {
-            return this.outerHTML;
-        } else if (this.nodeType === TEXT_NODE_TYPE) {
-            return this.textContent;
-        } else if (this.nodeType === COMMENT_NODE_TYPE) {
-            return '<!--' + this.textContent + '-->';
+        var self = this;
+        if (self.outerHTML) {
+            return self.outerHTML;
+        } else if (self.nodeType === TEXT_NODE_TYPE) {
+            return self.textContent;
+        } else if (self.nodeType === COMMENT_NODE_TYPE) {
+            return '<!--' + self.textContent + '-->';
         }
 
         var getAttributeHtml = function(attributes) {
@@ -67,34 +69,35 @@ extend(RootElementEngine.prototype, {
 
 
         var outerHtml = '';
-        if (this.nodeType === ELEMENT_NODE_TYPE) {
-            var tagName = this.tagName.toLowerCase();
-            var attrHtml = getAttributeHtml(this.attributes);
+        if (self.nodeType === ELEMENT_NODE_TYPE) {
+            var tagName = self.tagName.toLowerCase();
+            var attrHtml = getAttributeHtml(self.attributes);
             if (ODD_TAG_LIST.indexOf(tagName) === -1) {
-                outerHtml = '<' + tagName + (attrHtml ? ' ' + attrHtml : '') + '>' + getChildNodesHtml(this) + '</' + tagName + '>';
+                outerHtml = '<' + tagName + (attrHtml ? ' ' + attrHtml : '') + '>' + getChildNodesHtml(self) + '</' + tagName + '>';
             } else {
                 outerHtml = '<' + tagName + ' ' + attrHtml + '>';
             }
-        } else if (this.nodeType === DOCUMENT_NODE_TYPE) {
-            outerHtml = getChildNodesHtml(this);
+        } else if (self.nodeType === DOCUMENT_NODE_TYPE) {
+            outerHtml = getChildNodesHtml(self);
         }
 
-        this.outerHTML = outerHtml;
+        self.outerHTML = outerHtml;
         return outerHtml;
     },
     getInnerText: function() {
-        if (this.nodeType === TEXT_NODE_TYPE) {
-            return this.textContent;
-        } else if (this.nodeType === COMMENT_NODE_TYPE) {
+        var self = this;
+        if (self.nodeType === TEXT_NODE_TYPE) {
+            return self.textContent;
+        } else if (self.nodeType === COMMENT_NODE_TYPE) {
             return;
         }
         var text = '';
-        if (this.childNodes) { //单标签没有子级
-            for (var i = 0, len = this.childNodes.length; i < len; i++) {
-                text += this.childNodes[i].getInnerText() || '';
+        if (self.childNodes) { //单标签没有子级
+            for (var i = 0, len = self.childNodes.length; i < len; i++) {
+                text += self.childNodes[i].getInnerText() || '';
             }
         }
-        this.innerText = text;
+        self.innerText = text;
         return text;
     }
 });
@@ -105,21 +108,23 @@ ElementEventEngine.prototype = new RootElementEngine();
 extend(ElementEventEngine.prototype, {
     constructor: ElementEventEngine,
     addEventListener: function(eventType, fn, useCapture) {
+        var self = this;
         useCapture = !!useCapture;
         eventType = eventType.toLowerCase();
-        if (!isArray(this.eventListener[eventType])) {
-            this.eventListener[eventType] = [];
+        if (!isArray(self.eventListener[eventType])) {
+            self.eventListener[eventType] = [];
         }
-        this.eventListener[eventType].push({
+        self.eventListener[eventType].push({
             fn: fn,
             useCapture: useCapture
         });
     },
     removeEventListener: function(eventType, fn) {
-        if (isArray(this.eventListener[eventType])) {
-            for (var i = 0, len = this.eventListener.length; i < len; i++) {
-                if (this.eventListener[i].fn === fn) {
-                    this.eventListener.splice(i, 1);
+        var self = this;
+        if (isArray(self.eventListener[eventType])) {
+            for (var i = 0, len = self.eventListener.length; i < len; i++) {
+                if (self.eventListener[i].fn === fn) {
+                    self.eventListener.splice(i, 1);
                     return;
                 }
             }
@@ -134,79 +139,84 @@ ElementEngine.prototype = new ElementEventEngine();
 extend(ElementEngine.prototype, {
     constructor: ElementEngine,
     $refresh: function() {
-        this.innerHTML = this.outerHTML = this.innerText = '';
-        this.getOuterHtml();
-        this.getInnerHtml();
-        this.getInnerText();
-        if (this.parentNode) {
-            this.parentNode.$refresh();
+        var self = this;
+        self.innerHTML = self.outerHTML = self.innerText = '';
+        self.getOuterHtml();
+        self.getInnerHtml();
+        self.getInnerText();
+        if (self.parentNode) {
+            self.parentNode.$refresh();
         }
     },
     setInnerHtml: function(arg) {
+        var self = this;
         var newNodeElements = new VirtualDom(arg);
-        this.childNodes = [];
-        this.children = [];
+        self.childNodes = [];
+        self.children = [];
         for (var i = 0, len = newNodeElements.childNodes.length; i < len; i++) {
-            this.appendChild(newNodeElements.childNodes[i]);
+            self.appendChild(newNodeElements.childNodes[i]);
         }
         newNodeElements = null;
-        this.$refresh();
+        self.$refresh();
     },
     setAttribute: function(attributes, value) {
         var item;
-        for (var i = 0, len = this.attributes.length; i < len; i++) {
-            if (this.attributes[i].name === attributes) {
-                item = this.attributes[i];
+        var self = this;
+        for (var i = 0, len = self.attributes.length; i < len; i++) {
+            if (self.attributes[i].name === attributes) {
+                item = self.attributes[i];
                 break;
             }
         }
         if (!item) {
             item = {};
-            this.attributes.push(item);
+            self.attributes.push(item);
         }
         item.name = attributes;
         if (!isUndefined(value)) {
             item.value = value;
         }
-        this.className = this.getAttribute('class');
-        this.classList = this.className.match(/\S+/g) || [];
-        this.id = this.getAttribute('id');
-        this.$refresh();
+        self.className = self.getAttribute('class');
+        self.classList = self.className.match(/\S+/g) || [];
+        self.id = self.getAttribute('id');
+        self.$refresh();
     },
     getAttribute: function(key) {
-        for (var i = 0, len = this.attributes.length; i < len; i++) {
-            if (this.attributes[i].name === key) {
-                return this.attributes[i].value;
+        var self = this;
+        for (var i = 0, len = self.attributes.length; i < len; i++) {
+            if (self.attributes[i].name === key) {
+                return self.attributes[i].value;
             }
         }
         return '';
     },
     hasAttribute: function(key) {
-        for (var i = 0, len = this.attributes.length; i < len; i++) {
-            if (this.attributes[i].name === key) {
+        var self = this;
+        for (var i = 0, len = self.attributes.length; i < len; i++) {
+            if (self.attributes[i].name === key) {
                 return true;
             }
         }
         return false;
     },
     removeAttribute: function(key) {
-        for (var i = 0, len = this.attributes.length; i < len; i++) {
-            if (this.attributes[i].name === key) {
-                this.attributes.splice(i, 1);
+        var self = this;
+        for (var i = 0, len = self.attributes.length; i < len; i++) {
+            if (self.attributes[i].name === key) {
+                self.attributes.splice(i, 1);
                 if (key === 'class') {
-                    this.className = '';
-                    this.classList = [];
+                    self.className = '';
+                    self.classList = [];
                 } else if (key === 'id') {
-                    this.id = '';
+                    self.id = '';
                 }
                 break;
             }
         }
-        this.$refresh();
+        self.$refresh();
     },
     querySelectorAll: function(selector) {
         selector = ' ' + trim(selector);
-        var _this = this;
         var elements = [];
 
 
@@ -329,12 +339,13 @@ extend(ElementMethodEngine.prototype, {
     getElementsByTagName: function(tagName) {
         tagName = trim(tagName);
         var elements = [];
-        for (var i = 0, len = this.children.length; i < len; i++) {
-            if (this.children[i].tagName === tagName || tagName === '*') {
-                elements.push(this.children[i]);
+        var self = this;
+        for (var i = 0, len = self.children.length; i < len; i++) {
+            if (self.children[i].tagName === tagName || tagName === '*') {
+                elements.push(self.children[i]);
             }
-            if (this.children[i].children) {
-                this.children[i].getElementsByTagName(tagName).filter(function(item) {
+            if (self.children[i].children) {
+                self.children[i].getElementsByTagName(tagName).filter(function(item) {
                     elements.push(item);
                 });
             }
@@ -343,12 +354,13 @@ extend(ElementMethodEngine.prototype, {
     },
     getElementsByClassName: function(className) {
         var elements = [];
-        for (var i = 0, len = this.children.length; i < len; i++) {
-            if (this.children[i].hasClass(className)) {
-                elements.push(this.children[i]);
+        var self = this;
+        for (var i = 0, len = self.children.length; i < len; i++) {
+            if (self.children[i].hasClass(className)) {
+                elements.push(self.children[i]);
             }
-            if (this.children[i].children) {
-                this.children[i].getElementsByClassName(className).filter(function(item) {
+            if (self.children[i].children) {
+                self.children[i].getElementsByClassName(className).filter(function(item) {
                     elements.push(item);
                 });
             }
@@ -356,48 +368,51 @@ extend(ElementMethodEngine.prototype, {
         return elements;
     },
     appendChild: function(TBDomElement) {
-        if (TBDomElement.parentNode !== this) {
-            TBDomElement.parentNode = this;
-            this.childNodes.push(TBDomElement);
+        var self = this;
+        if (TBDomElement.parentNode !== self) {
+            TBDomElement.parentNode = self;
+            self.childNodes.push(TBDomElement);
             if (TBDomElement.nodeType === ELEMENT_NODE_TYPE) {
-                this.children.push(TBDomElement);
+                self.children.push(TBDomElement);
             }
         } else {
-            for (var i = 0, len = this.childNodes.length; i < len; i++) {
-                if (TBDomElement === this.childNodes[i]) {
-                    this.childNodes.push(this.childNodes.splice(i, 1));
+            for (var i = 0, len = self.childNodes.length; i < len; i++) {
+                if (TBDomElement === self.childNodes[i]) {
+                    self.childNodes.push(self.childNodes.splice(i, 1));
                     break;
                 }
             }
             if (TBDomElement.nodeType === ELEMENT_NODE_TYPE) {
-                for (var i = 0, len = this.children.length; i < len; i++) {
-                    if (TBDomElement === this.children[i]) {
-                        this.children.push(this.children.splice(i, 1));
+                for (var i = 0, len = self.children.length; i < len; i++) {
+                    if (TBDomElement === self.children[i]) {
+                        self.children.push(self.children.splice(i, 1));
                         break;
                     }
                 }
             }
         }
-        this.$refresh();
+        self.$refresh();
     },
     removeChild: function(TBDomElement) {
-        for (var i = 0, len = this.childNodes.length; i < len; i++) {
-            if (this.childNodes[i] === TBDomElement) {
-                this.childNodes.splice(i, 1);
+        var self = this;
+        for (var i = 0, len = self.childNodes.length; i < len; i++) {
+            if (self.childNodes[i] === TBDomElement) {
+                self.childNodes.splice(i, 1);
                 break;
             }
         }
         if (TBDomElement.nodeType === ELEMENT_NODE_TYPE) {
-            for (var i = 0, len = this.children.length; i < len; i++) {
-                if (this.children[i] === TBDomElement) {
-                    this.children.splice(i, 1);
+            for (var i = 0, len = self.children.length; i < len; i++) {
+                if (self.children[i] === TBDomElement) {
+                    self.children.splice(i, 1);
                     break;
                 }
             }
         }
-        this.$refresh();
+        self.$refresh();
     },
     insertBefore: function(TBDomElement, nextElement) {
+        var self = this;
         var parentNode = TBDomElement.parentNode;
         for (var i = 0, len = parentNode.childNodes.length; i < len; i++) {
             if (parentNode.childNodes[i] === TBDomElement) {
@@ -411,20 +426,20 @@ extend(ElementMethodEngine.prototype, {
                 break;
             }
         }
-        TBDomElement.parentNode = this;
-        for (var i = 0, len = this.childNodes.length; i < len; i++) {
-            if (this.childNodes[i] === nextElement) {
-                this.childNodes.splice(i, 0, TBDomElement);
+        TBDomElement.parentNode = self;
+        for (var i = 0, len = self.childNodes.length; i < len; i++) {
+            if (self.childNodes[i] === nextElement) {
+                self.childNodes.splice(i, 0, TBDomElement);
                 break;
             }
         }
-        for (var i = 0, len = this.children.length; i < len; i++) {
-            if (this.children[i] === nextElement) {
-                this.children.splice(i, 0, TBDomElement);
+        for (var i = 0, len = self.children.length; i < len; i++) {
+            if (self.children[i] === nextElement) {
+                self.children.splice(i, 0, TBDomElement);
                 break;
             }
         }
-        this.$refresh();
+        self.$refresh();
     }
 })
 var xmlEngine = function(context, htmlText) {
@@ -622,18 +637,19 @@ var xmlBuilder = function(document, parentNode, arr, i) {
 };
 //document构造函数
 function VirtualDom(htmlContent) {
-    this.$targetElement = null;
-    this.nodeType = DOCUMENT_NODE_TYPE;
-    this.parentNode = null;
-    this.innerHTML = '';
-    this.innerText = '';
-    this.outerHTML = '';
-    this.classList = [];
-    this.className = '';
-    this.childNodes = [];
-    this.children = [];
-    this.eventListener = {};
-    xmlEngine(this, htmlContent);
+    var self = this;
+    self.$targetElement = null;
+    self.nodeType = DOCUMENT_NODE_TYPE;
+    self.parentNode = null;
+    self.innerHTML = '';
+    self.innerText = '';
+    self.outerHTML = '';
+    self.classList = [];
+    self.className = '';
+    self.childNodes = [];
+    self.children = [];
+    self.eventListener = {};
+    xmlEngine(self, htmlContent);
 }
 VirtualDom.prototype = new ElementMethodEngine();
 extend(VirtualDom.prototype, {
@@ -681,18 +697,19 @@ extend(VirtualDom.prototype, {
 //单标签元素构造函数
 
 function OddElement(tagName) {
-    this.$targetElement = null;
-    this.tagName = this.nodeName = tagName.toUpperCase();
-    this.nodeType = ELEMENT_NODE_TYPE;
-    this.parentNode = null;
-    this.innerHTML = '';
-    this.innerText = '';
-    this.id = '';
-    this.outerHTML = '';
-    this.classList = [];
-    this.className = '';
-    this.attributes = [];
-    this.eventListener = {};
+    var self = this;
+    self.$targetElement = null;
+    self.tagName = self.nodeName = tagName.toUpperCase();
+    self.nodeType = ELEMENT_NODE_TYPE;
+    self.parentNode = null;
+    self.innerHTML = '';
+    self.innerText = '';
+    self.id = '';
+    self.outerHTML = '';
+    self.classList = [];
+    self.className = '';
+    self.attributes = [];
+    self.eventListener = {};
 }
 OddElement.prototype = new ElementEngine();
 extend(OddElement.prototype, {
@@ -702,20 +719,21 @@ extend(OddElement.prototype, {
 
 //双标签元素构造函数
 function EvenElement(tagName) {
-    this.$targetElement = null;
-    this.tagName = this.nodeName = tagName.toUpperCase();
-    this.nodeType = ELEMENT_NODE_TYPE;
-    this.parentNode = null;
-    this.innerHTML = '';
-    this.innerText = '';
-    this.outerHTML = '';
-    this.classList = [];
-    this.className = '';
-    this.id = '';
-    this.childNodes = [];
-    this.children = [];
-    this.attributes = [];
-    this.eventListener = {};
+    var self = this;
+    self.$targetElement = null;
+    self.tagName = self.nodeName = tagName.toUpperCase();
+    self.nodeType = ELEMENT_NODE_TYPE;
+    self.parentNode = null;
+    self.innerHTML = '';
+    self.innerText = '';
+    self.outerHTML = '';
+    self.classList = [];
+    self.className = '';
+    self.id = '';
+    self.childNodes = [];
+    self.children = [];
+    self.attributes = [];
+    self.eventListener = {};
 }
 EvenElement.prototype = new ElementMethodEngine();
 extend(EvenElement.prototype, {
@@ -724,23 +742,25 @@ extend(EvenElement.prototype, {
 
 //文本节点构造函数
 function TextElement(text) {
-    this.$targetElement = null;
-    this.parentNode = null;
-    this.nodeType = TEXT_NODE_TYPE;
-    this.nodeName = '#text';
-    this.textContent = text.replace(/[\n\t\r\v]/g, '');
-    this.eventListener = {};
+    var self = this;
+    self.$targetElement = null;
+    self.parentNode = null;
+    self.nodeType = TEXT_NODE_TYPE;
+    self.nodeName = '#text';
+    self.textContent = text.replace(/[\n\t\r\v]/g, '');
+    self.eventListener = {};
 }
 TextElement.prototype = new ElementEventEngine();
 TextElement.prototype.constructor = TextElement;
 
 
 function CommentElement(commentText) {
-    this.$targetElement = null;
-    this.parentNode = null;
-    this.nodeType = COMMENT_NODE_TYPE;
-    this.nodeName = '#comment';
-    this.textContent = commentText;
+    var self = this;
+    self.$targetElement = null;
+    self.parentNode = null;
+    self.nodeType = COMMENT_NODE_TYPE;
+    self.nodeName = '#comment';
+    self.textContent = commentText;
 }
 
 CommentElement.prototype = new RootElementEngine();

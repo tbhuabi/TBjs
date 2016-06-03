@@ -16,7 +16,7 @@ function $QueryProvider() {
         return false;
     };
     var dispatchEvent = function(event) {
-        var _this = this;
+        var self = this;
 
         var result;
         var eventCacheItem = findEventCache(this);
@@ -42,7 +42,7 @@ function $QueryProvider() {
                         eventListenerCollection.forEach(function(eventListenerObj) {
                             var eventListener = eventListenerObj.eventListener;
                             eventListener.forEach(function(fn) {
-                                if (fn.apply(_this, args) === false) {
+                                if (fn.apply(self, args) === false) {
                                     result = false
                                 }
                             })
@@ -55,7 +55,7 @@ function $QueryProvider() {
                     eventListenerCollection.forEach(function(eventListenerObj) {
                         var eventListener = eventListenerObj.eventListener;
                         eventListener.forEach(function(fn) {
-                            if (fn.apply(_this, args) === false) {
+                            if (fn.apply(self, args) === false) {
                                 result = false
                             }
                         })
@@ -75,12 +75,12 @@ function $QueryProvider() {
                 var eventListenerObj = events[key];
                 eventListenerObj.forEach(function(item) {
                     if (item.selector) {
-                        if (!findEventSrcElement(Query(_this).find(item.selector), event.srcElement)) {
+                        if (!findEventSrcElement(Query(self).find(item.selector), event.srcElement)) {
                             return;
                         }
                     }
                     item.eventListener.forEach(function(fn) {
-                        if (fn.call(_this, event) === false) {
+                        if (fn.call(self, event) === false) {
                             result = false;
                         };
                     })
@@ -94,22 +94,22 @@ function $QueryProvider() {
         return new Query.prototype.init(selector, context, isBrowser);
     }
     Query.prototype.init = function(selector, context, isBrowser) {
-        this.isBrowser = isBrowser === undefined ? true : !! isBrowser;
-        this.length = 0;
-        this.selector = '';
-        var _this = this;
+        var self = this;
+        self.isBrowser = isBrowser === undefined ? true : !!isBrowser;
+        self.length = 0;
+        self.selector = '';
         if (isArray(selector)) {
             selector.forEach(function(item) {
-                _this[_this.length++] = item;
+                self[self.length++] = item;
             })
         } else if (isString(selector)) {
-            this.selector = selector;
-            this.find(selector, context || [document]);
+            self.selector = selector;
+            self.find(selector, context || [document]);
         } else {
-            if (selector instanceof this.init) return selector;
-            this[this.length++] = selector;
+            if (selector instanceof self.init) return selector;
+            self[self.length++] = selector;
             if (selector.$ENGINE) {
-                this.isBrowser = false;
+                self.isBrowser = false;
             }
         }
     }
@@ -118,11 +118,11 @@ function $QueryProvider() {
     extend(Query.prototype, {
         find: function(selector, context) {
 
+            var self = this;
             if (isUndefined(context)) {
-                return Query(selector, this, this.isBrowser);
+                return Query(selector, self, self.isBrowser);
             }
 
-            var _this = this;
             var elements = [];
 
             if (this.isBrowser) {
@@ -155,27 +155,27 @@ function $QueryProvider() {
                 }
             }
             unique(elements).forEach(function(item) {
-                _this[_this.length++] = item;
+                self[self.length++] = item;
             });
-            return this;
+            return self;
         },
         on: function(eventTypes, selector, callback, useCapture, one) {
-            var _this = this;
-            if (!isString(eventTypes)) return this;
+            var self = this;
+            if (!isString(eventTypes)) return self;
             eventTypes = trim(eventTypes);
-            if (!eventTypes) return this;
+            if (!eventTypes) return self;
 
             if (isFunction(selector)) {
                 useCapture = callback;
                 callback = selector;
                 selector = '';
             }
-            useCapture = !! useCapture;
+            useCapture = !!useCapture;
 
             //eventType 可能的情况 click.eventName mouseover...
             var events = eventTypes.match(/[^\s]+/g);
 
-            this.each(function(item) {
+            self.each(function(item) {
                 if (!one) {
                     var eventCacheItem = findEventCache(item);
                     if (!eventCacheItem) {
@@ -231,9 +231,9 @@ function $QueryProvider() {
             return this;
         },
         off: function(eventType, selector, fn) {
-            var _this = this;
+            var self = this;
             if (arguments.length === 0) {
-                this.each(function(item) {
+                self.each(function(item) {
                     var eventCacheItem = findEventCache(item);
                     if (eventCacheItem) {
                         var events = eventCacheItem.events;
@@ -259,7 +259,7 @@ function $QueryProvider() {
                         eventName = eventType.substring(dotPosition + 1, eventType.length);
                         eventType = eventType.substring(0, dotPosition);
                     }
-                    _this.each(function(item) {
+                    self.each(function(item) {
                         var eventCacheItem = findEventCache(item);
                         if (eventCacheItem) {
                             var events = eventCacheItem.events;
@@ -306,13 +306,13 @@ function $QueryProvider() {
                     })
                 })
             }
-            return this;
+            return self;
         },
         one: function(eventType, selector, callback, useCapture) {
             return this.on(eventType, selector, callback, useCapture, 1);
         },
         trigger: function(eventTypes) {
-            var _this = this;
+            var self = this;
             var args = [].slice.call(arguments);
 
             var events = eventTypes.match(/[^\s]+/g);
@@ -326,7 +326,7 @@ function $QueryProvider() {
                 if (dotPosition !== -1) {
                     eventType = eventType.substring(0, dotPosition);
                 }
-                _this.each(function(item) {
+                self.each(function(item) {
                     try {
                         item[eventType]();
                     } catch (e) {
@@ -335,54 +335,57 @@ function $QueryProvider() {
                 })
             })
             triggerParams = null;
-            return this;
+            return self;
         },
         attr: function(name, value) {
+            var self = this;
             if (isString(name)) {
                 switch (arguments.length) {
                     case 2:
-                        this.each(function(item) {
+                        self.each(function(item) {
                             item.setAttribute(name, value)
                         })
-                        return this;
+                        return self;
                     case 1:
-                        return this[0].getAttribute(name);
+                        return self[0].getAttribute(name);
                 }
             }
-            return this;
+            return self;
         },
         addClass: function(className) {
+            var self = this;
             if (isString(className)) {
                 className = trim(className);
                 var reg = new RegExp('(^|\\s+)' + className + '(\\s+|$)');
-                if (this.isBrowser) {
-                    this.each(function(item) {
+                if (self.isBrowser) {
+                    self.each(function(item) {
                         item.className = trim(item.className + ' ' + className);
 
                     })
                 } else {
-                    this.each(function(item) {
+                    self.each(function(item) {
                         item.setAttribute('class', trim(item.className + ' ' + className));
                     })
                 }
             }
-            return this;
+            return self;
         },
         removeClass: function(className) {
+            var self = this;
             if (isString(className)) {
                 className = trim(className);
                 var reg = new RegExp('(^|\\s+)' + className + '(\\s+|$)');
-                if (this.isBrowser) {
-                    this.each(function(item) {
+                if (self.isBrowser) {
+                    self.each(function(item) {
                         item.className = trim(item.className.replace(reg, '')).replace(/\s+/g, ' ');
                     })
                 } else {
-                    this.each(function(item) {
+                    self.each(function(item) {
                         item.setAttribute('className', trim(item.className.replace(reg, '')).replace(/\s+/g, ' '));
                     })
                 }
             }
-            return this;
+            return self;
         },
         hasClass: function(className) {
             className = trim(className);
@@ -396,14 +399,15 @@ function $QueryProvider() {
             return this;
         },
         html: function(htmlText) {
-            if (isUndefined(htmlText)) return this[0] && this[0].innerHTML;
-            if (this.isBrowser) {
-                this.each(function(item) {
+            var self = this;
+            if (isUndefined(htmlText)) return self[0] && self[0].innerHTML;
+            if (self.isBrowser) {
+                self.each(function(item) {
                     item.innerHTML = htmlText;
                 })
             } else {
                 htmlText = htmlText.toString();
-                this.each(function(item) {
+                self.each(function(item) {
                     item.setInterHtml(htmlText)
                 })
             }

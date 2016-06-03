@@ -1,3 +1,4 @@
+function noop() {}
 /**
  * 向全局抛出TBjs
  * @param   {window|global} global 全局对象
@@ -13,16 +14,7 @@ function init(global) {
     var appCache = {
         TB: {
             requires: [],
-            provider: {
-                $compileProvider: $CompilerProvider,
-                $httpProvider: $HttpProvider,
-                $modelProvider: $ModelProvider,
-                $parseProvider: $ParseProvider,
-                $promiseProvider: $PromiseProvider,
-                $queryProvider: $QueryProvider,
-                $valueProvider: $ValueProvider,
-                $virtualDomProvider: $VirtualDomProvider,
-            },
+            provider: {},
             directive: {},
             module: {}
         }
@@ -30,65 +22,119 @@ function init(global) {
     var appFactory = ensure(TBjs, 'app', function() {
         return function app(appName, requires) {
             requires = requires || [];
-            return ensure(appCache, appName, function() {
-                appCache[appName] = appCache[appName] || {};
-                var methods = appCache[appName];
-                var appInstance = {
-                    appName: appName,
-                    requires: requires,
-                    directive: addMethodSuffix('Directive'),
-                    provider: addMethodSuffix('Provider'),
-                    module: addMethodSuffix('Module')
-                };
-                return appInstance;
+            requires.unshift('TB');
+            appCache[appName] = appCache[appName] || {
+                requires: requires,
+                directive: {},
+                module: {},
+                provider: {}
+            };
+            var methods = appCache[appName];
+            var appInstance = {
+                appName: appName,
+                requires: requires,
+                directive: addMethodSuffix('Directive'),
+                provider: addMethodSuffix('Provider'),
+                module: addMethodSuffix('Module')
+            };
+            return appInstance;
 
-                function addMethodSuffix(suffix) {
-                    return function(key, fn) {
-                        methods[suffix.toLowerCase()] = methods[suffix] || {};
-                        methods[suffix.toLowerCase()][key + suffix] = fn;
-                    }
+            function addMethodSuffix(suffix) {
+                var name = suffix.toLowerCase();
+                return function(key, fn) {
+                    methods[name][key + suffix] = fn;
+                    return appInstance;
                 }
-            })
+            }
         }
     });
     ensure(TBjs, 'bootstrap', function() {
-        var applicationsInstance = {};
         var builderErr = minErr('builder');
 
         return function(element, keys) {
+            var rootModel = new Model();
             keys.forEach(function(appName) {
                 var app = appCache[appName];
                 var requires = app.requires;
                 requires.forEach(function(requireAppName) {
                     appBuilder(appName, requireAppName);
                 })
-				var vDom = new VirtualDom('');
-				vDom.$targetElement = element;
-				createDomMap(element, vDom, vDom);
+                new Module(appInstantiate(app, appName), {
+                    template: element
+                }, rootModel)
             })
         }
 
-        function createDomMap(element, context, vDom) {
-            var attributes = element.attributes;
-            var currentVDom;
-            if (element.nodeType === ELEMENT_NODE_TYPE) {
-                currentVDom = vDom.createElement(element.nodeName);
-                forEach(attributes, function(attr) {
-					currentVDom.setAttribute(attr.name,attr.value);
-                })
-                context.appendChild(currentVDom);
-                forEach(element.childNodes, function(child) {
-                    createDomMap(child, currentVDom, vDom);
-                })
-            } else if (element.nodeType === TEXT_NODE_TYPE) {
-                currentVDom = vDom.createTextNode(element.textContent);
-                context.appendChild(currentVDom);
-            } else if (element.nodeType === COMMENT_NODE_TYPE) {
-                currentVDom = vDom.createComment(element.textContent);
-                context.appendChild(currentVDom);
+
+        function appInstantiate(app, appName) {
+            var obj = {
+                directive: {},
+                module: {},
+                provider: {}
+            };
+
+            initProvider(app.provider, obj.provider);
+            initDirective(app.directive, obj.directive, app.provider);
+            initModule(app.module, obj.module);
+            return obj;
+
+            function initProvider(source, target) {
+                for (var key in source) {
+                    if (target[key]) continue;
+                    target[key] = createInjector(source, target, source[key]);
+                }
             }
-            currentVDom.$targetElement = element;
-        };
+
+            function initDirective(source, target, provider) {
+                for (var key in source) {
+                    var params = source[key];
+                    if (isFunction(params)) {
+                        target[key] = params();
+                    } else {
+                        fn = params.pop();
+                        var args = [];
+                        params.forEach(function(name) {
+                            if (!provider[name]) {
+                                throw builderErr('injector', '应用：{0}中，指令{1}依赖的服务{2}未注册！', appName, key, name);
+                            }
+                            if (!isFunction(provider[name].$get)) {
+                                throw builderErr('injector', '应用：{0}中，provider：{1}未实现$get方法！', appName, name);
+                            }
+                            args.push(provider[name].$get())
+                        })
+                        target[key] = fn.apply(undefined, args);
+                    }
+                }
+            }
+
+            function initModule(source, target) {
+                for (var key in source) {
+                    target[key] = source[key]();
+                }
+            }
+        }
+
+        function createInjector(source, target, factoryFunction) {
+            factoryFunction = isFunction(factoryFunction) ? [factoryFunction] : factoryFunction;
+
+            var params = factoryFunction.slice(0, factoryFunction.length - 1);
+            factoryFunction = factoryFunction[factoryFunction.length - 1];
+            var args = [];
+
+            forEach(params, function(param) {
+                if (target[param]) {
+                    args.push(target[param]);
+                    return;
+                }
+                var provider = source[param];
+                instance = createInjector(source, target, provider);
+                source[param] = instance;
+                args.push(instance);
+            })
+            var newProvider = {};
+            factoryFunction.apply(newProvider, args);
+            return newProvider;
+        }
 
         function appBuilder(appName, requireAppName) {
             var dependApp = appCache[requireAppName];
@@ -98,9 +144,9 @@ function init(global) {
             dependApp.requires.forEach(function(key) {
                 appBuilder(requireAppName, key);
             })
-            appCache[appName].provider = extend({}, dependApp.provider);
-            appCache[appName].directive = extend({}, dependApp.directive);
-            appCache[appName].module = extend({}, dependApp.module);
+            extend(appCache[appName].provider, dependApp.provider);
+            extend(appCache[appName].provider, dependApp.directive);
+            extend(appCache[appName].provider, dependApp.module);
         }
     })
 }

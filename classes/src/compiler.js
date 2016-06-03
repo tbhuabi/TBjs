@@ -2,11 +2,6 @@
 //    vDom.$targetElement = element;
 //    createDomMap(element, vDom, vDom);
 function compiler(module) {
-    function transferDirectiveName(key) {
-        return key.replace(/-\w/g, function(str) {
-            return str.charAt(1).toUpperCase();
-        }) + 'Directive';
-    }
 
     function compileAttr(vDom, model) {
         forEach(vDom.attributes, function(item) {

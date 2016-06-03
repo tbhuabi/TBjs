@@ -1,34 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-	<meta charset="UTF-8">
-	<title>TBjs测试</title>
-	<script src="classes/src/toolkit.js"></script>
-	<script src="classes/src/model.js"></script>
-	<script src="classes/src/module.js"></script>
-	<script src="classes/src/virtualDom.js"></script>
-	<script src="classes/src/compiler.js"></script>
-	<script src="classes/src/main.js"></script>
-	<script>
-		var app=TBjs.app('app');
-		app.directive('change',function(model,vDom){
-		}).directive('tbClick',function(){
-			return function(){
-				console.log(arguments)
-				alert(333)
-			}
-		}).module('nav',function(){
-			return function(){
-				this.name='tb'
-			}
-		})
-		window.onload=function(){
-			console.log(app)
-			TBjs.bootstrap(document.body,['app'])
-		}
-	</script>
+    <meta charset="UTF-8">
+    <title>TBjs测试</title>
+    <script src="classes/src/toolkit.js"></script>
+    <script src="classes/src/model.js"></script>
+    <script src="classes/src/module.js"></script>
+    <script src="classes/src/virtualDom.js"></script>
+    <script src="classes/src/compiler.js"></script>
+    <script src="classes/src/main.js"></script>
+    <script>
+        var app = TBjs.app('app');
+        app.directive('tbClick', ['name',function(name) {
+            return function() {
+                console.log(arguments)
+				console.log(name)
+                alert(333)
+            }
+        }]).module('nav', ['name', function(name) {
+            return function() {
+                this.name = 'tb' + name
+            }
+        }]).provider('name', function() {
+            this.$get = function() {
+                return 'aaaaaaaaaaa'
+            }
+        })
+        window.onload = function() {
+            console.log(app)
+            TBjs.bootstrap(document.body, ['app'])
+        }
+    </script>
 </head>
+
 <body>
-	<div tb-click="submit()">test</div>
+    <div tb-click="submit()">test</div>
 </body>
+
 </html>

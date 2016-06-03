@@ -1,4 +1,15 @@
 function noop() {}
+
+function transferName(str) {
+    return function(key) {
+        return key.replace(/-\w/g, function(str) {
+            return str.charAt(1).toUpperCase();
+        }) + str;
+    }
+}
+var transferDirectiveName = transferName('Directive');
+var transferProviderName = transferName('Provider');
+var transferModuleName = transferName('Module');
 /**
  * 向全局抛出TBjs
  * @param   {window|global} global 全局对象
@@ -74,7 +85,7 @@ function init(global) {
             };
 
             initProvider(app.provider, obj.provider);
-            initDirective(app.directive, obj.directive, app.provider);
+            initDirective(app.directive, obj.directive, obj.provider);
             initModule(app.module, obj.module);
             return obj;
 
@@ -94,6 +105,7 @@ function init(global) {
                         fn = params.pop();
                         var args = [];
                         params.forEach(function(name) {
+							name=transferProviderName(name);
                             if (!provider[name]) {
                                 throw builderErr('injector', '应用：{0}中，指令{1}依赖的服务{2}未注册！', appName, key, name);
                             }

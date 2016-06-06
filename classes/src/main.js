@@ -66,9 +66,8 @@ function init(global) {
             var rootModel = new Model();
             keys.forEach(function(appName) {
                 var app = appCache[appName];
-                var requires = app.requires;
-                requires.forEach(function(requireAppName) {
-                    appBuilder(appName, requireAppName);
+                app.requires.forEach(function(requireAppName) {
+                    publishApi(appName, requireAppName);
                 })
                 new Module(appInstantiate(app, appName), {
                     template: element
@@ -78,77 +77,55 @@ function init(global) {
 
 
         function appInstantiate(app, appName) {
+
             var obj = {
                 directive: {},
                 module: {},
                 provider: {}
             };
 
-            initProvider(app.provider, obj.provider);
-            initDirective(app.directive, obj.directive, obj.provider);
-            initModule(app.module, obj.module);
+            var key;
+            for (key in app.provider) {
+                obj.provider[key] = injector(app.provider, obj.provider, {}, key);
+            }
+            for (key in app.directive) {
+                obj.directive[key] = injector(app.directive, obj.provider, undefined, key);
+            }
+            for (key in app.module) {
+                obj.module[key] = injector(app.module, obj.provider, undefined, key);
+            }
+
             return obj;
 
-            function initProvider(source, target) {
-                for (var key in source) {
-                    if (target[key]) continue;
-                    target[key] = createInjector(source, target, source[key]);
-                }
-            }
-
-            function initDirective(source, target, provider) {
-                for (var key in source) {
-                    var params = source[key];
-                    if (isFunction(params)) {
-                        target[key] = params();
-                    } else {
-                        fn = params.pop();
-                        var args = [];
-                        params.forEach(function(name) {
-							name=transferProviderName(name);
-                            if (!provider[name]) {
-                                throw builderErr('injector', '应用：{0}中，指令{1}依赖的服务{2}未注册！', appName, key, name);
-                            }
-                            if (!isFunction(provider[name].$get)) {
-                                throw builderErr('injector', '应用：{0}中，provider：{1}未实现$get方法！', appName, name);
-                            }
-                            args.push(provider[name].$get())
-                        })
-                        target[key] = fn.apply(undefined, args);
-                    }
-                }
-            }
-
-            function initModule(source, target) {
-                for (var key in source) {
-                    target[key] = source[key]();
-                }
-            }
         }
 
-        function createInjector(source, target, factoryFunction) {
+        function injector(source, target, result, serviceName) {
+            var factoryFunction = source[serviceName];
             factoryFunction = isFunction(factoryFunction) ? [factoryFunction] : factoryFunction;
-
             var params = factoryFunction.slice(0, factoryFunction.length - 1);
             factoryFunction = factoryFunction[factoryFunction.length - 1];
             var args = [];
 
             forEach(params, function(param) {
+                param = transferProviderName(param);
+                var instance = null;
                 if (target[param]) {
-                    args.push(target[param]);
-                    return;
+                    instance = target[param];
+                } else {
+                    instance = injector(source, target, result, param);
+                    source[param] = instance;
                 }
-                var provider = source[param];
-                instance = createInjector(source, target, provider);
-                source[param] = instance;
-                args.push(instance);
+                args.push(result ? instance : instance.$get());
             })
-            var newProvider = {};
-            factoryFunction.apply(newProvider, args);
-            return newProvider;
+            if (result) {
+                factoryFunction.apply(result, args)
+                return result;
+            }
+            return factoryFunction.apply(result, args);
         }
 
-        function appBuilder(appName, requireAppName) {
+
+        function publishApi(appName, requireAppName) {
             var dependApp = appCache[requireAppName];
             if (!dependApp) {
                 throw builderErr('injector', '应用{0}注入依赖{1}失败，{1}未注册！', appName, requireAppName);

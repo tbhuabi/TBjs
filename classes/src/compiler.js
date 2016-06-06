@@ -15,7 +15,6 @@ function compiler(module) {
     function compilerText(vDom, model) {
 
     }
-    console.log(module)
 
     var vDom = module.element;
     var app = module.app;

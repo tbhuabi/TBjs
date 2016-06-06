@@ -11,8 +11,9 @@ function Module(app, obj, model) {
             self.element = new VirtualDom(obj.template);
 			self.build();
         } else {
-            self.element = new VirtualDom('');
-            createDomMap(obj.template, self.element, self.element);
+//            self.element = new VirtualDom('');
+//            createDomMap(obj.template, self.element, self.element);
+			self.element=obj.template;
 			self.build();
         }
     } else if (obj.templateUrl) {

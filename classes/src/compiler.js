@@ -2,12 +2,33 @@
 //    vDom.$targetElement = element;
 //    createDomMap(element, vDom, vDom);
 function compiler(module) {
+    var compilerErr = minErr('compiler');
+
+    function transferDirectiveName(str) {
+        return str.replace(/-\w/g, function(str) {
+            return str.charAt(1).toUpperCase();
+        })
+    }
 
     function compileAttr(vDom, model) {
+        var invokeQueue = [];
         forEach(vDom.attributes, function(item) {
+            var value = item.value;
             var directiveName = transferDirectiveName(item.name);
-            if (app.directive[directiveName]) {
-                app.directive[directiveName](model, vDom);
+            var directive = app.directive[directiveName + 'Directive'];
+            if (directive) {
+                invokeQueue.push({
+                    key: directiveName,
+                    fn: directive.controller
+                })
+            }
+        })
+        invokeQueue.sort(function(n, m) {
+            return directivePriority.indexOf(n.key) > directivePriority.indexOf(m.key);
+        })
+        invokeQueue.forEach(function(item) {
+            if (isFunction(item.fn)) {
+                item.fn(model, Query(vDom));
             }
         })
     }

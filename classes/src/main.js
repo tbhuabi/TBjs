@@ -10,6 +10,9 @@ function transferName(str) {
 var transferDirectiveName = transferName('Directive');
 var transferProviderName = transferName('Provider');
 var transferModuleName = transferName('Module');
+
+
+var directivePriority = ['tbFor', 'tbIf', 'tbInit', 'tbModel'];
 /**
  * 向全局抛出TBjs
  * @param   {window|global} global 全局对象
@@ -83,19 +86,63 @@ function init(global) {
                 module: {},
                 provider: {}
             };
-
             var key;
             for (key in app.provider) {
                 obj.provider[key] = injector(app.provider, obj.provider, {}, key);
             }
             for (key in app.directive) {
-                obj.directive[key] = injector(app.directive, obj.provider, undefined, key);
+                var directive = injector(app.directive, obj.provider, undefined, key);
+                if (isFunction(directive)) {
+                    directive = {
+                        controller: directive
+                    }
+                }
+                if (!isObject(directive)) {
+                    throw builderErr('directive', '指令必须返回一个函数或者对象');
+                }
+                directive.priority = directive.priority || '>';
+                obj.directive[key] = directive;
+
+            }
+            for (key in obj.directive) {
+                var directive = obj.directive[key];
+                var priority = directive.priority = directive.priority || '>';
+                if (!isString(priority)) {
+                    throw builderErr('directive', '指令{0}的执行顺序必须为一个字符串声明\n如：\n`<`\n`>`\n`<directiveName`\n`directiveName>`', key);
+                }
+                if (priority === '<') {
+                    directivePriority.unshift(deleteDirectiveSuffix(key));
+                } else if (priority === '>') {
+                    directivePriority.push(deleteDirectiveSuffix(key));
+                } else if (priority.indexOf('<') === 0) {
+                    var anchor = trim(priority.substring(1, priority.length));
+                    anchor = deleteDirectiveSuffix(anchor);
+                    var index = directivePriority.indexOf(anchor);
+                    if (index === -1) {
+                        directivePriority.unshift(anchor)
+                    } else {
+                        directivePriority.splice(index, 0, anchor);
+                    }
+                } else if (priority.indexOf('>') === priority.length - 1) {
+                    var anchor = trim(priority.substring(0, priority.length - 1));
+                    anchor = deleteDirectiveSuffix(anchor);
+                    var index = directivePriority.indexOf(anchor)
+                    if (index == -1) {
+                        directivePriority.push(anchor);
+                    } else {
+                        directivePriority.splice(index, 0, anchor);
+                    }
+                }
             }
             for (key in app.module) {
                 obj.module[key] = injector(app.module, obj.provider, undefined, key);
             }
 
             return obj;
+
+            function deleteDirectiveSuffix(str) {
+                return str.replace(/Directive$/, '')
+            }
 
         }
 

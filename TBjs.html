@@ -10,13 +10,24 @@
     <script src="classes/src/virtualDom.js"></script>
     <script src="classes/src/compiler.js"></script>
     <script src="classes/src/main.js"></script>
+    <script src="classes/src/providers/query.js"></script>
     <script>
         var app = TBjs.app('app');
-        app.directive('tbClick', ['name',function(name) {
-            return function() {
+        app.directive('tbClick', ['name', function(name) {
+            return function(model,element) {
+				element.on('click',function(){
+					alert(333)
+				})
                 console.log(arguments)
-				console.log(name)
-                alert(333)
+                console.log(name)
+            }
+        }]).directive('tbChange', ['name', function(name) {
+            return {
+                priority: '<',
+                controller: function() {
+                    console.log(arguments)
+                    console.log(name)
+                }
             }
         }]).module('nav', ['name', function(name) {
             return function() {
@@ -35,7 +46,8 @@
 </head>
 
 <body>
-    <div tb-click="submit()">test</div>
+    <div tb-click="submit()" tb-change="name">test</div>
+    <p>fdsafdsa</p>
 </body>
 
 </html>

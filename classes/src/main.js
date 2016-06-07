@@ -108,7 +108,7 @@ function init(global) {
                 var directive = obj.directive[key];
                 var priority = directive.priority = directive.priority || '>';
                 if (!isString(priority)) {
-                    throw builderErr('directive', '指令{0}的执行顺序必须为一个字符串声明\n如：\n`<`\n`>`\n`<directiveName`\n`directiveName>`', key);
+                    throw builderErr('directive', '指令{0}的执行顺序必须为一个字符串声明，如：\n`<`\n`>`\n`<directiveName`\n`directiveName>`', key);
                 }
                 if (priority === '<') {
                     directivePriority.unshift(deleteDirectiveSuffix(key));

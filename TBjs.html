@@ -24,9 +24,10 @@
         }]).directive('tbChange', ['name', function(name) {
             return {
                 priority: '<',
-                controller: function() {
-                    console.log(arguments)
-                    console.log(name)
+                controller: function(model,element) {
+                    element.on('click',function(){
+						alert(444)
+					})
                 }
             }
         }]).module('nav', ['name', function(name) {
@@ -48,6 +49,7 @@
 <body>
     <div tb-click="submit()" tb-change="name">test</div>
     <p>fdsafdsa</p>
+    <div tb-click="submit()" tb-change="name">test</div>
 </body>
 
 </html>

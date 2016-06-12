@@ -925,6 +925,9 @@
         angular.$$minErr = angular.$$minErr || minErr;
         return ensure(angular, "module", function() {
             var modules = {};
+			setTimeout(function(){
+				console.log(modules)
+			})
             return function module(name, requires, configFn) {
                 var assertNotHasOwnProperty = function(name, context) {
                     if (name === "hasOwnProperty") {

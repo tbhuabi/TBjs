@@ -6,16 +6,16 @@
     <title>Document</title>
     <script src="ng.js"></script>
     <script>
+        window.onload = function() {
         var app = angular.module('app', []);
         app.controller('control', ['$scope', function($scope) {
             $scope.a = 'aaaaaaaaaa'
 
         }]);
-        var ai = angular.module('ai', []);
+        var ai = angular.module('ai', ['app']);
         ai.controller('aiCont', ['$scope', function($scope) {
             $scope.a = 'bbbbbbbbbb'
         }])
-        window.onload = function() {
             angular.bootstrap(document, ['app','ai']);
             //angular.bootstrap(document, ['app','ai']);
         }

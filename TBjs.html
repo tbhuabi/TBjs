@@ -1,55 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
     <meta charset="UTF-8">
-    <title>TBjs测试</title>
+    <title>TBjs222222</title>
     <script src="classes/src/toolkit.js"></script>
-    <script src="classes/src/model.js"></script>
-    <script src="classes/src/module.js"></script>
-    <script src="classes/src/virtualDom.js"></script>
-    <script src="classes/src/compiler.js"></script>
-    <script src="classes/src/main.js"></script>
-    <script src="classes/src/providers/query.js"></script>
+    <script src="classes/src/tb.js"></script>
+    <script src="classes/src/injector.js"></script>
+    <script src="classes/src/bootstarp.js"></script>
     <script>
-        var app = TBjs.app('app');
-        app.directive('tbClick', ['name', function(name) {
-            return function(model,element) {
-				element.on('click',function(){
-					alert(333)
-				})
-                console.log(arguments)
-                console.log(name)
-            }
-        }]).directive('tbChange', ['name', function(name) {
-            return {
-                priority: '<',
-                controller: function(model,element) {
-                    element.on('click',function(){
-						alert(444)
-					})
-                }
-            }
-        }]).module('nav', ['name', function(name) {
-            return function() {
-                this.name = 'tb' + name
-            }
-        }]).provider('name', function() {
-            this.$get = function() {
-                return 'aaaaaaaaaaa'
-            }
+        var app = TBjs.app('app', []);
+        app.module('moduleA', function() {
+
+        }).directive('directiveA', function() {
+
+        }).provider('providerA', function() {
+
+        }).filter('filterA', function() {
+
         })
-        window.onload = function() {
-            console.log(app)
-            TBjs.bootstrap(document.body, ['app'])
-        }
+		var app2 = TBjs.app('app2', ['app']);
+        app2.module('moduleB', function() {
+
+        }).directive('directiveB', function() {
+
+        }).provider('providerB', function() {
+
+        }).filter('filterB', function() {
+
+        })
+		var app3 = TBjs.app('app3', ['app']);
+        app3.module('moduleB', function() {
+
+        }).directive('directiveB', function() {
+
+        }).provider('providerB', function() {
+			this.$get=function(){
+				return 'testProvider'
+			}
+        }).filter('filterB', function() {
+
+        })
+		bootstrap(document,['app2','app3'])
     </script>
 </head>
 
 <body>
-    <div tb-click="submit()" tb-change="name">test</div>
-    <p>fdsafdsa</p>
-    <div tb-click="submit()" tb-change="name">test</div>
+
 </body>
 
 </html>

@@ -1,3 +1,0 @@
-function parser(ast, model){
-
-}

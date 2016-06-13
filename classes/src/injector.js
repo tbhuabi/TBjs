@@ -1,6 +1,7 @@
 function createInjector(applications) {
 
     var injectorMinErr = minErr('Injector');
+    var providerSuffixName = 'Provider';
 
     var providerCache = {};
     var instanceCache = {};
@@ -15,50 +16,39 @@ function createInjector(applications) {
     forEach(applications, function(appName) {
         appInit(appName);
     })
-    setTimeout(function() {
-        console.log(providerCache)
-        console.log(instanceCache)
-    })
 
     function appInit(appName) {
         var app = TBjs.app(appName);
         var requires = app.requires || [];
         var invokeQueue = app.invokeQueue;
         forEach(requires, function(appName) {
-            loadApplication(appName);
-        })
-        var providerCollection = providerCache[appName] = providerCache[appName] || {};
-        forEach(requires, function(requireAppName) {
-            extend(providerCache[appName], providerCache[requireAppName])
+            appInit(appName);
         })
         forEach(invokeQueue, function(methodRecipe) {
-            providerFactory[methodRecipe[0].toLowerCase()](providerCollection, methodRecipe[1], methodRecipe[2], methodRecipe[0]);
+            providerFactory[methodRecipe[0].toLowerCase()](methodRecipe[1], methodRecipe[2], methodRecipe[0]);
         })
     }
 
-    function provider(providerCollection, providerName, factoryFunction) {
-        providerCollection[providerName + 'Provider'] = new factoryFunction();
+    function provider(providerName, factoryFunction) {
+        providerCache[providerName + 'Provider'] = new factoryFunction();
     }
 
-    function supportProvider(providerCollection, moduleName, factoryFunction, methodName) {
-        provider(providerCollection, moduleName + methodName, function() {
+    function supportProvider(moduleName, factoryFunction, methodName) {
+        provider(moduleName + methodName, function() {
             this.$get = factoryFunction;
         })
     }
 
-    function loadApplication(appName) {
-        appInit(appName);
-    }
 
-    function createInternalInjector(provider, appName) {
-        var $getFn = provider.$get;
-        if (isFunction($getFn)) {
-            return $getFn.call(provider);
-        } else if (isArray($getFn)) {
-            var fn = $getFn.pop();
-            var params = provider;
+    function invoke(fn, self) {
+        if (isFunction(fn)) {
+            return fn.call(self);
+        }
+        if (isArray(fn)) {
+            var factory = fn.pop();
+            var params = fn;
             var args = [];
-            if (!isFunction(fn)) {
+            if (!isFunction(factory)) {
                 throw injectorMinErr('invoke', '依赖注入最后一个参数必须为一个函数！');
             }
             forEach(params, function(providerName) {
@@ -67,21 +57,24 @@ function createInjector(applications) {
                 }
                 if (instanceCache[providerName]) {
                     args.push(instanceCache[providerName])
-                } else if (providerCache[providerName]) {
-                    var providerInstance = createInternalInjector(providerName, appName);
-                    instanceCache[providerName] = providerInstance;
-                    args.push(providerInstance)
                 } else {
-                    throw injectorMinErr('invoke', '应用 {0} 中，{1}未注册！', appName, providerName);
+                    var provider = providerCache[providerName + providerSuffixName];
+                    if (provider) {
+                        var providerGetFn = provider.$get;
+                        if (!isFunction(providerGetFn) || !isArray) {
+                            throw injectorMinErr('invoke', 'provider<{0}>必须提供$get方法！', providerName);
+                        }
+                        var providerInstance = invoke(providerGetFn, isFunction(providerGetFn) ? provider : undefined);
+                        instanceCache[providerName] = providerInstance;
+                        args.push(providerInstance);
+                    } else {
+                        throw injectorMinErr('invoke', 'provider：{0}未注册！', providerName);
+                    }
                 }
             })
-            return fn.apply(provider, args);
+            return factory.apply(self, args);
         }
-        throw injectorMinErr('invoke', 'provider必须提供 `$get` 方法！');
-    }
-
-    function invoke(provider, appName) {
-		return createInternalInjector(provider,appName);
+        throw injectorMinErr('invoke', '{0}依赖注入格式有误！', fn + '');
     }
 
     function instantiate() {

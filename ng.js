@@ -2066,17 +2066,23 @@
                 decorator: decorator
             }
         };
-        var providerInjector = (providerCache.$injector = createInternalInjector(providerCache, function(serviceName, caller) {
+
+
+        var providerInjector = providerCache.$injector = createInternalInjector(providerCache, function(serviceName, caller) {
             if (angular.isString(caller)) {
                 path.push(caller)
             }
             throw $injectorMinErr("unpr", "Unknown provider: {0}", path.join(" <- "))
-        }));
+        });
+
+
         var instanceCache = {};
-        var instanceInjector = (instanceCache.$injector = createInternalInjector(instanceCache, function(serviceName, caller) {
+        var instanceInjector = instanceCache.$injector = createInternalInjector(instanceCache, function(serviceName, caller) {
             var provider = providerInjector.get(serviceName + providerSuffix, caller);
             return instanceInjector.invoke(provider.$get, provider, undefined, serviceName)
-        }));
+        });
+
+
         forEach(loadModules(modulesToLoad), function(fn) {
             if (fn) {
                 instanceInjector.invoke(fn)

@@ -3,7 +3,8 @@ function bootstrap(element, applications) {
     var injector = createInjector(applications);
     injector.invoke(['providerB',
         function(providerB) {
-
+			console.log(this)
+			console.log(providerB)
         }
     ])
 }

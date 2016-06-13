@@ -2072,6 +2072,11 @@
             throw $injectorMinErr("unpr", "Unknown provider: {0}", path.join(" <- "))
         });
 
+		setTimeout(function(){
+			console.log(path)
+			console.log(providerCache)
+			console.log(instanceCache)
+		})
 
         var instanceCache = {};
         var instanceInjector = instanceCache.$injector = createInternalInjector(instanceCache, function(serviceName, caller) {
@@ -2085,9 +2090,6 @@
                 instanceInjector.invoke(fn)
             }
         });
-        setTimeout(function() {
-            console.log(instanceCache)
-        })
         return instanceInjector;
 
         function supportObject(delegate) {

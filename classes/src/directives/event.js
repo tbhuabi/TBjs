@@ -11,7 +11,8 @@ forEach('click dblclick mousedown mouseup mouseover mouseout mousemove mouseente
 //            terminal: false,
             controller: function(model, vDomElement, attrs) {
                 vDomElement.on(eventType, function() {
-                    $parse(attrs[event])(model);
+					alert(2222)
+                    //$parse(attrs[event])(model);
                 })
             }
         }

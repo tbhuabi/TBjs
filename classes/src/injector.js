@@ -16,10 +16,13 @@ function createInjector(applications) {
         directive: supportProvider,
         filter: supportProvider
     };
+    var injector = instanceCache.$injector = createInternalInjector();
 
     forEach(applications, function(appName) {
         appInit(appName);
     })
+
+    return injector;
 
     function appInit(appName) {
         var app = TBjs.app(appName);
@@ -43,59 +46,57 @@ function createInjector(applications) {
         })
     }
 
-
-    function invoke(fn, self) {
-        if (isFunction(fn)) {
-            return fn.call(self);
-        }
-        if (isArray(fn)) {
-            var factory = fn.pop();
-            var params = fn;
-            var args = [];
-            if (!isFunction(factory)) {
-                throw injectorMinErr('invoke', '依赖注入最后一个参数必须为一个函数！');
+    function createInternalInjector() {
+        function invoke(fn, self) {
+            if (isFunction(fn)) {
+                return fn.call(self);
             }
-            forEach(params, function(providerName) {
-                if (!isString(providerName)) {
-                    throw injectorMinErr('invoke', '依赖注入项必须为字符串！');
+            if (isArray(fn)) {
+                var factory = fn.pop();
+                var params = fn;
+                var args = [];
+                if (!isFunction(factory)) {
+                    throw injectorMinErr('invoke', '依赖注入最后一个参数必须为一个函数！');
                 }
-                if (instanceCache[providerName]) {
-                    args.push(instanceCache[providerName])
-                } else {
-                    var provider = providerCache[providerName + providerSuffixName];
-                    if (provider) {
-                        var providerGetFn = provider.$get;
-                        if (!isFunction(providerGetFn) && !isArray(providerGetFn)) {
-                            throw injectorMinErr('invoke', 'provider<{0}>必须提供$get方法！', providerName);
-                        }
-                        var providerInstance = invoke(providerGetFn, isFunction(providerGetFn) ? provider : undefined);
-                        instanceCache[providerName] = providerInstance;
-                        args.push(providerInstance);
-                    } else {
-                        throw injectorMinErr('invoke', 'provider：{0}未注册！', providerName);
+                forEach(params, function(providerName) {
+                    if (!isString(providerName)) {
+                        throw injectorMinErr('invoke', '依赖注入项必须为字符串！');
                     }
-                }
-            })
-            return factory.apply(self, args);
+                    args.push(getProvider(providerName));
+                })
+                return factory.apply(self, args);
+            }
+            throw injectorMinErr('invoke', '{0}依赖注入格式有误！', fn + '');
         }
-        throw injectorMinErr('invoke', '{0}依赖注入格式有误！', fn + '');
+
+        function instantiate() {
+
+        }
+
+        function getProvider(name) {
+            if (instanceCache[name]) {
+                return instanceCache[name]
+            }
+            var provider = providerCache[name + providerSuffixName];
+            if (provider) {
+                var providerGetFn = provider.$get;
+                if (!isFunction(providerGetFn) && !isArray(providerGetFn)) {
+                    throw injectorMinErr('invoke', 'provider<{0}>必须提供$get方法！', name);
+                }
+                var providerInstance = invoke(providerGetFn, isFunction(providerGetFn) ? provider : undefined);
+                instanceCache[name] = providerInstance;
+                return providerInstance;
+            }
+            throw injectorMinErr('invoke', 'provider：{0}未注册！', name);
+        }
+        return {
+            invoke: invoke,
+            instantiate: instantiate,
+            get: getProvider,
+            has: function(name) {
+                return providerCache.hasOwnProperty(name + providerSuffixName) || instanceCache.hasOwnProperty(name);
+            }
+        }
     }
 
-    function instantiate() {
-
-    }
-
-    function getService() {
-
-    }
-
-    function has() {
-
-    }
-    return {
-        invoke: invoke,
-        instantiate: instantiate,
-        get: getService,
-        has: has
-    }
 }

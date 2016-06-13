@@ -20,44 +20,16 @@
     <script src="classes/src/bootstarp.js"></script>
     <script src="classes/src/directives/event.js"></script>
     <script>
-        var app = TBjs.app('app', []);
-        app.module('moduleA', function() {
+        window.onload = function() {
 
-        }).directive('directiveA', function() {
-
-        }).provider('providerA', function() {
-
-        }).filter('filterA', function() {
-
-        })
-		var app2 = TBjs.app('app2', ['app']);
-        app2.module('moduleB', function() {
-
-        }).directive('directiveB', function() {
-
-        }).provider('providerB', function() {
-
-        }).filter('filterB', function() {
-
-        })
-		var app3 = TBjs.app('app3', ['app']);
-        app3.module('moduleB', function() {
-
-        }).directive('directiveB', function() {
-
-        }).provider('providerB', function() {
-			this.$get=function(){
-				return 'testProvider'
-			}
-        }).filter('filterB', function() {
-
-        })
-		bootstrap(document,['app2','app3'])
+            var app = TBjs.app('app', []);
+            bootstrap(document, ['app'])
+        }
     </script>
 </head>
 
 <body>
-
+    <div tb-click="">fdsfdsafdsa</div>
 </body>
 
 </html>

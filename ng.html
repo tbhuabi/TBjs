@@ -1,35 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html ng-app>
 
 <head>
     <meta charset="UTF-8">
     <title>Document</title>
     <script src="ng.js"></script>
-    <script>
-        window.onload = function() {
-        var app = angular.module('app', []);
-        app.controller('control', ['$scope', function($scope) {
-            $scope.a = 'aaaaaaaaaa'
-
-        }]);
-        var ai = angular.module('ai', ['app']);
-        ai.controller('aiCont', ['$scope', function($scope) {
-            $scope.a = 'bbbbbbbbbb'
-        }])
-            angular.bootstrap(document, ['app','ai']);
-            //angular.bootstrap(document, ['app','ai']);
-        }
-    </script>
 </head>
 
 <body>
-    <div ng-controller="control">
-
+    <div>
         <input type="text" ng-model="a">
         <div>{{a}}</div>
         <div>{{a}}</div>
     </div>
-    <div ng-controller="aiCont">{{a}}</div>
 </body>
 
 </html>

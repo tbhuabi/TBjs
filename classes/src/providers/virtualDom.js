@@ -4,10 +4,17 @@ var COMMENT_NODE_TYPE = 8;
 var DOCUMENT_NODE_TYPE = 9;
 
 function $VirtualDomProvider() {
-    this.$get = function() {
-        return VirtualDom
-    };
     var xmlMinErr = minErr('$XmlEngine');
+
+    this.$get = function() {
+        return function(str) {
+            str = str || '';
+            if (isString(str)) {
+                return new VirtualDom(str);
+            }
+            throw xmlMinErr('params', '要构建虚拟DOM，参数必须为一个字符串！');
+        }
+    };
     var ODD_TAG_LIST = ['img', 'input', 'br', 'hr', 'param', 'meta', 'link'];
 
 

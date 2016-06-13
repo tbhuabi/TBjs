@@ -1,3 +1,5 @@
+function noop() {}
+
 function minErr(module) {
     return function(code, template) {
         var args = arguments;
@@ -43,7 +45,7 @@ var extend = function(obj, properties) {
     for (var i in properties) {
         obj[i] = properties[i];
     }
-	return obj;
+    return obj;
 };
 var forEach = function(arr, fn) {
     for (var i = 0, len = arr.length; i < len; i++) {

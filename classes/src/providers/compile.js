@@ -1,5 +1,7 @@
-function $CompileProvider(){
-	this.$get=function(){
+function $CompileProvider() {
+    this.$get = ['$parse', function($parse) {
+		return function parserExpors(exp){
 
-	}
+		}
+    }]
 }

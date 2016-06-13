@@ -1,6 +1,6 @@
 function $ModuleProvider() {
     this.$get = function() {
-
+		return Module;
     }
 
     function Module(app, obj, model) {

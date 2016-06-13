@@ -6,6 +6,10 @@ function createInjector(applications) {
     var providerCache = {};
     var instanceCache = {};
 
+    setTimeout(function() {
+        console.log(providerCache)
+        console.log(instanceCache)
+    })
     var providerFactory = {
         provider: provider,
         module: supportProvider,
@@ -30,7 +34,7 @@ function createInjector(applications) {
     }
 
     function provider(providerName, factoryFunction) {
-        providerCache[providerName + 'Provider'] = new factoryFunction();
+        providerCache[providerName + providerSuffixName] = new factoryFunction();
     }
 
     function supportProvider(moduleName, factoryFunction, methodName) {
@@ -61,7 +65,7 @@ function createInjector(applications) {
                     var provider = providerCache[providerName + providerSuffixName];
                     if (provider) {
                         var providerGetFn = provider.$get;
-                        if (!isFunction(providerGetFn) || !isArray) {
+                        if (!isFunction(providerGetFn) && !isArray(providerGetFn)) {
                             throw injectorMinErr('invoke', 'provider<{0}>必须提供$get方法！', providerName);
                         }
                         var providerInstance = invoke(providerGetFn, isFunction(providerGetFn) ? provider : undefined);

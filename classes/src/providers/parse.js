@@ -1,5 +1,9 @@
 function $ParseProvider() {
-    this.$get = function() {
+    this.$get = ['$ast', function($ast) {
+        return function expressionParser(experssion) {
+            return function value(model) {
 
-    };
+            }
+        }
+    }];
 }

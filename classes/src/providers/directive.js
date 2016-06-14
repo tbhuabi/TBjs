@@ -28,7 +28,7 @@ function $DirectiveProvider() {
             }
         }
         if (!isObject(directive)) {
-            throw compileMinErr('directive', 'directive必须返回一个控制函数或一个包含controller方法的对象!');
+            throw compileMinErr('directive', 'directive必须返回一个控制函数或一个对象!');
         }
         var directiveTemplate = {
             restrict: 'EAM',

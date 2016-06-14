@@ -11,7 +11,7 @@ var tbEventDirectives = {};
             //            terminal: false,
             controller: function(model, vDomElement, attrs) {
                 vDomElement.on(eventType, function() {
-                    alert(2222)
+                    console.log(2222)
                         //$parse(attrs[event])(model);
 
                 })

@@ -28,18 +28,18 @@ function $ModuleProvider() {
             }
         }
         if (!isObject(module)) {
-            throw compileMinErr('normalize', 'module必须返回一个控制函数或一个包含model方法的对象!');
+            throw compileMinErr('normalize', 'module必须返回一个控制函数或一个对象!');
         }
-        var defaultProperty = {
-            restrict: 'EAM',
-            priority: '>',
-            compile: noop,
-            replace: false,
-            terminal: false,
-            require: '',
-            transclude: false,
-            controller: noop
+        var moduleTemplate = {
+            template: null,
+            templateUrl: '',
+            model: noop
         };
+        for (var key in moduleTemplate) {
+            if (module.hasOwnProperty(key)) {
+                moduleTemplate[key] = module[key];
+            }
+        }
         return module;
     }
 }

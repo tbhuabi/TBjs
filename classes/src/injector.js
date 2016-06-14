@@ -6,10 +6,6 @@ function createInjector(applications) {
     var providerCache = {};
     var instanceCache = {};
 
-    setTimeout(function() {
-        console.log(providerCache)
-        console.log(instanceCache)
-    })
     var providerFactory = {
         provider: provider,
         module: supportProvider,

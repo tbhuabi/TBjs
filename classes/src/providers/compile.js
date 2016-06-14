@@ -24,9 +24,12 @@ function $CompileProvider() {
                 function compileDomTree(vDom) {
                     switch (vDom.nodeType) {
                         case NODE_TYPE_ELEMENT:
-                            if ($module.has(nameNormalize(vDom.tagName))) {
-                                compileModuleNode(vDom)
+							// 模块并编译
+							var moduleName=nameNormalize(vDom.tagName);
+                            if ($module.has(moduleName)) {
+                                var moduleInstance=$module.get(moduleName);
                             }
+							// 编译指令
                             var attributes = vDom.attributes;
                             var directiveQueue = [];
                             forEach(attributes, function(attr) {

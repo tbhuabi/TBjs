@@ -1,8 +1,11 @@
 function $ModelProvider() {
     this.$get = function() {
-        return Model;
+        return function model() {
+            return new Model();
+        };
     };
-    function Model(scopeName, callback) {}
+
+    function Model() {}
     extend(Model.prototype, {
         $new: function(scopeName, obj) {
             function a() {}
@@ -10,9 +13,6 @@ function $ModelProvider() {
             var newModule = new a();
             this.$init.call(newModule, scopeName, obj);
             return newModule;
-        },
-        $apply: function() {
-
         }
     })
 };

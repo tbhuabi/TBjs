@@ -1,11 +1,8 @@
-//var tbIfDirective = ['$parse', function($parse) {
-//    return {
-//        priority: 0,
-//        controller: function() {
-//
-//        }
-//    }
-//}];
-var tbIfDirective = function() {
-    return function() {}
-}
+var tbIfDirective = ['$parse', function($parse) {
+    return {
+        priority: 100,
+        controller: function() {
+
+        }
+    }
+}];

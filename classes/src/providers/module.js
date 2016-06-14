@@ -14,9 +14,9 @@ function $ModuleProvider() {
         }
 
         function getModule(name) {
-            if (moduleCache.hasOwnProperty(name)) {
-                return moduleCache[name];
-            }
+//            if (moduleCache.hasOwnProperty(name)) {
+//                return moduleCache[name];
+//            }
             return moduleCache[name] = moduleNormalize($injector.get(name + moduleSuffix));
         }
     }];
@@ -40,6 +40,6 @@ function $ModuleProvider() {
                 moduleTemplate[key] = module[key];
             }
         }
-        return module;
+        return moduleTemplate;
     }
 }

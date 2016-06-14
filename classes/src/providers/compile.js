@@ -23,13 +23,39 @@ function $CompileProvider() {
 
                 function compileDomTree(vDom) {
                     switch (vDom.nodeType) {
+						case NODE_TYPE_COMMENT:
+
+							break;
+
                         case NODE_TYPE_ELEMENT:
-							// 模块并编译
-							var moduleName=nameNormalize(vDom.tagName);
+                            // 模块并编译
+                            var moduleName = nameNormalize(vDom.tagName);
                             if ($module.has(moduleName)) {
-                                var moduleInstance=$module.get(moduleName);
+                                var module = $module.get(moduleName);
+                                if (vDom.children.length && !isEmpty(vDom.innerText)) {
+                                    module.template = vDom;
+                                } else {
+                                    vDom = $virtualDom(module.template);
+                                    var emptyNodes = [];
+                                    forEach(vDom.childNodes, function(ele) {
+                                        if (ele.nodeType === NODE_TYPE_TEXT && isEmpty(ele.textContent)) {
+                                            emptyNodes.push(ele);
+                                        }
+                                    })
+                                    emptyNodes.forEach(function(ele) {
+                                        vDom.removeChild(ele);
+                                    })
+                                    if (vDom.childNodes.length === 1) {
+                                        module.template = vDom
+                                    } else {
+                                        var moduleStartSymbol = vDom.createComment(templateToString(' module:start {0} ', moduleName));
+                                        var moduleEndSymbol = vDom.createComment(templateToString(' module:end {0} ', moduleName));
+                                        vDom.insertBefore(moduleStartSymbol, vDom.childNodes[0]);
+                                        vDom.appendChild(moduleEndSymbol);
+                                    }
+                                }
                             }
-							// 编译指令
+                            // 编译指令
                             var attributes = vDom.attributes;
                             var directiveQueue = [];
                             forEach(attributes, function(attr) {
@@ -54,9 +80,11 @@ function $CompileProvider() {
                             }
                             console.log(directiveQueue)
                             break;
+
                         case NODE_TYPE_TEXT:
                             compileInterpolateExpression(vDom.textContent);
                             break;
+
                         case NODE_TYPE_DOCUMENT:
                             forEach(vDom.childNodes, function(ele) {
                                 compileDomTree(ele);

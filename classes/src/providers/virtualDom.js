@@ -440,7 +440,6 @@ function $VirtualDomProvider() {
         }
     })
     var xmlEngine = function(context, htmlText) {
-
         var ALL_RGE_STRING = '.|[\\n\\t\\r\\v\\s]';
         var TAG_OR_PROPERTY_REG_STRING = '[a-zA-Z]\\w*(?:-\\w+)*';
         var TAG_ATTRIBUTE_VALUE_REG_STRING = '="[^"]*"|=\'[^\']*\'|=[^\\s>]+';

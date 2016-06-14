@@ -35,24 +35,35 @@ var isArray = Array.isArray || isType('Array');
 var isFunction = isType('Function');
 var isUndefined = isType('Undefined');
 
+function isEmpty(str) {
+    return /^[\s\t\n\r\v]$/gi.test(str);
+}
 
-
-var trim = function(str) {
+function trim(str) {
     return str.replace(/^\s+|\s+$/g, '');
 };
 
-var extend = function(obj, properties) {
+function templateToString() {
+    var template = arguments[0];
+    return template.replace(/\{(\d+)\}/g, function(str, $1) {
+        return arguments[Number($1) + 1];
+    })
+}
+
+function extend(obj, properties) {
     for (var i in properties) {
         obj[i] = properties[i];
     }
     return obj;
 };
-var forEach = function(arr, fn) {
+
+function forEach(arr, fn) {
     for (var i = 0, len = arr.length; i < len; i++) {
         fn(arr[i]);
     }
 };
-var unique = function(arr) {
+
+function unique(arr) {
     if (arr.length < 2) {
         return arr;
     }
@@ -72,7 +83,7 @@ var unique = function(arr) {
     return result;
 };
 
-var clone = function(obj) {
+function clone(obj) {
     var newObj;
     if (isArray(obj)) {
         newObj = [];

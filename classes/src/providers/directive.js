@@ -31,7 +31,7 @@ function $DirectiveProvider() {
             throw compileMinErr('directive', 'directive必须返回一个控制函数或一个对象!');
         }
         var directiveTemplate = {
-            restrict: 'EAM',
+            restrict: 'AM',
             priority: 1000,
             compile: noop,
             replace: false,

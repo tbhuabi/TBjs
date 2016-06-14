@@ -1,61 +1,45 @@
 function $ModuleProvider() {
-    this.$get = function() {
-		return Module;
-    }
+    var moduleMinErr = minErr('module');
+    var moduleSuffix = 'Module';
+    var moduleCache = {};
+    this.$get = ['$injector', function($injector) {
 
-    function Module(app, obj, model) {
-        var self = this;
-        self.app = app;
-        obj = obj || {};
-        var Model = obj.model || noop;
-        Model.prototype = model;
-        self.model = new Model();
+        return {
+            has: hasModule,
+            get: getModule
+        }
 
-        if (obj.template) {
-            if (isString(obj.template)) {
-                self.element = new VirtualDom(obj.template);
-                self.build();
-            } else {
-                //            self.element = new VirtualDom('');
-                //            createDomMap(obj.template, self.element, self.element);
-                self.element = obj.template;
-                self.build();
+        function hasModule(name) {
+            return moduleCache.hasOwnProperty(name) || $injector.has(name + moduleSuffix);
+        }
+
+        function getModule(name) {
+            if (moduleCache.hasOwnProperty(name)) {
+                return moduleCache[name];
             }
-        } else if (obj.templateUrl) {
-            http({
-                url: obj.templateUrl
-            }).then(function(response) {
-                self.element = new VirtualDom(response);
-                self.build();
-            })
+            return moduleCache[name] = moduleNormalize($injector.get(name + moduleSuffix));
         }
+    }];
+
+    function moduleNormalize(module) {
+        if (isFunction(module)) {
+            module = {
+                model: module
+            }
+        }
+        if (!isObject(module)) {
+            throw compileMinErr('normalize', 'module必须返回一个控制函数或一个包含model方法的对象!');
+        }
+        var defaultProperty = {
+            restrict: 'EAM',
+            priority: '>',
+            compile: noop,
+            replace: false,
+            terminal: false,
+            require: '',
+            transclude: false,
+            controller: noop
+        };
+        return module;
     }
-    extend(Module.prototype, {
-        build: function() {
-            compiler(this);
-        }
-    })
-
-    function createDomMap(element, context, vDom) {
-        var attributes = element.attributes;
-        var currentVDom;
-        if (element.nodeType === ELEMENT_NODE_TYPE) {
-            currentVDom = vDom.createElement(element.nodeName);
-            forEach(attributes, function(attr) {
-                currentVDom.setAttribute(attr.name, attr.value);
-            })
-            context.appendChild(currentVDom);
-            forEach(element.childNodes, function(child) {
-                createDomMap(child, currentVDom, vDom);
-            })
-        } else if (element.nodeType === TEXT_NODE_TYPE) {
-            currentVDom = vDom.createTextNode(element.textContent);
-            context.appendChild(currentVDom);
-        } else if (element.nodeType === COMMENT_NODE_TYPE) {
-            currentVDom = vDom.createComment(element.textContent);
-            context.appendChild(currentVDom);
-        }
-        currentVDom.$targetElement = element;
-    };
-
 }

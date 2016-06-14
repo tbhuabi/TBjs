@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>TBjs</title>
+    <!--    加载provider-->
     <script src="classes/src/providers/ast.js"></script>
     <script src="classes/src/providers/compile.js"></script>
     <script src="classes/src/providers/http.js"></script>
@@ -14,22 +15,37 @@
     <script src="classes/src/providers/promise.js"></script>
     <script src="classes/src/providers/query.js"></script>
     <script src="classes/src/providers/virtualDom.js"></script>
+    <script src="classes/src/providers/directive.js"></script>
+    <!--    加载directive-->
+    <script src="classes/src/directives/event.js"></script>
+    <script src="classes/src/directives/tbClass.js"></script>
+    <script src="classes/src/directives/tbFor.js"></script>
+    <script src="classes/src/directives/tbIf.js"></script>
+    <script src="classes/src/directives/tbInit.js"></script>
+    <script src="classes/src/directives/tbModel.js"></script>
+    <script src="classes/src/directives/tbModule.js"></script>
+    <script src="classes/src/directives/tbShow.js"></script>
+    <script src="classes/src/directives/tbStyle.js"></script>
+    <script src="classes/src/directives/tbTemplate.js"></script>
+    <!--    加载主文件-->
     <script src="classes/src/toolkit.js"></script>
     <script src="classes/src/main.js"></script>
     <script src="classes/src/injector.js"></script>
     <script src="classes/src/bootstarp.js"></script>
-    <script src="classes/src/directives/event.js"></script>
     <script>
         window.onload = function() {
 
             var app = TBjs.app('app', []);
+            app.directive('test', function() {
+                return function() {}
+            })
             bootstrap(document, ['app'])
         }
     </script>
 </head>
 
 <body>
-    <div tb-click="">fdsfdsafdsa</div>
+    <div tb-click="" tb-if test>fdsfdsafdsa</div>
 </body>
 
 </html>

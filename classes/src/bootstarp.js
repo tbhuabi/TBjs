@@ -19,8 +19,19 @@ function bootstrap(element, applications) {
         $parse: $ParseProvider,
         $promise: $PromiseProvider,
         $query: $QueryProvider,
-        $virtualDom: $VirtualDomProvider
-    })('directive', tbEventDirectives);
+        $virtualDom: $VirtualDomProvider,
+        $directive: $DirectiveProvider
+    })('directive', tbEventDirectives)('directive', {
+        tbModule: tbModuleDirective,
+        tbShow: tbShowDirective,
+        tbClass: tbClassDirective,
+        tbInit: tbInitDirective,
+        tbIf: tbIfDirective,
+        tbFor: tbForDirective,
+        tbModel: tbModelDirective,
+        tbTemplate: tbTemplateDirective,
+        tbStyle: tbStyleDirective
+    });
 
     var injector = createInjector(applications);
     injector.invoke(['$virtualDom', '$compile', '$model',
@@ -37,7 +48,7 @@ function bootstrap(element, applications) {
             function createDomMap(element, context, vDom) {
                 var attributes = element.attributes;
                 var currentVDom;
-                if (element.nodeType === ELEMENT_NODE_TYPE) {
+                if (element.nodeType === NODE_TYPE_ELEMENT) {
                     currentVDom = vDom.createElement(element.nodeName);
                     forEach(attributes, function(attr) {
                         currentVDom.setAttribute(attr.name, attr.value);
@@ -46,10 +57,10 @@ function bootstrap(element, applications) {
                     forEach(element.childNodes, function(child) {
                         createDomMap(child, currentVDom, vDom);
                     })
-                } else if (element.nodeType === TEXT_NODE_TYPE) {
+                } else if (element.nodeType === NODE_TYPE_TEXT) {
                     currentVDom = vDom.createTextNode(element.textContent);
                     context.appendChild(currentVDom);
-                } else if (element.nodeType === COMMENT_NODE_TYPE) {
+                } else if (element.nodeType === NODE_TYPE_COMMENT) {
                     currentVDom = vDom.createComment(element.textContent);
                     context.appendChild(currentVDom);
                 }

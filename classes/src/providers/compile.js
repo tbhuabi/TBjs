@@ -5,25 +5,11 @@ function $CompileProvider() {
         end: '}}'
     };
     this.interpolateSymbol = interpolateSymbol;
-    this.$get = ['$injector', '$parse', '$virtualDom', '$query',
-        function($injector, $parse, $virtualDom, $query) {
+
+    this.$get = ['$parse', '$virtualDom', '$query', '$directive', '$module',
+        function($parse, $virtualDom, $query, $directive, $module) {
             var startSymbol = interpolateSymbol.start;
             var endSymbol = interpolateSymbol.end;
-
-            function hasModule(name) {
-                return $injector.has(name + 'Module');
-            }
-
-            function hasDirecrtive(name) {
-                return $injector.has(name + 'Directive');
-            }
-
-            function nameNormalize(name) {
-                return name.toLowerCase().replace(/-\w/g, function(str) {
-                    return str.charAt(1).toUpperCase();
-                })
-            }
-
             return function compile(domElement) {
                 if (isString(domElement)) {
                     domElement = $virtualDom(domElement);
@@ -37,8 +23,8 @@ function $CompileProvider() {
 
                 function compileDomTree(vDom) {
                     switch (vDom.nodeType) {
-                        case ELEMENT_NODE_TYPE:
-                            if (hasModule(nameNormalize(vDom.tagName))) {
+                        case NODE_TYPE_ELEMENT:
+                            if ($module.has(nameNormalize(vDom.tagName))) {
                                 compileModuleNode(vDom)
                             }
                             var attributes = vDom.attributes;
@@ -48,8 +34,8 @@ function $CompileProvider() {
                                     compileInterpolateExpression(attr.value)
                                 }
                                 var directiveName = nameNormalize(attr.name);
-                                if (hasDirecrtive(directiveName)) {
-                                    directiveQueue.push($injector.get(directiveName + 'Directive'));
+                                if ($directive.has(directiveName)) {
+                                    directiveQueue.push($directive.get(directiveName));
                                 }
                             })
                             directiveQueue.sort(function(n, m) {
@@ -65,10 +51,10 @@ function $CompileProvider() {
                             }
                             console.log(directiveQueue)
                             break;
-                        case TEXT_NODE_TYPE:
+                        case NODE_TYPE_TEXT:
                             compileInterpolateExpression(vDom.textContent);
                             break;
-                        case DOCUMENT_NODE_TYPE:
+                        case NODE_TYPE_DOCUMENT:
                             forEach(vDom.childNodes, function(ele) {
                                 compileDomTree(ele);
                             })
@@ -88,6 +74,12 @@ function $CompileProvider() {
                 function compileModuleNode() {
 
                 }
+            }
+
+            function nameNormalize(name) {
+                return name.toLowerCase().replace(/-\w/g, function(str) {
+                    return str.charAt(1).toUpperCase();
+                })
             }
         }
     ]

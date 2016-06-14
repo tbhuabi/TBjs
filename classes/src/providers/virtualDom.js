@@ -1,7 +1,7 @@
-var ELEMENT_NODE_TYPE = 1;
-var TEXT_NODE_TYPE = 3;
-var COMMENT_NODE_TYPE = 8;
-var DOCUMENT_NODE_TYPE = 9;
+var NODE_TYPE_ELEMENT = 1;
+var NODE_TYPE_TEXT = 3;
+var NODE_TYPE_COMMENT = 8;
+var NODE_TYPE_DOCUMENT = 9;
 
 function $VirtualDomProvider() {
     var xmlMinErr = minErr('$XmlEngine');
@@ -28,7 +28,7 @@ function $VirtualDomProvider() {
         getInnerHtml: function() {
             if (this.innerHTML) {
                 return this.innerHTML;
-            } else if (this.nodeType === TEXT_NODE_TYPE || this.nodeType === COMMENT_NODE_TYPE) {
+            } else if (this.nodeType === NODE_TYPE_TEXT || this.nodeType === NODE_TYPE_COMMENT) {
                 return this.textContent;
             }
             var innerHTML = '';
@@ -43,9 +43,9 @@ function $VirtualDomProvider() {
         getOuterHtml: function() {
             if (this.outerHTML) {
                 return this.outerHTML;
-            } else if (this.nodeType === TEXT_NODE_TYPE) {
+            } else if (this.nodeType === NODE_TYPE_TEXT) {
                 return this.textContent;
-            } else if (this.nodeType === COMMENT_NODE_TYPE) {
+            } else if (this.nodeType === NODE_TYPE_COMMENT) {
                 return '<!--' + this.textContent + '-->';
             }
 
@@ -79,7 +79,7 @@ function $VirtualDomProvider() {
 
 
             var outerHtml = '';
-            if (this.nodeType === ELEMENT_NODE_TYPE) {
+            if (this.nodeType === NODE_TYPE_ELEMENT) {
                 var tagName = this.tagName.toLowerCase();
                 var attrHtml = getAttributeHtml(this.attributes);
                 if (ODD_TAG_LIST.indexOf(tagName) === -1) {
@@ -87,7 +87,7 @@ function $VirtualDomProvider() {
                 } else {
                     outerHtml = '<' + tagName + ' ' + attrHtml + '>';
                 }
-            } else if (this.nodeType === DOCUMENT_NODE_TYPE) {
+            } else if (this.nodeType === NODE_TYPE_DOCUMENT) {
                 outerHtml = getChildNodesHtml(this);
             }
 
@@ -95,9 +95,9 @@ function $VirtualDomProvider() {
             return outerHtml;
         },
         getInnerText: function() {
-            if (this.nodeType === TEXT_NODE_TYPE) {
+            if (this.nodeType === NODE_TYPE_TEXT) {
                 return this.textContent;
-            } else if (this.nodeType === COMMENT_NODE_TYPE) {
+            } else if (this.nodeType === NODE_TYPE_COMMENT) {
                 return;
             }
             var text = '';
@@ -371,7 +371,7 @@ function $VirtualDomProvider() {
             if (TBDomElement.parentNode !== this) {
                 TBDomElement.parentNode = this;
                 this.childNodes.push(TBDomElement);
-                if (TBDomElement.nodeType === ELEMENT_NODE_TYPE) {
+                if (TBDomElement.nodeType === NODE_TYPE_ELEMENT) {
                     this.children.push(TBDomElement);
                 }
             } else {
@@ -381,7 +381,7 @@ function $VirtualDomProvider() {
                         break;
                     }
                 }
-                if (TBDomElement.nodeType === ELEMENT_NODE_TYPE) {
+                if (TBDomElement.nodeType === NODE_TYPE_ELEMENT) {
                     for (var i = 0, len = this.children.length; i < len; i++) {
                         if (TBDomElement === this.children[i]) {
                             this.children.push(this.children.splice(i, 1));
@@ -399,7 +399,7 @@ function $VirtualDomProvider() {
                     break;
                 }
             }
-            if (TBDomElement.nodeType === ELEMENT_NODE_TYPE) {
+            if (TBDomElement.nodeType === NODE_TYPE_ELEMENT) {
                 for (var i = 0, len = this.children.length; i < len; i++) {
                     if (this.children[i] === TBDomElement) {
                         this.children.splice(i, 1);
@@ -635,7 +635,7 @@ function $VirtualDomProvider() {
     //document构造函数
     function DocumentElement(htmlContent) {
         this.$targetElement = null;
-        this.nodeType = DOCUMENT_NODE_TYPE;
+        this.nodeType = NODE_TYPE_DOCUMENT;
         this.parentNode = null;
         this.innerHTML = '';
         this.innerText = '';
@@ -695,7 +695,7 @@ function $VirtualDomProvider() {
     function OddElement(tagName) {
         this.$targetElement = null;
         this.tagName = this.nodeName = tagName.toUpperCase();
-        this.nodeType = ELEMENT_NODE_TYPE;
+        this.nodeType = NODE_TYPE_ELEMENT;
         this.parentNode = null;
         this.innerHTML = '';
         this.innerText = '';
@@ -716,7 +716,7 @@ function $VirtualDomProvider() {
     function EvenElement(tagName) {
         this.$targetElement = null;
         this.tagName = this.nodeName = tagName.toUpperCase();
-        this.nodeType = ELEMENT_NODE_TYPE;
+        this.nodeType = NODE_TYPE_ELEMENT;
         this.parentNode = null;
         this.innerHTML = '';
         this.innerText = '';
@@ -738,7 +738,7 @@ function $VirtualDomProvider() {
     function TextElement(text) {
         this.$targetElement = null;
         this.parentNode = null;
-        this.nodeType = TEXT_NODE_TYPE;
+        this.nodeType = NODE_TYPE_TEXT;
         this.nodeName = '#text';
         this.textContent = text.replace(/[\n\t\r\v]/g, '');
         this.eventListener = {};
@@ -750,7 +750,7 @@ function $VirtualDomProvider() {
     function CommentElement(commentText) {
         this.$targetElement = null;
         this.parentNode = null;
-        this.nodeType = COMMENT_NODE_TYPE;
+        this.nodeType = NODE_TYPE_COMMENT;
         this.nodeName = '#comment';
         this.textContent = commentText;
     }

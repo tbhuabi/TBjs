@@ -10,7 +10,7 @@ function $VirtualDomProvider() {
         return function(str) {
             str = str || '';
             if (isString(str)) {
-                return new VirtualDom(str);
+                return new DocumentElement(str);
             }
             throw xmlMinErr('params', '要构建虚拟DOM，参数必须为一个字符串！');
         }
@@ -155,7 +155,7 @@ function $VirtualDomProvider() {
             }
         },
         setInnerHtml: function(arg) {
-            var newNodeElements = new VirtualDom(arg);
+            var newNodeElements = new DocumentElement(arg);
             this.childNodes = [];
             this.children = [];
             for (var i = 0, len = newNodeElements.childNodes.length; i < len; i++) {
@@ -633,7 +633,7 @@ function $VirtualDomProvider() {
         }
     };
     //document构造函数
-    function VirtualDom(htmlContent) {
+    function DocumentElement(htmlContent) {
         this.$targetElement = null;
         this.nodeType = DOCUMENT_NODE_TYPE;
         this.parentNode = null;
@@ -647,9 +647,9 @@ function $VirtualDomProvider() {
         this.eventListener = {};
         xmlEngine(this, htmlContent);
     }
-    VirtualDom.prototype = new ElementMethodEngine();
-    extend(VirtualDom.prototype, {
-        constructor: VirtualDom,
+    DocumentElement.prototype = new ElementMethodEngine();
+    extend(DocumentElement.prototype, {
+        constructor: DocumentElement,
         createElement: function(tag) {
             tag = tag.toLowerCase();
             if (ODD_TAG_LIST.indexOf(tag) === -1) {

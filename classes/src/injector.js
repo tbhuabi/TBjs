@@ -52,8 +52,8 @@ function createInjector(applications) {
                 return fn.call(self);
             }
             if (isArray(fn)) {
-                var factory = fn.pop();
-                var params = fn;
+                var factory = fn[fn.length - 1];
+                var params = fn.slice(0, fn.length - 1);
                 var args = [];
                 if (!isFunction(factory)) {
                     throw injectorMinErr('invoke', '依赖注入最后一个参数必须为一个函数！');

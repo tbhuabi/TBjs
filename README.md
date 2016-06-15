@@ -30,8 +30,8 @@ angular各种好，但2.0跳崖式升级，想必大家的有所诟病，另外�
 #### 项目文件简介（可能因为不能及时更新，有所不同）：
   
 
-* `classes`		源码目录
-	- `src`			框架源文件
+* classes		源码目录
+	- src			框架源文件
 		+ `amd`  		类requirejs的AMD模块化框架
 		+ `bootstrap`	启动已注册的应用
 		+ `injector`	依赖注入方法
@@ -50,7 +50,7 @@ angular各种好，但2.0跳崖式升级，想必大家的有所诟病，另外�
 			* `promise` 	异步回调解决方案
 			* `query`		兼容DOM和虚拟DOM的类jQuery类库
 			* `virtualDom`	虚拟DOM成生器
-		+ `directives` 
+		+ directives 
 			* `event`		一般DOM事件指令集合
 			* `tbClass`
 			* `tbFor`

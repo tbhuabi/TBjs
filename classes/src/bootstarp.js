@@ -12,7 +12,7 @@ function bootstrap(element, applications) {
     publishApi('provider', {
         $ast: $AstProvider,
         $compile: $CompileProvider,
-        $http: $HttpProvider,
+        $async: $AsyncProvider,
         $lexer: $LexerProvider,
         $model: $ModelProvider,
         $module: $ModuleProvider,

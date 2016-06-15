@@ -1,4 +1,4 @@
-function $HttpProvider() {
+function $AsyncProvider() {
     var _this = this;
 
     function transferParams(obj) {

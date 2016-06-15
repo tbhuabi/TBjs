@@ -16,7 +16,7 @@ QQ：464328895
 ##### React  
 本身并没有做什么事，只是提供一了套前端组织代码的方法，JSX虽好，但需要编译，否则前端需要加载JSX的解析文件，不利于前端精简代码……  
 ##### Angular
-angular各种好，但2.0跳崖式升级，想必大家的有所诟病，另外不利于SEO，虽然有其他迂回的方法，但还是让人不爽，模板和指令很好，但后台不认识，兼容第三方类库或插件也必须经过包装…… 
+angular各种好，但2.0跳崖式升级，想必大家的有所诟病，另外不利于SEO，虽然有其他迂回的方法，但还是让人不爽，模板和指令很好，但后台不认识…… 
 ##### jQuery
 这个基本不用说了，大家太熟悉，jQuery提供了一套非常优雅的API，操作DOM非常方便，但基本可能说，也仅些而已。 
 
@@ -31,26 +31,37 @@ angular各种好，但2.0跳崖式升级，想必大家的有所诟病，另外�
   
 
 * `classes`		源码目录
-	- `TBjs.js`		框架主文件
 	- `src`			框架源文件
-		+ `amd.js`  类requirejs的AMD模块化框架
-		+ `ast.js`  构建抽象语法树
-		+ `bootstrap.js`  启动已注册的应用
-		+ `compiler.js`  编译需要实例化的应用
-		+ `directive.js`  指令提供者
-		+ `http.js`  数据交互模块
-		+ `lexer.js`  模板语法，词法分析器
-		+ `main.js`  注册应用的入口
-		+ `module.js`  MVC模块提供者
-		+ `parse.js`  解析模板语法的入口
-		+ `promise.js`  异步回调金字塔解决方案
-		+ `query.js`  类jQuery的DOM及虚拟DOM的类库
-		+ `scope.js`  构建模块作用域
-		+ `service.js`  服务提供者
-		+ `toolkit.js`  工具函数集合
-		+ `value.js`  根据当前作用域，求出模板表达式的值
-		+ `xmlEngine.js`  虚拟DOM引擎
-* `test.html`	测试文件
+		+ `amd`  		类requirejs的AMD模块化框架
+		+ `bootstrap`	启动已注册的应用
+		+ `injector`	依赖注入方法
+		+ `main`  		框架主文件
+		+ `main`  		框架主文件
+		+ `toolkit`  	公共方法集合
+		+	providers  
+			* `ast`			构建抽象语法树
+			* `async`		兼容Node和Web的异步文件服务
+			* `compile`		虚拟DOM编译器
+			* `directive` 	指令服务	
+			* `lexer`		词法分析器
+			* `model`		数据模型
+			* `module`		模块服务
+			* `parse`		语法树解析器
+			* `promise` 	异步回调解决方案
+			* `query`		兼容DOM和虚拟DOM的类jQuery类库
+			* `virtualDom`	虚拟DOM成生器
+		+ `directives` 
+			* `event`		一般DOM事件指令集合
+			* `tbClass`
+			* `tbFor`
+			* `tbIf`
+			* `tbInit`
+			* `tbModel`
+			* `tbModule`
+			* `tbShow`
+			* `tbStyle`
+			* `tbTemplate`
+* `TBjs.html`	测试文件
 
 
 例用范例：
@@ -58,80 +69,29 @@ angular各种好，但2.0跳崖式升级，想必大家的有所诟病，另外�
 **以下demo是当前开发进度下可能的预览，正式发布时可能有所更改**
 ##### 注册一个应用
 ```javascript
-var TB = require('TBjs');
-var myApp = TB.app('myApplication');
+var TBjs = require('TBjs');
+var myApp = TBjs.app('myApplication');
 ```
 ##### 给myApp注册通用服务
-TBjs的service跟angular不同，TBjs对service的定义是当调用某个已注册的服务时，一定会更新视图或数据，当使用时需要一些公共的字面量或函数时，推荐用AMD或commonjs规范，通过require函数来引入，这样可以保证服务的单一性，以降低复杂度。
-虽然你也可以通过service的返回值来返回一个常量，但并不推荐这么做。
-service方法会跟据不同的返回值，做出不同的响应，为了防止迷惑，把所有可能的情况列举如下：
+TBjs的service跟angular不同，TBjs只实现了angular的provider，剔除了angular的factory、service、value等方法，相应功能推荐用TBjs的AMD模块来定义：
 
 ###### 返回一个常量
 ```javascript
-myApp.service('serviceA', function() {
-    return 'a';
-})
-```
-###### 返回一个对象
-```javascript
-myApp.service('serviceB', function() {
-    return {
-        name: '张三',
-        age: 24
-    }
-})
-```
-###### 返回一个对象，并提供一个$get方法
-
-如果返回一个对象，并且有$get方法，那么在module中，service会注入$get方法的返回值
-
-```javascript
-
-myApp.service('serviceC', function() {
-    return {
-        $get: function() {
-            return {
-                name: '张三',
-                age: 24,
-            }
-        }
-    }
-})
-```
-######  返回一个构造函数
-如果service返回的是一个函数，那么这个函数一定会被当成一个构造函数来调用，如果使用中确实须要返回一个函数，请通过$get方法返回
-
-```javascript
-myApp.service('serviceD', function() {
-    return function() {
-        this.name = '张三';
-        this.age = 24;
-    }
-})
-```
-######  返回一个构造函数
-
-如果实例化后有$get方法，那么在module中，service会注入$get方法的返回值
-```javascript
-myApp.service('serviceE', function() {
-    return function() {
-        this.$get = function() {
-            return {
-                name: '张三',
-                age: 24,
-            }
-        }
-    }
+myApp.directive('serviceA', function() {
+	var value = 'yourValue';
+    this.$get = function() {
+		return value;
+	}
 })
 ```
 ######  service中的依赖注入
 依赖注入同angular一样，以数组的方式传入，最后一个元素为函数，函数参数会按照数组的书写顺序依次传入
 ```javascript
-myApp.service('serviceF', ['serviceA', 'serviceB',
-    function(serviceA, serviceB) {
-		//your code
-    }
-])
+myApp.service('serviceF', function() {
+	this.$get=['service1', 'service2', function(service1, service2) {
+		return 'value';
+	}]
+})
 ```
 
 ##### 给myApp注册指令
@@ -173,7 +133,7 @@ TBjs的模块是一个包含数据模型，视图模板的集合，有点类似�
 如果直接返回一个函数，那么这个函数将会被当做构造函数来调用，并传入当前module所属的已实例化的application的服务的集合
 ```javascript
 myApp.module('myModule', function() {
-    return function(services) {
+    return function() {
         this.name = '张三';
         this.age = 24;
         var _this = this;
@@ -189,7 +149,7 @@ myApp.module('myModule', function() {
     return {
         template: '一个模板字符串',
         templateUrl: '一个模板字符串的url地址',
-        model: function(services) {
+        model: function() {
             this.name = '张三';
             this.age = 24;
             var _this = this;
@@ -200,6 +160,23 @@ myApp.module('myModule', function() {
     }
 })
 ```
+如要需要服务，注入方式和angular一样：
 
+```javascript
+myApp.module('myModule', ['serviceA', function(serviceA) {
+    return {
+        template: '一个模板字符串',
+        templateUrl: '一个模板字符串的url地址',
+        model: function() {
+            this.name = '张三';
+            this.age = 24;
+            var _this = this;
+            this.changeName = function() {
+                _this.name = '李四';
+            }
+        }
+    }
+}])
+```
 		
 			

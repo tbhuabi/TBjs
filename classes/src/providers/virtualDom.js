@@ -17,7 +17,198 @@ function $VirtualDomProvider() {
     };
     var ODD_TAG_LIST = ['img', 'input', 'br', 'hr', 'param', 'meta', 'link'];
 
+    var xmlEngine = function(context, htmlText) {
+        var ALL_RGE_STRING = '.|[\\n\\t\\r\\v\\s]';
+        var TAG_OR_PROPERTY_REG_STRING = '[a-zA-Z]\\w*(?:-\\w+)*';
+        var TAG_ATTRIBUTE_VALUE_REG_STRING = '="[^"]*"|=\'[^\']*\'|=[^\\s>]+';
+        var TAG_ATTRIBUTE_REG_STRING = '\\s*' + TAG_OR_PROPERTY_REG_STRING + '(?:' + TAG_ATTRIBUTE_VALUE_REG_STRING + ')?';
+        var TAG_CLOSE_REG_STRING = '</' + TAG_OR_PROPERTY_REG_STRING + '>';
 
+        var TEST_SCRIPT_BERORE_REG = new RegExp('^<script\\s(' + TAG_ATTRIBUTE_REG_STRING + ')*>|^<script\\s*>', 'i');
+
+        var SPLIT_SCRIPT_CONTENT_REG = new RegExp('^(<script\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+' + '>|^<script\\s*>)((?:' + ALL_RGE_STRING + ')*)(</script>)', 'i');
+
+        var SPLIT_TAG_BEFORE_REG = new RegExp('(?!^)(?=(?:<' + TAG_OR_PROPERTY_REG_STRING + '\\s*/?>|<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*/?>)|</' + TAG_OR_PROPERTY_REG_STRING + '\\s*>)');
+
+        var SPLIT_TAG_AFTER_REG = new RegExp('(<' + TAG_OR_PROPERTY_REG_STRING + '\\s*/?>|<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*/?>|</' + TAG_OR_PROPERTY_REG_STRING + '\\s*>)((?:' + ALL_RGE_STRING + ')*)');
+
+        var TEST_TAG_REG = new RegExp('^<' + TAG_OR_PROPERTY_REG_STRING + '\\s*/?>$|^<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*/?>$|^</' + TAG_OR_PROPERTY_REG_STRING + '\\s*>$');
+
+
+        var arr = [];
+
+        var findScriptOrCommentNode = function(str) {
+            var startScriptIndex = str.search(/<script/i);
+            var startCommentIndex = str.indexOf('<!--');
+
+
+            var list = [startScriptIndex, startCommentIndex].sort(function(n, m) {
+                return n - m;
+            });
+
+            var startIndex = list[0] === -1 ? list[1] : list[0];
+
+            if (startIndex === -1) {
+                arr.push(str);
+                return;
+            }
+
+            var type = startIndex === startScriptIndex ? 'script' : 'comment';
+
+
+
+            if (type === 'script') {
+                var beforeStr = str.substring(0, startIndex);
+                var afterStr = str.substring(startIndex, str.length);
+                if (TEST_SCRIPT_BERORE_REG.test(afterStr)) {
+                    var scriptTagName = afterStr.slice(1, 7);
+                    var closeIndex = afterStr.search(new RegExp('</' + scriptTagName + '>', 'i'));
+                    if (closeIndex === -1) {
+                        //如果没有找到结尾标签，添加一个，主要是防止在词法分析时，正则匹配内存溢出的问题
+                        closeIndex = afterStr.length;
+                        afterStr += '</' + scriptTagName + '>';
+                    }
+                    beforeStr && arr.push(beforeStr);
+                    var body = afterStr.substring(0, closeIndex + 9);
+                    arr.push(body);
+                    if (closeIndex + 9 === afterStr.length) return;
+                    findScriptOrCommentNode(afterStr.substring(closeIndex + 9, afterStr.length));
+                }
+            } else {
+                var beforeStr = str.substring(0, startIndex);
+                if (beforeStr) arr.push(beforeStr);
+                var afterStr = str.substring(startIndex, str.length);
+                var closeIndex = afterStr.indexOf('-->');
+                if (closeIndex === -1 || closeIndex + 3 === afterStr.length) {
+                    arr.push(afterStr);
+                } else {
+                    var body = afterStr.substring(0, closeIndex + 3);
+                    arr.push(body);
+                    findScriptOrCommentNode(afterStr.substring(closeIndex + 3, afterStr.length));
+                }
+            }
+        };
+
+
+
+        findScriptOrCommentNode(htmlText);
+
+
+        var IS_SCRIPT_REG = /^<script/i;
+        var IS_COMMENT_REG = /^<!--/;
+        var arr1 = []; //存放第一次标签分析结果
+        arr.forEach(function(item) {
+            if (IS_SCRIPT_REG.test(item) || IS_COMMENT_REG.test(item)) {
+                arr1.push(item);
+                return;
+            }
+            item.split(SPLIT_TAG_BEFORE_REG).forEach(function(item) {
+                arr1.push(item);
+            });
+        })
+
+        var arr2 = []; //存放第二次标签分析结果
+        arr1.forEach(function(item) {
+            if (IS_SCRIPT_REG.test(item) || IS_COMMENT_REG.test(item)) {
+                arr2.push(item);
+                return;
+            }
+            var oldLength = arr2.length;
+            item.replace(SPLIT_TAG_AFTER_REG, function(str, $1, $2) {
+                arr2.push($1);
+                $2 && arr2.push($2);
+            });
+            if (oldLength === arr2.length) {
+                arr2.push(item);
+            }
+        })
+        var arr3 = []; //存入组合过滤后的dom文本元素集合;
+        var text = '';
+        for (var i = 0, len = arr2.length; i < len; i++) {
+            if (IS_SCRIPT_REG.test(arr2[i])) {
+                if (text !== '') {
+                    arr3.push(text);
+                    text = '';
+                }
+                arr2[i].replace(SPLIT_SCRIPT_CONTENT_REG, function(str, $1, $2, $3) {
+                    arr3.push($1);
+                    $2 && arr3.push($2);
+                    arr3.push($3);
+                });
+                continue;
+            } else if (TEST_TAG_REG.test(arr2[i])) {
+                if (text !== '') {
+                    arr3.push(text);
+                    text = '';
+                }
+                arr3.push(arr2[i]);
+            } else if (IS_COMMENT_REG.test(arr2[i])) {
+                if (text !== '') {
+                    arr3.push(text);
+                    text = '';
+                }
+                arr3.push(arr2[i]);
+            } else {
+                text += arr2[i];
+            }
+        }
+        xmlBuilder(context, context, arr3, 0);
+    };
+    var GET_BEGIN_TAG_REG = /^<(\w+(?:-\w+)*)/;
+    var GET_TAG_ATTRIBUTES_REG = /^<\w+(-\w+)*\s*|\s*\/?>$/g;
+    var MATCH_ATTRIBUTE_REG = /(\w+(?:-\w+)*)(="[^"]*"|='[^']*'|[^\s>]+)?/g;
+    var SPLIT_ATTRIBUTE_REG = /(^\w+(?:-\w+)*)(?:=(.*)$)?/;
+    var TRIM_QUOTE_REG = /^['"]|['"]$/g;
+    var TEST_CLOSE_TAG_REG = /^<\/[a-zA-Z]\w*(?:-\w+)*/;
+    var TEST_COMMENT_REG = /^<!--/;
+    var TRIM_COMMENT_REG = /^<!--|-->$/g;
+    var xmlBuilder = function(document, parentNode, arr, i) {
+        if (i < arr.length) {
+            var currentString = arr[i];
+            var beginTag = GET_BEGIN_TAG_REG.exec(currentString);
+            if (beginTag) {
+                beginTag = beginTag[1];
+
+                var currentElement = document.createElement(beginTag);
+                var attrStr = currentString.replace(GET_TAG_ATTRIBUTES_REG, '');
+                var attrbutes = attrStr.match(MATCH_ATTRIBUTE_REG);
+                if (attrbutes) {
+                    attrbutes.filter(function(item) {
+                        item = trim(item);
+                        item.replace(SPLIT_ATTRIBUTE_REG, function(str, $1, $2) {
+                            if ($2) {
+                                $2 = $2.replace(TRIM_QUOTE_REG, '');
+                            }
+                            currentElement.setAttribute($1, $2);
+                        })
+                    })
+                }
+                parentNode.appendChild(currentElement);
+                i++;
+                if (currentElement.childNodes === undefined || /\/>$/.test(currentString)) {
+                    xmlBuilder(document, parentNode, arr, i);
+                } else {
+                    xmlBuilder(document, currentElement, arr, i);
+                }
+                return;
+            }
+            if (TEST_CLOSE_TAG_REG.test(currentString)) {
+                if (parentNode.parentNode) {
+                    xmlBuilder(document, parentNode.parentNode, arr, ++i);
+                }
+                return;
+            }
+            if (TEST_COMMENT_REG.test(currentString)) {
+                var currentElement = document.createComment(currentString.replace(TRIM_COMMENT_REG, ''));
+                parentNode.appendChild(currentElement);
+                xmlBuilder(document, parentNode, arr, ++i);
+                return;
+            }
+            var currentElement = document.createTextNode(currentString);
+            parentNode.appendChild(currentElement);
+            xmlBuilder(document, parentNode, arr, ++i);
+        }
+    };
 
 
     //根对象
@@ -439,198 +630,7 @@ function $VirtualDomProvider() {
             this.$refresh();
         }
     })
-    var xmlEngine = function(context, htmlText) {
-        var ALL_RGE_STRING = '.|[\\n\\t\\r\\v\\s]';
-        var TAG_OR_PROPERTY_REG_STRING = '[a-zA-Z]\\w*(?:-\\w+)*';
-        var TAG_ATTRIBUTE_VALUE_REG_STRING = '="[^"]*"|=\'[^\']*\'|=[^\\s>]+';
-        var TAG_ATTRIBUTE_REG_STRING = '\\s*' + TAG_OR_PROPERTY_REG_STRING + '(?:' + TAG_ATTRIBUTE_VALUE_REG_STRING + ')?';
-        var TAG_CLOSE_REG_STRING = '</' + TAG_OR_PROPERTY_REG_STRING + '>';
 
-        var TEST_SCRIPT_BERORE_REG = new RegExp('^<script\\s(' + TAG_ATTRIBUTE_REG_STRING + ')*>|^<script\\s*>', 'i');
-
-        var SPLIT_SCRIPT_CONTENT_REG = new RegExp('^(<script\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+' + '>|^<script\\s*>)((?:' + ALL_RGE_STRING + ')*)(</script>)', 'i');
-
-        var SPLIT_TAG_BEFORE_REG = new RegExp('(?!^)(?=(?:<' + TAG_OR_PROPERTY_REG_STRING + '\\s*/?>|<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*/?>)|</' + TAG_OR_PROPERTY_REG_STRING + '\\s*>)');
-
-        var SPLIT_TAG_AFTER_REG = new RegExp('(<' + TAG_OR_PROPERTY_REG_STRING + '\\s*/?>|<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*/?>|</' + TAG_OR_PROPERTY_REG_STRING + '\\s*>)((?:' + ALL_RGE_STRING + ')*)');
-
-        var TEST_TAG_REG = new RegExp('^<' + TAG_OR_PROPERTY_REG_STRING + '\\s*/?>$|^<' + TAG_OR_PROPERTY_REG_STRING + '\\s(?:' + TAG_ATTRIBUTE_REG_STRING + ')+\\s*/?>$|^</' + TAG_OR_PROPERTY_REG_STRING + '\\s*>$');
-
-
-        var arr = [];
-
-        var findScriptOrCommentNode = function(str) {
-            var startScriptIndex = str.search(/<script/i);
-            var startCommentIndex = str.indexOf('<!--');
-
-
-            var list = [startScriptIndex, startCommentIndex].sort(function(n, m) {
-                return n - m;
-            });
-
-            var startIndex = list[0] === -1 ? list[1] : list[0];
-
-            if (startIndex === -1) {
-                arr.push(str);
-                return;
-            }
-
-            var type = startIndex === startScriptIndex ? 'script' : 'comment';
-
-
-
-            if (type === 'script') {
-                var beforeStr = str.substring(0, startIndex);
-                var afterStr = str.substring(startIndex, str.length);
-                if (TEST_SCRIPT_BERORE_REG.test(afterStr)) {
-                    var scriptTagName = afterStr.slice(1, 7);
-                    var closeIndex = afterStr.search(new RegExp('</' + scriptTagName + '>', 'i'));
-                    if (closeIndex === -1) {
-                        //如果没有找到结尾标签，添加一个，主要是防止在词法分析时，正则匹配内存溢出的问题
-                        closeIndex = afterStr.length;
-                        afterStr += '</' + scriptTagName + '>';
-                    }
-                    beforeStr && arr.push(beforeStr);
-                    var body = afterStr.substring(0, closeIndex + 9);
-                    arr.push(body);
-                    if (closeIndex + 9 === afterStr.length) return;
-                    findScriptOrCommentNode(afterStr.substring(closeIndex + 9, afterStr.length));
-                }
-            } else {
-                var beforeStr = str.substring(0, startIndex);
-                if (beforeStr) arr.push(beforeStr);
-                var afterStr = str.substring(startIndex, str.length);
-                var closeIndex = afterStr.indexOf('-->');
-                if (closeIndex === -1 || closeIndex + 3 === afterStr.length) {
-                    arr.push(afterStr);
-                } else {
-                    var body = afterStr.substring(0, closeIndex + 3);
-                    arr.push(body);
-                    findScriptOrCommentNode(afterStr.substring(closeIndex + 3, afterStr.length));
-                }
-            }
-        };
-
-
-
-        findScriptOrCommentNode(htmlText);
-
-
-        var IS_SCRIPT_REG = /^<script/i;
-        var IS_COMMENT_REG = /^<!--/;
-        var arr1 = []; //存放第一次标签分析结果
-        arr.forEach(function(item) {
-            if (IS_SCRIPT_REG.test(item) || IS_COMMENT_REG.test(item)) {
-                arr1.push(item);
-                return;
-            }
-            item.split(SPLIT_TAG_BEFORE_REG).forEach(function(item) {
-                arr1.push(item);
-            });
-        })
-
-        var arr2 = []; //存放第二次标签分析结果
-        arr1.forEach(function(item) {
-            if (IS_SCRIPT_REG.test(item) || IS_COMMENT_REG.test(item)) {
-                arr2.push(item);
-                return;
-            }
-            var oldLength = arr2.length;
-            item.replace(SPLIT_TAG_AFTER_REG, function(str, $1, $2) {
-                arr2.push($1);
-                $2 && arr2.push($2);
-            });
-            if (oldLength === arr2.length) {
-                arr2.push(item);
-            }
-        })
-        var arr3 = []; //存入组合过滤后的dom文本元素集合;
-        var text = '';
-        for (var i = 0, len = arr2.length; i < len; i++) {
-            if (IS_SCRIPT_REG.test(arr2[i])) {
-                if (text !== '') {
-                    arr3.push(text);
-                    text = '';
-                }
-                arr2[i].replace(SPLIT_SCRIPT_CONTENT_REG, function(str, $1, $2, $3) {
-                    arr3.push($1);
-                    $2 && arr3.push($2);
-                    arr3.push($3);
-                });
-                continue;
-            } else if (TEST_TAG_REG.test(arr2[i])) {
-                if (text !== '') {
-                    arr3.push(text);
-                    text = '';
-                }
-                arr3.push(arr2[i]);
-            } else if (IS_COMMENT_REG.test(arr2[i])) {
-                if (text !== '') {
-                    arr3.push(text);
-                    text = '';
-                }
-                arr3.push(arr2[i]);
-            } else {
-                text += arr2[i];
-            }
-        }
-        xmlBuilder(context, context, arr3, 0);
-    };
-    var GET_BEGIN_TAG_REG = /^<(\w+(?:-\w+)*)/;
-    var GET_TAG_ATTRIBUTES_REG = /^<\w+(-\w+)*\s*|\s*\/?>$/g;
-    var MATCH_ATTRIBUTE_REG = /(\w+(?:-\w+)*)(="[^"]*"|='[^']*'|[^\s>]+)?/g;
-    var SPLIT_ATTRIBUTE_REG = /(^\w+(?:-\w+)*)(?:=(.*)$)?/;
-    var TRIM_QUOTE_REG = /^['"]|['"]$/g;
-    var TEST_CLOSE_TAG_REG = /^<\/[a-zA-Z]\w*(?:-\w+)*/;
-    var TEST_COMMENT_REG = /^<!--/;
-    var TRIM_COMMENT_REG = /^<!--|-->$/g;
-    var xmlBuilder = function(document, parentNode, arr, i) {
-        if (i < arr.length) {
-            var currentString = arr[i];
-            var beginTag = GET_BEGIN_TAG_REG.exec(currentString);
-            if (beginTag) {
-                beginTag = beginTag[1];
-
-                var currentElement = document.createElement(beginTag);
-                var attrStr = currentString.replace(GET_TAG_ATTRIBUTES_REG, '');
-                var attrbutes = attrStr.match(MATCH_ATTRIBUTE_REG);
-                if (attrbutes) {
-                    attrbutes.filter(function(item) {
-                        item = trim(item);
-                        item.replace(SPLIT_ATTRIBUTE_REG, function(str, $1, $2) {
-                            if ($2) {
-                                $2 = $2.replace(TRIM_QUOTE_REG, '');
-                            }
-                            currentElement.setAttribute($1, $2);
-                        })
-                    })
-                }
-                parentNode.appendChild(currentElement);
-                i++;
-                if (currentElement.childNodes === undefined || /\/>$/.test(currentString)) {
-                    xmlBuilder(document, parentNode, arr, i);
-                } else {
-                    xmlBuilder(document, currentElement, arr, i);
-                }
-                return;
-            }
-            if (TEST_CLOSE_TAG_REG.test(currentString)) {
-                if (parentNode.parentNode) {
-                    xmlBuilder(document, parentNode.parentNode, arr, ++i);
-                }
-                return;
-            }
-            if (TEST_COMMENT_REG.test(currentString)) {
-                var currentElement = document.createComment(currentString.replace(TRIM_COMMENT_REG, ''));
-                parentNode.appendChild(currentElement);
-                xmlBuilder(document, parentNode, arr, ++i);
-                return;
-            }
-            var currentElement = document.createTextNode(currentString);
-            parentNode.appendChild(currentElement);
-            xmlBuilder(document, parentNode, arr, ++i);
-        }
-    };
     //document构造函数
     function DocumentElement(htmlContent) {
         this.$targetElement = null;

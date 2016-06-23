@@ -1,7 +1,7 @@
 function $ParseProvider() {
     var parseMinErr = minErr('$parse');
-    this.$get = ['$ast',
-        function($ast) {
+    this.$get = ['$ast', '$filter',
+        function($ast, $filter) {
             return function parser(experssion) {
                 var programs = $ast(experssion);
 
@@ -20,7 +20,7 @@ function $ParseProvider() {
                         case AST.AssignmentExpression:
                             var key = program.left.type === AST.Identifier ? program.left.value : astInterpreter(program.left, model);
                             if (!isString(key)) {
-                                throw parseMinErr('AssignmentExpression', '表达式{0}有误，不能给{1}赋值！', experssion, {}.toString.call(key));
+                                throw parseMinErr('assignment', '表达式{0}有误，不能给{1}赋值！', experssion, {}.toString.call(key));
                             }
                             return model[key] = astInterpreter(program.right, model);
 
@@ -80,8 +80,18 @@ function $ParseProvider() {
                         case AST.CallExpression:
                             var args = [];
                             program.arguments.forEach(function(item) {
-                                args.push(astInterpreter(item), model);
+                                args.push(astInterpreter(item, model));
                             })
+                            if (program.filter) {
+                                var key = program.callee.type === AST.Identifier ? program.callee.value : astInterpreter(program.callee, model);
+                                if (!isString(key)) {
+                                    throw parseMinErr('filter', '表达式{0}有误，{1}不能做为一个过滤器的名字！', experssion, {}.toString.call(key));
+                                }
+                                if (!$filter.has(key)) {
+                                    throw parseMinErr('injector', '过滤器{0}未注册！', key);
+                                }
+                                return $filter.get(key).apply(undefined, args);
+                            }
                             return model[astInterpreter(program.callee, model)].apply(model, args);
 
                         case AST.MemberExpression:

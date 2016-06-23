@@ -20,7 +20,8 @@ function bootstrap(element, applications) {
         $promise: $PromiseProvider,
         $query: $QueryProvider,
         $virtualDom: $VirtualDomProvider,
-        $directive: $DirectiveProvider
+        $directive: $DirectiveProvider,
+        $filter: $filterProvider
     })('directive', tbEventDirectives)('directive', {
         tbModule: tbModuleDirective,
         tbShow: tbShowDirective,

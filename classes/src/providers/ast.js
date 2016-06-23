@@ -281,7 +281,8 @@ function $AstProvider() {
             var result = {
                 type: AST.CallExpression,
                 callee: this.identifier(),
-                arguments: args
+                arguments: args,
+                filter: true
             };
             while (this.expect(':')) {
                 args.push(this.expression());

@@ -16,6 +16,7 @@
     <script src="classes/src/providers/query.js"></script>
     <script src="classes/src/providers/virtualDom.js"></script>
     <script src="classes/src/providers/directive.js"></script>
+	<script src="classes/src/providers/filter.js"></script>
     <!--    加载directive-->
     <script src="classes/src/directives/event.js"></script>
     <script src="classes/src/directives/tbClass.js"></script>
@@ -42,7 +43,7 @@
                 }
             }]).filter('toHtml', function() {
                 return function(value) {
-                    return value;
+                    return value+'aaaaaaaa';
                 }
             }).directive('show', ['$parse', function($parse) {
 				var obj={
@@ -55,7 +56,7 @@
                     c: 4,
                     d: 2
                 };
-                var a = $parse('[sss]=3')(obj);
+                var a = $parse('b|toHtml')(obj);
                 console.log(a);
 				console.log(obj);
 

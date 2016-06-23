@@ -18,6 +18,10 @@ function createInjector(applications) {
         appInit(appName);
     })
 
+	setTimeout(function(){
+		console.log(providerCache)
+		console.log(instanceCache)
+	})
     return injector;
 
     function appInit(appName) {

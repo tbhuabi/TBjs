@@ -34,6 +34,8 @@ function $DirectiveProvider() {
         }
         var directiveTemplate = {
             model: false,
+			template:'',
+			templateUrl:'',
             restrict: 'EA',
             priority: 1000,
             compile: noop,

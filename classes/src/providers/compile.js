@@ -78,7 +78,7 @@ function $CompileProvider() {
                                     compileDomTree(ele);
                                 })
                             }
-                            console.log(directiveQueue)
+                            //console.log(directiveQueue)
                             break;
 
                         case NODE_TYPE_TEXT:

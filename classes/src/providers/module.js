@@ -2,7 +2,7 @@ function $ModuleProvider() {
     var moduleMinErr = minErr('module');
     var moduleSuffix = 'Module';
     var moduleCache = {};
-    this.$get = ['$injector', function($injector) {
+    this.$get = ['$directive', function($injector) {
 
         return {
             has: hasModule,
@@ -33,7 +33,8 @@ function $ModuleProvider() {
         var moduleTemplate = {
             template: null,
             templateUrl: '',
-            model: noop
+            model: noop,
+			controller: noop
         };
         for (var key in moduleTemplate) {
             if (module.hasOwnProperty(key)) {

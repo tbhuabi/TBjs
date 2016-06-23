@@ -1,6 +1,6 @@
 function $LexerProvider() {
     this.$get = function() {
-        return Lexer;
+        return  new Lexer();
     };
     var OPERATORS = {};
     '+ - * / % === !== == != < > <= >= && || ! = |'.split(' ').forEach(function(operator) {

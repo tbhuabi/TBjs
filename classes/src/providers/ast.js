@@ -1,29 +1,30 @@
+function AST(lexer) {
+    this.lexer = lexer;
+}
+
+AST.Program = 'Program';
+AST.ExpressionStatement = 'ExpressionStatement'; //表达式语句
+AST.AssignmentExpression = 'AssignmentExpression'; //赋值表达式
+AST.ConditionalExpression = 'ConditionalExpression'; //条件表达式
+AST.LogicalExpression = 'LogicalExpression'; //逻辑表达式
+AST.BinaryExpression = 'BinaryExpression'; //二元运算表达式
+AST.UnaryExpression = 'UnaryExpression'; //一元运算表达式
+AST.CallExpression = 'CallExpression'; //函数调用表达式
+AST.MemberExpression = 'MemberExpression'; //成员表达式
+AST.Identifier = 'Identifier'; //标识符
+AST.Literal = 'Literal'; //文本常量
+AST.ArrayExpression = 'ArrayExpression'; //数组表达式
+AST.Property = 'Property'; //属性表达式
+AST.ObjectExpression = 'ObjectExpression'; //对象表达式
+AST.ThisExpression = 'ThisExpression'; //this表达式
+
 function $AstProvider() {
     this.$get = ['$lexer', function($lexer) {
-        return function ast() {
-            return new AST($lexer);
+        return function ast(expression) {
+            return (new AST($lexer)).ast(expression);
         }
     }];
 
-    function AST(lexer) {
-        this.lexer = lexer;
-    }
-
-    AST.Program = 'Program';
-    AST.ExpressionStatement = 'ExpressionStatement'; //表达式语句
-    AST.AssignmentExpression = 'AssignmentExpression'; //赋值表达式
-    AST.ConditionalExpression = 'ConditionalExpression'; //条件表达式
-    AST.LogicalExpression = 'LogicalExpression'; //逻辑表达式
-    AST.BinaryExpression = 'BinaryExpression'; //二元运算表达式
-    AST.UnaryExpression = 'UnaryExpression'; //一元运算表达式
-    AST.CallExpression = 'CallExpression'; //函数调用表达式
-    AST.MemberExpression = 'MemberExpression'; //成员表达式
-    AST.Identifier = 'Identifier'; //标识符
-    AST.Literal = 'Literal'; //文本常量
-    AST.ArrayExpression = 'ArrayExpression'; //数组表达式
-    AST.Property = 'Property'; //属性表达式
-    AST.ObjectExpression = 'ObjectExpression'; //对象表达式
-    AST.ThisExpression = 'ThisExpression'; //this表达式
 
     var astMinErr = minErr('AST');
 

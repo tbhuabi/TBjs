@@ -58,11 +58,11 @@ function $ParseProvider() {
                                 case '<=':
                                     return leftValue <= rightValue;
                                 case '==':
-                                    return leftValue == rightValue;
+                                    return leftValue == rightValue || isNaN(leftValue) && isNaN(rightValue);
                                 case '!=':
                                     return leftValue != rightValue;
                                 case '===':
-                                    return leftValue === rightValue;
+                                    return leftValue === rightValue || isNaN(leftValue) && isNaN(rightValue);
                                 case '!==':
                                     return leftValue !== rightValue;
                             }

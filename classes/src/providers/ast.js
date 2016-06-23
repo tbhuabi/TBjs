@@ -19,11 +19,13 @@ AST.ObjectExpression = 'ObjectExpression'; //对象表达式
 AST.ThisExpression = 'ThisExpression'; //this表达式
 
 function $AstProvider() {
-    this.$get = ['$lexer', function($lexer) {
-        return function ast(expression) {
-            return (new AST($lexer)).ast(expression);
+    this.$get = ['$lexer',
+        function($lexer) {
+            return function ast(expression) {
+                return (new AST($lexer)).ast(expression);
+            }
         }
-    }];
+    ];
 
 
     var astMinErr = minErr('AST');
@@ -251,6 +253,7 @@ function $AstProvider() {
                         callee: primary,
                         arguments: this.parseArguments()
                     }
+                    this.consume(')');
                 } else if (next.text === '.') {
                     primary = {
                         type: AST.MemberExpression,
@@ -390,6 +393,9 @@ function $AstProvider() {
             'undefined': {
                 type: AST.Literal,
                 value: undefined
+            },
+            'this': {
+                type: AST.ThisExpression
             }
         }
     });

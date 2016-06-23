@@ -141,7 +141,7 @@ function $LexerProvider() {
             return text === '+' || text === '-' || this.isNumber(text);
         },
         isNumber: function(currentText) {
-            return typeof currentText === 'string' && currentText > '0' && currentText < '9';
+            return typeof currentText === 'string' && currentText >= '0' && currentText <= '9';
         },
         peek: function(index) {
             var i = index || 1;

@@ -79,6 +79,7 @@ function $ParseProvider() {
 
                         case AST.CallExpression:
                             var args = [];
+                            var fn;
                             program.arguments.forEach(function(item) {
                                 args.push(astInterpreter(item, model));
                             })
@@ -90,9 +91,14 @@ function $ParseProvider() {
                                 if (!$filter.has(key)) {
                                     throw parseMinErr('injector', '过滤器{0}未注册！', key);
                                 }
-                                return $filter.get(key).apply(undefined, args);
+                                fn = $filter.get(key);
+                                if (!isFunction(fn)) {
+                                    throw parseMinErr('invoke', '过滤器{0}不是一个函数！', key);
+                                }
+                                return fn.apply(undefined, args);
                             }
-                            return model[astInterpreter(program.callee, model)].apply(model, args);
+                            fn = model[astInterpreter(program.callee, model)];
+                            return isFunction(fn) ? fn.apply(model, args) : undefined;
 
                         case AST.MemberExpression:
                             return astInterpreter(program.property, astInterpreter(program.primary, model));

@@ -10,7 +10,7 @@ function minErr(module) {
             return args[index + 2] ? args[index + 2] : str;
         })
 
-        msg += '\nhttp://www.TBjs.org?' + module + '=' + code;
+        msg += '\nhttp://www.TBjs.org?module=' + module + '&type=' + code;
         //        var params = [];
         //        index += 2;
         //        for (; index < args.length; index++) {

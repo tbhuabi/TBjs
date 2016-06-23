@@ -1,24 +1,28 @@
 function $ParseProvider() {
+    var parseMinErr = minErr('$parse');
     this.$get = ['$ast',
         function($ast) {
-            return function expressionParser(experssion) {
+            return function parser(experssion) {
                 var programs = $ast(experssion);
-
-                function parser(model) {
-                    var value;
-                    programs.body.forEach(function(program) {
-                        value = astInterpreter(program, model);
-                    })
-                    return value;
-                }
 
                 function astInterpreter(program, model) {
                     switch (program.type) {
+                        case AST.Program:
+                            var value;
+                            program.body.forEach(function(item) {
+                                value = astInterpreter(item, model);
+                            })
+                            return value;
+
                         case AST.ExpressionStatement:
                             return astInterpreter(program.expression, model);
 
                         case AST.AssignmentExpression:
-                            return model[program.left.type === AST.Identifier ? program.left.value : astInterpreter(program.left, model)] = astInterpreter(program.right, model);
+                            var key = program.left.type === AST.Identifier ? program.left.value : astInterpreter(program.left, model);
+                            if (!isString(key)) {
+                                throw parseMinErr('AssignmentExpression', '表达式{0}有误，不能给{1}赋值！', experssion, {}.toString.call(key));
+                            }
+                            return model[key] = astInterpreter(program.right, model);
 
                         case AST.ConditionalExpression:
                             return astInterpreter(program.test, model) ? astInterpreter(program.alternate, model) : astInterpreter(program.consequent, model);
@@ -108,11 +112,10 @@ function $ParseProvider() {
 
                         case AST.ThisExpression:
                             return model;
-
                     }
                 }
                 return function value(model) {
-                    return parser(model);
+                    return astInterpreter(programs, model);
                 }
             }
         }

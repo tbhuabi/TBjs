@@ -19,7 +19,7 @@ function $ParseProvider() {
 
                         case AST.AssignmentExpression:
                             var key = program.left.type === AST.Identifier ? program.left.value : astInterpreter(program.left, model);
-                            if (!isString(key)) {
+                            if (!isString(key) || !isNumber(key)) {
                                 throw parseMinErr('assignment', '表达式{0}有误，不能给{1}赋值！', experssion, {}.toString.call(key));
                             }
                             return model[key] = astInterpreter(program.right, model);

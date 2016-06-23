@@ -34,9 +34,12 @@ var isString = isType('String');
 var isArray = Array.isArray || isType('Array');
 var isFunction = isType('Function');
 var isUndefined = isType('Undefined');
+var isNumber = function(val) {
+    return typeof val === 'number';
+};
 
 function isEmpty(str) {
-    return /^[\s\t\n\r\v]$/gi.test(str);
+    return /^[\s\t\n\r\v]$/gm.test(str);
 }
 
 function trim(str) {
